@@ -1,100 +1,198 @@
 # Research Code Principles
 
-**Research code doesn't have to be garbage.**
+**Production-grade infrastructure for AI-assisted research software.**
 
-A complete system for building production-grade research software using AI agents.
-
-## The Problem
-
-Research code defaults to being terrible:
-- No tests
-- No validation
-- No reproducibility
-- Results can't be trusted
-
-**Why?** Scientists and AI agents both optimize for "code that compiles," not "code that's correct."
-
-## The Solution
-
-**5 Core Principles:**
-1. **Correctness First** — Physical accuracy is non-negotiable
-2. **Specification Before Code** — Tests define the contract
-3. **Fail Fast with Clarity** — Validate at boundaries, error immediately
-4. **Simplicity by Design** — Each function does one thing
-5. **Infrastructure Enables Speed** — Tests, CI/CD, and tooling aren't overhead
-
-## Who This Is For
-
-- PhD students learning to code scientifically
-- Researchers pairing Claude/ChatGPT with their work
-- Labs wanting to enforce quality without micromanaging
-- Anyone tired of inheriting garbage research code
+Clone this repository. Copy a template. Start building research code that meets the same standards as production systems.
 
 ## Quick Start
 
-1. **Understand why:** Read `docs/research-code-principles.md` (15 min)
-2. **Reference standards:** Use `docs/style-guide-reference.md` when coding
-3. **Prompt AI agents:** Use `docs/agent-coding-context.md` + `docs/prompting-research-code.md`
-4. **See examples:** Check `examples/quantum-gate-example/`
+### 1. Copy a Starter Template
 
-## Key Files
-
-| File | Purpose |
-|------|---------|
-| `research-code-principles.md` | Philosophy: why good code matters |
-| `style-guide-reference.md` | Standards: C++, Python, CMake, testing |
-| `repo-standards.md` | Workflow: git, CI/CD, infrastructure |
-| `agent-coding-context.md` | Paste into Claude for coding sessions |
-| `prompting-research-code.md` | How to prompt for research-grade code |
-
-## Tools
-
-### OpenCode Context Manager
-
-**Reduce token usage by 60-70%** when loading documentation into AI sessions.
-
-Instead of loading entire 50k+ token doc files, use vector search to load only relevant chunks:
-
+**Python project:**
 ```bash
-# Load all docs from a directory (~20k tokens instead of 60k)
-oc-context --all ./agent_docs
-
-# Semantic search for specific topics
-oc-context --query "error handling validation"
+cp -r templates/python_research ~/my-project
+cd ~/my-project
+pip install -e ".[dev]"
+pytest  # Run tests
 ```
 
-See [`opencode-context/README.md`](opencode-context/README.md) for installation and usage.
+**C++/CUDA project:**
+```bash
+cp -r templates/cpp_hpc ~/my-project
+cd ~/my-project
+cmake -B build && cmake --build build
+ctest --test-dir build  # Run tests
+```
 
-## Using With Claude/ChatGPT
+### 2. Load Context for AI Sessions
 
-1. Paste `docs/agent-coding-context.md` into your session
-2. Reference `docs/prompting-research-code.md` for patterns
-3. Provide one working example (few-shot)
-4. Use Chain of Thought: "Think step by step about edge cases, then write tests, then implement"
+Load modular prompts instead of giant context files:
+
+```bash
+# Just the essentials (~50 lines)
+cat agent_prompts/core-principles.md
+
+# Add physics validation for quantum work
+cat agent_prompts/core-principles.md agent_prompts/physics-validation.md
+```
+
+### 3. Generate Repository Map
+
+Understand any codebase structure without reading every file:
+
+```bash
+./scripts/map_repo.sh > repo_map.txt
+```
+
+## What's Included
+
+```
+research-code-principles/
+├── templates/                  # Clonable project starters
+│   ├── python_research/        # Pre-configured Python environment
+│   └── cpp_hpc/                # Pre-configured C++/CUDA environment
+├── agent_prompts/              # Modular AI context snippets
+│   ├── core-principles.md      # 5 principles (~50 lines)
+│   ├── test-generation.md      # Writing research tests
+│   ├── physics-validation.md   # Quantum constraints
+│   ├── kernel-optimization.md  # CUDA best practices
+│   ├── code-review.md          # Quick checklist
+│   └── error-handling.md       # Fail-fast patterns
+├── .github/workflows/ci.yml    # CI/CD template
+├── .pre-commit-config.yaml     # Pre-commit hooks
+├── scripts/map_repo.sh         # Repository mapper
+├── examples/                   # Proof-of-concepts
+│   ├── quantum-gate-example/   # Quantum gate with tests
+│   └── hpc-vqe-benchmark/      # 117x speedup demonstration
+└── docs/                       # Deep-dive documentation
+    ├── philosophy.md           # Why good code matters
+    ├── agent-coding-context.md # Full AI context (if needed)
+    └── style-guide-reference.md # Exhaustive style guide
+```
+
+## The 5 Principles
+
+1. **Correctness First** — Physical accuracy is non-negotiable
+2. **Specification Before Code** — Tests define the contract
+3. **Fail Fast with Clarity** — Validate inputs, descriptive errors
+4. **Simplicity by Design** — Functions ≤50 lines, single responsibility
+5. **Infrastructure Enables Speed** — CI, tests, linting from day one
+
+## Templates
+
+### Python Research Template
+
+Pre-configured with:
+- **ruff** for linting (strict rules)
+- **mypy** in strict mode (type checking)
+- **pytest** with 70% coverage minimum
+- **Physical validation** helpers (unitarity, normalization, density matrices)
+- **Reproducibility fixtures** (fixed seeds)
+
+```bash
+cp -r templates/python_research ~/my-project
+```
+
+### C++/HPC Template
+
+Pre-configured with:
+- **CMake** with zero-warning policy (`-Wall -Wextra -Werror` in CI)
+- **GoogleTest** for testing
+- **CudaMemory<T>** RAII wrapper (zero manual cudaFree)
+- **Physical validation** functions (unitarity, normalization)
+- **Optional CUDA** support
+
+```bash
+cp -r templates/cpp_hpc ~/my-project
+```
+
+## Agent Prompts
+
+Instead of loading 500+ lines of context, use modular prompts:
+
+| Prompt | Lines | Use Case |
+|--------|-------|----------|
+| `core-principles.md` | ~50 | Every session |
+| `test-generation.md` | ~60 | Writing tests |
+| `physics-validation.md` | ~60 | Quantum/physics code |
+| `kernel-optimization.md` | ~60 | CUDA kernels |
+| `code-review.md` | ~40 | Reviewing code |
+| `error-handling.md` | ~50 | Fail-fast patterns |
+
+**Combine as needed:**
+```bash
+cat agent_prompts/core-principles.md agent_prompts/test-generation.md > session.md
+```
+
+## Automated Enforcement
+
+### GitHub Actions CI
+
+Copy `.github/workflows/ci.yml` to your project. It:
+- Runs tests with coverage check (70% minimum)
+- Runs linting (ruff for Python, compiler warnings for C++)
+- Runs type checking (mypy)
+- Fails the build on any warning
+
+### Pre-commit Hooks
+
+Copy `.pre-commit-config.yaml` and install:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+Hooks include:
+- Secret detection (prevent credential leaks)
+- Code formatting (ruff, clang-format)
+- Type checking (mypy)
+- Commit message linting (conventional commits)
 
 ## Examples
 
-- `examples/quantum-gate-example/` — Full quantum gate implementation with tests
+### Quantum Gate Example
 
-## Status
+Full implementation with tests demonstrating the principles:
+- `examples/quantum-gate-example/gate.py` — Gate implementation
+- `examples/quantum-gate-example/test_gate.py` — Comprehensive tests
+- `examples/quantum-gate-example/prompting-log.md` — How it was built with AI
 
-- ✅ Philosophy complete
-- ✅ Detailed standards complete
-- ✅ Prompt engineering guide complete
-- ✅ Quantum gate example complete
-- ✅ OpenCode Context Manager (vector-based context retrieval)
-- 🔄 Community examples (accepting contributions)
+### HPC VQE Benchmark
+
+Demonstrates the **117x speedup** achieved through systematic optimization:
+- JAX JIT compilation (21.7x)
+- GPU backend (2.8x additional)
+- MPI parallelization (1.9x additional)
+
+See `examples/hpc-vqe-benchmark/`
+
+## Proof Points
+
+These standards are applied across production projects:
+
+| Project | Language | Tests | Key Practices |
+|---------|----------|-------|---------------|
+| **QubitPulseOpt** | Python | 800+ | CI/CD, 74% coverage, type hints |
+| **cuda-quantum-simulator** | CUDA/C++ | 9 suites | RAII, zero manual cudaFree |
+| **quantum-circuit-optimizer** | C++17 | 340+ | OpenQASM parser, DAG optimization |
+| **QuantumVQE** | Python | - | 117x speedup, deterministic seeds |
+
+## Documentation
+
+For deep dives:
+- `docs/philosophy.md` — Why good code matters (theory)
+- `docs/agent-coding-context.md` — Full AI context (500+ lines)
+- `docs/style-guide-reference.md` — Exhaustive style conventions
 
 ## License
 
 MIT — Use and adapt freely.
 
-## Contributing
+## Author
 
-Found issues? Better prompts? New examples? See `CONTRIBUTING.md`.
+Rylan Malarchick — [rylan1012@gmail.com](mailto:rylan1012@gmail.com)
 
 ---
 
-**Latest:** v1.0 (Dec 2025)  
-**Author:** Rylan Malarchick  
-**Contact:** rylan1012@gmail.com
+**Latest:** v2.0 (Dec 2025) — Restructured as clonable infrastructure

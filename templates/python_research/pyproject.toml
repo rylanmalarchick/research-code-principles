@@ -1,0 +1,109 @@
+# Research Code Principles - Python Starter Template
+# Copy this directory to start a new research project with production-grade tooling
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "my-research-project"
+version = "0.1.0"
+description = "Brief description of your research project"
+authors = [{name = "Your Name", email = "your.email@example.com"}]
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = [
+    "numpy>=1.21",
+    "scipy>=1.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1",
+    "mypy>=1.0",
+    "pre-commit>=3.0",
+]
+
+# ============================================================================
+# PYTEST - Test Configuration
+# ============================================================================
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "-ra",
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-fail-under=70",  # Research code: 70% minimum
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "deterministic: marks tests requiring fixed random seed",
+    "integration: marks integration tests",
+    "requires_gpu: marks tests requiring GPU",
+]
+
+# ============================================================================
+# RUFF - Linting (replaces flake8, isort, pyupgrade)
+# ============================================================================
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "W",      # pycodestyle warnings
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "SIM",    # flake8-simplify
+    "ARG",    # flake8-unused-arguments
+    "PTH",    # flake8-use-pathlib
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+# ============================================================================
+# MYPY - Type Checking (Strict Mode)
+# ============================================================================
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_ignores = true
+no_implicit_optional = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+strict_equality = true
+extra_checks = true
+
+[[tool.mypy.overrides]]
+module = ["numpy.*", "scipy.*"]
+ignore_missing_imports = true
+
+# ============================================================================
+# COVERAGE - Minimum Thresholds
+# ============================================================================
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]

@@ -1,0 +1,85 @@
+# Research Code Principles - CI/CD Template
+# Copy to your project's .github/workflows/ci.yml
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ============================================================================
+  # Python CI
+  # ============================================================================
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint with ruff
+        run: ruff check . --output-format=github
+
+      - name: Type check with mypy
+        run: mypy src/
+
+      - name: Test with pytest
+        run: pytest --cov=src --cov-report=xml --cov-fail-under=70
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+
+  # ============================================================================
+  # C++ CI
+  # ============================================================================
+  cpp:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build
+
+      - name: Configure CMake
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+  # ============================================================================
+  # C++ with CUDA (optional, requires self-hosted runner with GPU)
+  # ============================================================================
+  # cpp-cuda:
+  #   runs-on: self-hosted
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Configure with CUDA
+  #       run: cmake -B build -DENABLE_CUDA=ON -DCMAKE_BUILD_TYPE=Release
+  #     - name: Build
+  #       run: cmake --build build --parallel
+  #     - name: Run tests
+  #       run: ctest --test-dir build --output-on-failure
