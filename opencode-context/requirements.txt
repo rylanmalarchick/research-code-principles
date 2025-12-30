@@ -1,0 +1,23 @@
+# OpenCode Context Manager Dependencies
+# Install: pip install -r requirements.txt
+
+# Vector database
+chromadb>=0.4.0
+
+# OpenAI embeddings
+openai>=1.0.0
+
+# Token counting
+tiktoken>=0.5.0
+
+# Local embedding fallback
+sentence-transformers>=2.2.0
+
+# Config parsing
+pyyaml>=6.0
+
+# CLI framework
+click>=8.0
+
+# Rich terminal output
+rich>=13.0

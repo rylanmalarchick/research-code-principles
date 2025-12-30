@@ -1,0 +1,46 @@
+# OpenCode Context Manager Configuration
+# Copy this to ~/.local/share/opencode/config.yaml and customize
+
+embedding:
+  provider: openai                    # openai or local (sentence-transformers)
+  model: text-embedding-3-small       # OpenAI embedding model
+  chunk_size: 1000                    # tokens per chunk
+  chunk_overlap: 200                  # overlap between chunks
+
+retrieval:
+  default_top_k: 5                    # number of query results
+  similarity_threshold: 0.7           # minimum similarity score (0-1)
+
+# Global docs - loaded for all projects
+global_docs:
+  - path: /path/to/research-code-principles.md
+    always_include: true
+    description: "Core research code principles"
+    type: reference
+    
+  - path: /path/to/style-guide-reference.md
+    always_include: false
+    description: "Detailed style guidelines"
+    type: reference
+
+# Per-project configurations
+projects:
+  my-project:
+    root: /path/to/my-project
+    description: "My awesome project"
+    docs:
+      - path: agent_docs/guide.md       # relative to project root
+        always_include: true
+        description: "Project guide"
+        
+      - path: README.md
+        always_include: false
+        description: "Project readme"
+        
+  another-project:
+    root: /path/to/another-project
+    description: "Another project"
+    docs:
+      - path: docs/architecture.md
+        always_include: true
+        description: "Architecture docs"

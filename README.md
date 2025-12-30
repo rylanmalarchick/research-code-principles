@@ -47,6 +47,24 @@ Research code defaults to being terrible:
 | `agent-coding-context.md` | Paste into Claude for coding sessions |
 | `prompting-research-code.md` | How to prompt for research-grade code |
 
+## Tools
+
+### OpenCode Context Manager
+
+**Reduce token usage by 60-70%** when loading documentation into AI sessions.
+
+Instead of loading entire 50k+ token doc files, use vector search to load only relevant chunks:
+
+```bash
+# Load all docs from a directory (~20k tokens instead of 60k)
+oc-context --all ./agent_docs
+
+# Semantic search for specific topics
+oc-context --query "error handling validation"
+```
+
+See [`opencode-context/README.md`](opencode-context/README.md) for installation and usage.
+
 ## Using With Claude/ChatGPT
 
 1. Paste `docs/agent-coding-context.md` into your session
@@ -64,6 +82,7 @@ Research code defaults to being terrible:
 - ✅ Detailed standards complete
 - ✅ Prompt engineering guide complete
 - ✅ Quantum gate example complete
+- ✅ OpenCode Context Manager (vector-based context retrieval)
 - 🔄 Community examples (accepting contributions)
 
 ## License

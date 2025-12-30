@@ -1,0 +1,213 @@
+#!/usr/bin/env python3
+"""
+oc-context - Generate context file for OpenCode sessions
+
+Usage:
+    oc-context                      # Load defaults for detected project
+    oc-context --query "topic"      # Semantic search + defaults
+    oc-context --project foo        # Specify project explicitly
+    oc-context --all ./agent_docs   # Load ALL files from directory
+    oc-context --no-always          # Skip always_include docs
+    oc-context --max-tokens 8000    # Limit output tokens
+"""
+
+import sys
+from pathlib import Path
+
+# Add oc_lib to path
+OC_DIR = Path.home() / ".local" / "share" / "opencode"
+sys.path.insert(0, str(OC_DIR))
+
+import click
+from rich.console import Console
+
+from oc_lib.config import Config
+from oc_lib.retrieve import ContextRetriever
+
+console = Console()
+
+
+@click.command()
+@click.option(
+    "--query", "-q",
+    type=str,
+    default=None,
+    help="Semantic search query to find relevant context"
+)
+@click.option(
+    "--project", "-p",
+    type=str,
+    default=None,
+    help="Project name (auto-detected from cwd if not specified)"
+)
+@click.option(
+    "--all", "-a", "all_dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, resolve_path=True),
+    default=None,
+    help="Load ALL chunks from files in this directory"
+)
+@click.option(
+    "--top-k", "-k",
+    type=int,
+    default=None,
+    help="Number of chunks to retrieve per query"
+)
+@click.option(
+    "--no-always",
+    is_flag=True,
+    default=False,
+    help="Skip loading always_include documents"
+)
+@click.option(
+    "--max-tokens", "-m",
+    type=int,
+    default=None,
+    help="Maximum tokens in output"
+)
+@click.option(
+    "--output", "-o",
+    type=click.Path(),
+    default=None,
+    help="Output file path (default: .opencode-context.md in project root)"
+)
+@click.option(
+    "--stdout",
+    is_flag=True,
+    default=False,
+    help="Print to stdout instead of writing to file"
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Show what would be loaded without generating output"
+)
+def main(
+    query: str,
+    project: str,
+    all_dir: str,
+    top_k: int,
+    no_always: bool,
+    max_tokens: int,
+    output: str,
+    stdout: bool,
+    dry_run: bool,
+):
+    """Generate context file for OpenCode sessions."""
+    
+    try:
+        config = Config.load()
+    except FileNotFoundError as e:
+        console.print(f"[red]Error: {e}[/red]")
+        console.print("Run 'oc-update' to initialize the database first.")
+        sys.exit(1)
+    
+    # Auto-detect project if not specified
+    if not project:
+        cwd = Path.cwd()
+        detected = config.detect_project(cwd)
+        if detected:
+            project = detected.name
+            console.print(f"[dim]Detected project: {project}[/dim]")
+        else:
+            console.print("[dim]No project detected, using global docs only[/dim]")
+    
+    # Validate project exists
+    if project and project not in config.projects:
+        console.print(f"[red]Error: Unknown project '{project}'[/red]")
+        console.print(f"Available projects: {', '.join(config.projects.keys())}")
+        sys.exit(1)
+    
+    # Initialize retriever
+    retriever = ContextRetriever(config)
+    
+    if dry_run:
+        # Show what would be loaded
+        console.print("\n[bold]Dry run - would load:[/bold]\n")
+        
+        if all_dir:
+            # Show all files from directory
+            all_path = Path(all_dir)
+            console.print(f"[green]All files from directory:[/green] {all_path}")
+            try:
+                dir_chunks = retriever.get_all_chunks_from_dir(
+                    directory=all_path,
+                    project_name=project,
+                    include_global=True,
+                )
+                sources = set(c.source for c in dir_chunks)
+                for source in sorted(sources):
+                    chunk_count = sum(1 for c in dir_chunks if c.source == source)
+                    console.print(f"  - {Path(source).name} ({chunk_count} chunks)")
+                console.print(f"\n[dim]Total: {len(dir_chunks)} chunks[/dim]")
+            except FileNotFoundError as e:
+                console.print(f"[yellow]{e}[/yellow]")
+        
+        elif not no_always:
+            try:
+                always_chunks = retriever.get_always_include_chunks(project)
+                sources = set(c.source for c in always_chunks)
+                console.print("[green]Always-include documents:[/green]")
+                for source in sorted(sources):
+                    chunk_count = sum(1 for c in always_chunks if c.source == source)
+                    console.print(f"  - {Path(source).name} ({chunk_count} chunks)")
+            except FileNotFoundError as e:
+                console.print(f"[yellow]{e}[/yellow]")
+        
+        if query:
+            console.print(f"\n[green]Query results for:[/green] {query}")
+            try:
+                query_chunks = retriever.query(
+                    query=query,
+                    project_name=project,
+                    top_k=top_k or config.retrieval.default_top_k,
+                )
+                for chunk in query_chunks[:10]:
+                    console.print(
+                        f"  - {Path(chunk.source).name}:{chunk.line_start} "
+                        f"(score: {chunk.score:.2f})"
+                    )
+            except FileNotFoundError as e:
+                console.print(f"[yellow]{e}[/yellow]")
+        
+        return
+    
+    # Build context
+    try:
+        context = retriever.build_context(
+            query=query,
+            project_name=project,
+            top_k=top_k,
+            include_always=not no_always,
+            max_tokens=max_tokens,
+            all_from_dir=Path(all_dir) if all_dir else None,
+        )
+    except FileNotFoundError as e:
+        console.print(f"[red]Error: {e}[/red]")
+        console.print("Run 'oc-update' to create embeddings first.")
+        sys.exit(1)
+    
+    if stdout:
+        print(context)
+        return
+    
+    # Determine output path
+    if output:
+        output_path = Path(output)
+    elif project:
+        project_config = config.get_project(project)
+        output_path = project_config.root / ".opencode-context.md"
+    else:
+        output_path = Path.cwd() / ".opencode-context.md"
+    
+    # Write output
+    output_path.write_text(context)
+    console.print(f"\n[green]Context written to:[/green] {output_path}")
+    
+    # Show summary
+    lines = context.count("\n")
+    console.print(f"[dim]Lines: {lines}[/dim]")
+
+
+if __name__ == "__main__":
+    main()

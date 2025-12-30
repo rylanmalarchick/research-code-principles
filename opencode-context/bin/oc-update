@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+"""
+oc-update - Update vector embeddings for OpenCode context manager
+
+Usage:
+    oc-update                  # Re-embed everything
+    oc-update --global         # Re-embed global docs only
+    oc-update --project foo    # Re-embed specific project only
+    oc-update --status         # Show embedding status
+"""
+
+import json
+import sys
+from datetime import datetime
+from pathlib import Path
+
+# Add oc_lib to path
+OC_DIR = Path.home() / ".local" / "share" / "opencode"
+sys.path.insert(0, str(OC_DIR))
+
+import click
+from rich.console import Console
+from rich.table import Table
+
+from oc_lib.config import Config, VECTORDB_DIR, get_vectordb_path
+from oc_lib.embed import EmbeddingManager
+
+console = Console()
+
+
+def get_db_metadata(path: Path) -> dict:
+    """Load metadata for a vector database."""
+    meta_path = path / "metadata.json"
+    if meta_path.exists():
+        with open(meta_path) as f:
+            return json.load(f)
+    return {}
+
+
+def show_status(config: Config):
+    """Show current embedding status."""
+    table = Table(title="Embedding Status")
+    table.add_column("Name", style="cyan")
+    table.add_column("Chunks", justify="right")
+    table.add_column("Docs", justify="right")
+    table.add_column("Last Updated", style="dim")
+    table.add_column("Status", style="green")
+    
+    # Global docs
+    global_path = get_vectordb_path()
+    if global_path.exists():
+        meta = get_db_metadata(global_path)
+        table.add_row(
+            "global",
+            str(meta.get("total_chunks", "?")),
+            str(meta.get("doc_count", "?")),
+            meta.get("updated_at", "Unknown")[:19].replace("T", " "),
+            "Ready",
+        )
+    else:
+        table.add_row("global", "-", "-", "-", "[yellow]Not embedded[/yellow]")
+    
+    # Project docs
+    for name, project in config.projects.items():
+        project_path = get_vectordb_path(name)
+        if project_path.exists():
+            meta = get_db_metadata(project_path)
+            table.add_row(
+                name,
+                str(meta.get("total_chunks", "?")),
+                str(meta.get("doc_count", "?")),
+                meta.get("updated_at", "Unknown")[:19].replace("T", " "),
+                "Ready",
+            )
+        else:
+            table.add_row(name, "-", "-", "-", "[yellow]Not embedded[/yellow]")
+    
+    console.print(table)
+
+
+@click.command()
+@click.option(
+    "--global-only",
+    is_flag=True,
+    default=False,
+    help="Only re-embed global documents"
+)
+@click.option(
+    "--project", "-p",
+    type=str,
+    default=None,
+    help="Re-embed specific project only"
+)
+@click.option(
+    "--status",
+    is_flag=True,
+    default=False,
+    help="Show embedding status without updating"
+)
+@click.option(
+    "--force",
+    is_flag=True,
+    default=False,
+    help="Force re-embedding even if up to date"
+)
+def main(
+    global_only: bool,
+    project: str,
+    status: bool,
+    force: bool,
+):
+    """Update vector embeddings for context retrieval."""
+    
+    try:
+        config = Config.load()
+    except FileNotFoundError as e:
+        console.print(f"[red]Error: {e}[/red]")
+        sys.exit(1)
+    
+    if status:
+        show_status(config)
+        return
+    
+    # Validate project if specified
+    if project and project not in config.projects:
+        console.print(f"[red]Error: Unknown project '{project}'[/red]")
+        console.print(f"Available projects: {', '.join(config.projects.keys())}")
+        sys.exit(1)
+    
+    manager = EmbeddingManager(config)
+    
+    try:
+        if global_only:
+            console.print("[bold]Embedding global documents...[/bold]\n")
+            count = manager.embed_global_docs()
+            console.print(f"\n[green]Done![/green] Created {count} chunks")
+        
+        elif project:
+            console.print(f"[bold]Embedding project: {project}[/bold]\n")
+            count = manager.embed_project_docs(project)
+            console.print(f"\n[green]Done![/green] Created {count} chunks")
+        
+        else:
+            console.print("[bold]Embedding all documents...[/bold]\n")
+            results = manager.embed_all()
+            total = sum(results.values())
+            console.print(f"\n[green]Done![/green] Created {total} total chunks")
+    
+    except Exception as e:
+        console.print(f"\n[red]Error during embedding: {e}[/red]")
+        import traceback
+        if "--debug" in sys.argv:
+            traceback.print_exc()
+        sys.exit(1)
+    
+    console.print("\n[dim]Run 'oc-update --status' to view embedding details[/dim]")
+
+
+if __name__ == "__main__":
+    main()
