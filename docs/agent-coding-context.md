@@ -7,6 +7,17 @@
 
 ---
 
+## Related Documents
+
+| Document | Purpose |
+|----------|---------|
+| [agent-coding-context.md](agent-coding-context.md) | Quick reference for AI agents |
+| [research-code-principles.md](research-code-principles.md) | Philosophy and principles |
+| [style-guide-reference.md](style-guide-reference.md) | Detailed style conventions |
+| [repo-standards.md](repo-standards.md) | Git workflow and repository hygiene |
+
+---
+
 ## Quick Reference: 5 Core Principles
 
 ### 1. Correctness First
@@ -240,6 +251,79 @@ Use this checklist before considering any code "done."
 - [ ] Documentation updated
 - [ ] Dependencies pinned
 - [ ] Seeds documented for reproducibility
+
+---
+
+## Self-Check Before Completing
+
+Before marking any task complete, verify:
+
+- [ ] All tests pass?
+- [ ] Zero compiler warnings?
+- [ ] Every public function has docstring?
+- [ ] Every non-trivial algorithm has citation?
+- [ ] Edge cases tested (empty, single, max, invalid)?
+- [ ] Physical constraints validated (if applicable)?
+- [ ] Dependencies pinned (if added)?
+- [ ] Documentation updated?
+
+---
+
+## Algorithms Requiring Citation
+
+Always cite the source for these algorithms:
+
+| Algorithm | Citation Example |
+|-----------|------------------|
+| Topological sort | Kahn, A.B. (1962). Comm. ACM 5(11):558-562 |
+| Graph traversal (BFS/DFS) | Standard algorithm, note variant if non-standard |
+| Matrix decomposition (QR, SVD, LU) | Cite numerical library or Golub & Van Loan |
+| Optimization (GRAPE, BFGS, Adam) | Cite original paper with DOI/arXiv |
+| Quantum algorithms | Cite Nielsen & Chuang or original paper |
+| Any equation from a paper | Include DOI or arXiv link |
+
+Format in code:
+```cpp
+/**
+ * @brief Brief description.
+ *
+ * @references
+ * [1] Author, "Title", Journal, Year. doi:XXX
+ */
+```
+
+---
+
+## New File Checklist
+
+Every new source file must have:
+
+1. **SPDX header**: `// SPDX-License-Identifier: MIT`
+2. **Copyright**: `// Copyright (c) 2025 Rylan Malarchick`
+3. **Doxygen block**: `@file`, `@brief`, `@author`, `@date`
+4. **References**: `@references` if implementing algorithms
+5. **Include guard**: `#pragma once` (C++) or nothing needed (Python)
+6. **Include order**: own header → project → third-party → stdlib
+
+---
+
+## Task Management
+
+When working on complex tasks:
+
+1. **Break down**: Split into trackable items before starting
+2. **Status tracking**: Mark items `in_progress` while working
+3. **Immediate completion**: Mark `complete` as soon as done
+4. **No batching**: Never batch multiple completions
+5. **Verification**: Run self-check before marking complete
+
+Example workflow:
+```
+- [ ] pending: Implement DAG class
+- [~] in_progress: Add topological sort  ← currently working
+- [x] complete: Create DAGNode wrapper
+- [x] complete: Add unit tests
+```
 
 ---
 

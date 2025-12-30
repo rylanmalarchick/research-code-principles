@@ -7,6 +7,17 @@
 
 ---
 
+## Related Documents
+
+| Document | Purpose |
+|----------|---------|
+| [agent-coding-context.md](agent-coding-context.md) | Quick reference for AI agents |
+| [research-code-principles.md](research-code-principles.md) | Philosophy and principles |
+| [style-guide-reference.md](style-guide-reference.md) | Detailed style conventions |
+| [repo-standards.md](repo-standards.md) | Git workflow and repository hygiene |
+
+---
+
 ## Preamble: Why This Matters
 
 Research code has a reputation problem. Scientists write code that "works" for a single experiment, then move on. No tests. No validation. No thought about whether results are reproducible. This is not acceptable.

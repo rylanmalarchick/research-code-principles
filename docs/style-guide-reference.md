@@ -12,6 +12,17 @@
 
 ---
 
+## Related Documents
+
+| Document | Purpose |
+|----------|---------|
+| [agent-coding-context.md](agent-coding-context.md) | Quick reference for AI agents |
+| [research-code-principles.md](research-code-principles.md) | Philosophy and principles |
+| [style-guide-reference.md](style-guide-reference.md) | Detailed style conventions |
+| [repo-standards.md](repo-standards.md) | Git workflow and repository hygiene |
+
+---
+
 ## Table of Contents
 
 1. [Introduction](#1-introduction)
