@@ -1,0 +1,276 @@
+# Agent Bible: Coding Rules
+
+You are working in a research code repository that enforces production-grade standards. These rules are non-negotiable.
+
+## MANDATORY RULES (NEVER VIOLATE)
+
+### 1. Specification Before Code
+
+- **REFUSE** to write implementation code without a test specification
+- Before writing ANY function, ask: "What are the test cases?"
+- Write the test file FIRST, then the implementation
+- If asked to "just write the code", respond: "I need to define the test cases first. What are the expected inputs, outputs, and edge cases?"
+
+### 2. Rule of 50
+
+- **REFUSE** to write functions longer than 50 lines (Python) or 60 lines (C++)
+- If a function exceeds this limit, STOP and refactor into smaller functions
+- Each function does ONE thing - if you need "and" to describe it, split it
+- When you notice a function growing too long, say: "This function is getting too long. Let me refactor it into smaller pieces."
+
+### 3. Input Validation at Boundaries
+
+- **ALWAYS** validate inputs at function entry points
+- **NEVER** assume inputs are valid - check types, ranges, shapes, constraints
+- Raise descriptive exceptions with three pieces of information:
+  1. What failed
+  2. What was expected  
+  3. What was received
+- Example: `raise ValueError(f"Matrix must be square, expected shape (n, n), got {matrix.shape}")`
+
+### 4. Physical Correctness (Research Code)
+
+- **ALWAYS** check physical constraints where applicable:
+  - Unitarity: U†U = I (for quantum gates/operators)
+  - Trace preservation: tr(ρ) = 1 (for density matrices)
+  - Probability bounds: 0 ≤ p ≤ 1
+  - Hermiticity: H = H† (for observables/Hamiltonians)
+  - Normalization: ⟨ψ|ψ⟩ = 1 (for state vectors)
+- **ALWAYS** cite sources for physics equations
+- Include paper references, textbook citations, or DOIs in docstrings
+- Example: `"""Implements the Suzuki-Trotter decomposition. See: arXiv:quant-ph/9705002"""`
+
+### 5. No Silent Failures
+
+- **NEVER** catch exceptions and ignore them
+- **NEVER** use bare `except:` clauses
+- **NEVER** use `except Exception: pass`
+- **ALWAYS** either handle the error meaningfully OR re-raise with added context
+- If you see existing code with silent failures, flag it: "This code silently ignores errors. I should add proper error handling."
+
+### 6. Reproducibility
+
+- **ALWAYS** set random seeds explicitly when randomness is involved
+- **ALWAYS** document seed values in comments or docstrings
+- **ALWAYS** use deterministic algorithms where possible
+- Pin dependency versions in requirements.txt/pyproject.toml
+- Example: `np.random.seed(42)  # Fixed seed for reproducibility`
+
+## CODE STYLE
+
+### Python
+
+```python
+# Type hints on ALL function signatures
+def compute_fidelity(state1: np.ndarray, state2: np.ndarray) -> float:
+    """
+    Compute quantum state fidelity.
+    
+    Args:
+        state1: First state vector, shape (d,)
+        state2: Second state vector, shape (d,)
+        
+    Returns:
+        Fidelity value in [0, 1]
+        
+    Raises:
+        ValueError: If states have different dimensions
+        
+    References:
+        Nielsen & Chuang, Eq. 9.53
+    """
+```
+
+- Google-style docstrings on all public functions
+- `snake_case` for functions/variables
+- `PascalCase` for classes
+- `UPPER_SNAKE_CASE` for constants
+- Use `ruff` for formatting
+
+### C++
+
+```cpp
+// RAII for all resource management
+class CudaMemory {
+public:
+    explicit CudaMemory(size_t size);  // No implicit conversions
+    ~CudaMemory();                      // Automatic cleanup
+    
+    CudaMemory(const CudaMemory&) = delete;             // No copying
+    CudaMemory& operator=(const CudaMemory&) = delete;
+    
+    CudaMemory(CudaMemory&&) noexcept;                  // Move OK
+    CudaMemory& operator=(CudaMemory&&) noexcept;
+    
+private:
+    void* ptr_;  // Trailing underscore for private members
+};
+```
+
+- `camelCase` for functions/methods
+- `PascalCase` for classes
+- Trailing underscore for private members: `member_`
+- Zero-warning policy: `-Wall -Wextra -Werror`
+- No raw `new`/`delete` - use smart pointers or RAII wrappers
+
+## WORKFLOW
+
+### Before Writing Code
+
+1. Clarify requirements: "What should this function do?"
+2. Identify edge cases: "What happens with empty input? Negative values? Maximum size?"
+3. Define test cases: "I'll test: normal case, empty case, single element, invalid input"
+4. Check for physical constraints: "Does this need to preserve unitarity/normalization?"
+
+### While Writing Code
+
+1. Write test first (or alongside)
+2. Validate inputs at function entry
+3. Keep functions short - refactor when approaching 50 lines
+4. Add type hints and docstrings as you go
+5. Include citations for physics/math formulas
+
+### After Writing Code
+
+1. Run tests: `pytest`
+2. Check coverage: `pytest --cov`
+3. Run linter: `ruff check`
+4. Run type checker: `mypy`
+5. Verify physical constraints if applicable
+
+## REFUSAL PATTERNS
+
+Use these phrases when rules would be violated:
+
+**Function too long:**
+> "This function is exceeding 50 lines. Let me refactor it into smaller, focused functions before continuing."
+
+**No tests:**
+> "I need to define test cases before implementing this. What are the expected inputs and outputs for: (1) normal case, (2) edge cases, (3) error cases?"
+
+**Missing validation:**
+> "This function should validate its inputs. Let me add checks for [types/ranges/constraints]."
+
+**Silent failure:**
+> "This code silently catches errors. I should either handle them properly or let them propagate with context."
+
+**Missing citation:**
+> "This equation needs a citation. What paper or textbook is this from?"
+
+## CONTEXT LOADING
+
+When starting a session, load relevant context:
+
+```bash
+# Load all agent docs (sprint planning, architecture)
+oc-context --all ./agent_docs
+
+# Load specific prompts
+cat agent_prompts/core-principles.md agent_prompts/physics-validation.md
+
+# Query for specific topics
+oc-context --query "error handling validation"
+```
+
+## EXAMPLES OF GOOD CODE
+
+### Python - Validated, Tested, Documented
+
+```python
+import numpy as np
+from typing import Tuple
+
+def apply_pauli_x(state: np.ndarray) -> np.ndarray:
+    """
+    Apply Pauli-X gate to a single-qubit state.
+    
+    The Pauli-X gate is the quantum NOT gate:
+    X = [[0, 1], [1, 0]]
+    
+    Args:
+        state: Qubit state vector, shape (2,), must be normalized
+        
+    Returns:
+        Transformed state vector, shape (2,)
+        
+    Raises:
+        ValueError: If state is not a valid qubit state
+        
+    References:
+        Nielsen & Chuang, Section 1.3.1
+        
+    Example:
+        >>> state = np.array([1, 0], dtype=complex)  # |0⟩
+        >>> result = apply_pauli_x(state)
+        >>> np.allclose(result, [0, 1])  # |1⟩
+        True
+    """
+    # Input validation
+    if state.shape != (2,):
+        raise ValueError(f"State must have shape (2,), got {state.shape}")
+    
+    norm = np.linalg.norm(state)
+    if not np.isclose(norm, 1.0, atol=1e-10):
+        raise ValueError(f"State must be normalized, got norm={norm}")
+    
+    # Apply gate
+    pauli_x = np.array([[0, 1], [1, 0]], dtype=complex)
+    result = pauli_x @ state
+    
+    # Verify output (paranoid check)
+    assert np.isclose(np.linalg.norm(result), 1.0), "Unitarity violation"
+    
+    return result
+```
+
+### Test File
+
+```python
+import numpy as np
+import pytest
+from mymodule import apply_pauli_x
+
+class TestApplyPauliX:
+    """Tests for apply_pauli_x function."""
+    
+    def test_zero_to_one(self):
+        """X|0⟩ = |1⟩"""
+        state = np.array([1, 0], dtype=complex)
+        result = apply_pauli_x(state)
+        expected = np.array([0, 1], dtype=complex)
+        np.testing.assert_allclose(result, expected)
+    
+    def test_one_to_zero(self):
+        """X|1⟩ = |0⟩"""
+        state = np.array([0, 1], dtype=complex)
+        result = apply_pauli_x(state)
+        expected = np.array([1, 0], dtype=complex)
+        np.testing.assert_allclose(result, expected)
+    
+    def test_superposition(self):
+        """X preserves normalization for superposition states."""
+        state = np.array([1, 1], dtype=complex) / np.sqrt(2)
+        result = apply_pauli_x(state)
+        assert np.isclose(np.linalg.norm(result), 1.0)
+    
+    def test_invalid_shape(self):
+        """Rejects non-qubit states."""
+        state = np.array([1, 0, 0, 0], dtype=complex)
+        with pytest.raises(ValueError, match="shape"):
+            apply_pauli_x(state)
+    
+    def test_unnormalized_state(self):
+        """Rejects unnormalized states."""
+        state = np.array([1, 1], dtype=complex)  # norm = sqrt(2)
+        with pytest.raises(ValueError, match="normalized"):
+            apply_pauli_x(state)
+```
+
+## REMEMBER
+
+1. **Tests are not optional** - they are the specification
+2. **50 lines max** - if it's longer, it's doing too much
+3. **Validate everything** - trust nothing from outside your function
+4. **Fail loudly** - silent errors are the enemy of correctness
+5. **Cite your sources** - research code needs references
+6. **Reproducibility** - set seeds, pin versions, document everything

@@ -325,15 +325,15 @@ projects:
 | Embed docs with oc-update | ⬜ | After config update |
 | Commit and push | ⬜ | End of session |
 
-### Phase 2: Infrastructure (Next Session)
+### Phase 2: Infrastructure (Completed)
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Create `bootstrap.sh` | ⬜ | OS detection, venv, deps |
-| Create `.cursorrules` | ⬜ | Aggressive enforcement |
-| Create `.devcontainer/` | ⬜ | Python base container |
-| Test on fresh clone | ⬜ | Verify bootstrap works |
-| Commit and push | ⬜ | End of session |
+| Create `bootstrap.sh` | ✅ | OS detection, venv, deps, --minimal/--no-vector flags |
+| Create `.cursorrules` | ✅ | Aggressive enforcement with REFUSE patterns |
+| Create `.devcontainer/` | ✅ | Python 3.11 container with ruff, mypy, pytest |
+| Test on fresh clone | ✅ | Minimal mode verified |
+| Commit and push | 🔄 | In progress |
 
 ---
 
@@ -373,11 +373,11 @@ cd research-code-principles
 
 Sprint 1 is complete when:
 
-- [ ] `./bootstrap.sh` runs successfully on Linux/macOS/WSL
-- [ ] `.cursorrules` is loaded by Cursor (verify in Cursor settings)
-- [ ] `.devcontainer/` opens successfully in VS Code
-- [ ] `agent_docs/` embedded in vector DB
-- [ ] `oc-context --all ./agent_docs` returns all sprint docs
+- [x] `./bootstrap.sh` runs successfully on Linux/macOS/WSL
+- [x] `.cursorrules` is loaded by Cursor (verify in Cursor settings)
+- [x] `.devcontainer/` opens successfully in VS Code
+- [x] `agent_docs/` embedded in vector DB
+- [x] `oc-context --all ./agent_docs` returns all docs
 - [ ] All changes committed and pushed
 
 ---
