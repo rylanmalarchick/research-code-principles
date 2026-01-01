@@ -27,7 +27,7 @@ def _check_unitarity(matrix: np.ndarray, rtol: float, atol: float) -> None:
     identity = np.eye(matrix.shape[0], dtype=complex)
 
     if not np.allclose(product, identity, rtol=rtol, atol=atol):
-        max_diff = np.max(np.abs(product - identity))
+        max_diff: np.floating[Any] = np.max(np.abs(product - identity))
         raise ValidationError(
             f"Matrix is not unitary: max deviation from identity = {max_diff:.2e}"
         )
@@ -39,7 +39,7 @@ def _check_hermiticity(matrix: np.ndarray, rtol: float, atol: float) -> None:
         raise ValidationError("Hermiticity check requires a square matrix")
 
     if not np.allclose(matrix, matrix.conj().T, rtol=rtol, atol=atol):
-        max_diff = np.max(np.abs(matrix - matrix.conj().T))
+        max_diff: np.floating[Any] = np.max(np.abs(matrix - matrix.conj().T))
         raise ValidationError(
             f"Matrix is not Hermitian: max asymmetry = {max_diff:.2e}"
         )
@@ -61,7 +61,7 @@ def _check_positive_semidefinite(matrix: np.ndarray, rtol: float, atol: float) -
         raise ValidationError("Positive semi-definite check requires a square matrix")
 
     eigenvalues = np.linalg.eigvalsh(matrix)
-    min_eigenvalue = np.min(eigenvalues.real)
+    min_eigenvalue: np.floating[Any] = np.min(eigenvalues.real)
 
     if min_eigenvalue < -atol:
         raise ValidationError(f"Matrix has negative eigenvalue: {min_eigenvalue:.2e}")
@@ -77,7 +77,8 @@ def _check_normalization(vector: np.ndarray, rtol: float, atol: float) -> None:
 def _check_probability(array: np.ndarray, rtol: float, atol: float) -> None:
     """Check if all values are valid probabilities in [0, 1]."""
     if np.any(array < -atol) or np.any(array > 1 + atol):
-        min_val, max_val = np.min(array), np.max(array)
+        min_val: np.floating[Any] = np.min(array)
+        max_val: np.floating[Any] = np.max(array)
         raise ValidationError(
             f"Values outside probability range [0, 1]: min={min_val:.2e}, max={max_val:.2e}"
         )

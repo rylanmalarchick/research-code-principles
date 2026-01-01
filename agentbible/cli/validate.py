@@ -6,6 +6,7 @@ Validates physics constraints in numpy/HDF5 data files.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from rich.console import Console
@@ -35,7 +36,7 @@ def _check_unitarity(matrix: np.ndarray, rtol: float, atol: float) -> tuple[bool
     if np.allclose(product, identity, rtol=rtol, atol=atol):
         return True, "Matrix is unitary"
     else:
-        max_diff = np.max(np.abs(product - identity))
+        max_diff: np.floating[Any] = np.max(np.abs(product - identity))
         return False, f"Not unitary (max deviation: {max_diff:.2e})"
 
 
@@ -49,7 +50,7 @@ def _check_hermiticity(
     if np.allclose(matrix, matrix.conj().T, rtol=rtol, atol=atol):
         return True, "Matrix is Hermitian"
     else:
-        max_diff = np.max(np.abs(matrix - matrix.conj().T))
+        max_diff: np.floating[Any] = np.max(np.abs(matrix - matrix.conj().T))
         return False, f"Not Hermitian (max asymmetry: {max_diff:.2e})"
 
 
@@ -71,7 +72,7 @@ def _check_positivity(matrix: np.ndarray, rtol: float, atol: float) -> tuple[boo
         return False, "Not a square matrix"
 
     eigenvalues = np.linalg.eigvalsh(matrix)
-    min_eigenvalue = np.min(eigenvalues.real)
+    min_eigenvalue: np.floating[Any] = np.min(eigenvalues.real)
 
     if min_eigenvalue >= -atol:
         return True, f"Positive semi-definite (min eigenvalue: {min_eigenvalue:.2e})"
