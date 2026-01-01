@@ -1,73 +1,176 @@
-# Research Code Principles
+# AgentBible
+
+[![CI](https://github.com/rylanmalarchick/research-code-principles/actions/workflows/ci.yml/badge.svg)](https://github.com/rylanmalarchick/research-code-principles/actions/workflows/ci.yml)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Production-grade infrastructure for AI-assisted research software.**
 
-Clone this repository. Copy a template. Start building research code that meets the same standards as production systems.
+AgentBible provides physics validation decorators, project scaffolding, provenance tracking, and testing utilities for scientific Python projects.
+
+## Installation
+
+```bash
+pip install agentbible
+
+# With HDF5 provenance support
+pip install agentbible[hdf5]
+
+# Full development install
+pip install agentbible[all]
+```
 
 ## Quick Start
 
-### 1. Copy a Starter Template
+### Create a New Project
 
-**Python project:**
 ```bash
-cp -r templates/python_research ~/my-project
-cd ~/my-project
+bible init my-quantum-sim --template python-scientific
+cd my-quantum-sim
+source .venv/bin/activate
 pip install -e ".[dev]"
-pytest  # Run tests
+pytest  # 28 tests pass immediately
 ```
 
-**C++/CUDA project:**
+### Use Physics Validators
+
+```python
+from agentbible import validate_unitary, validate_density_matrix
+import numpy as np
+
+@validate_unitary
+def create_hadamard():
+    """Returns Hadamard gate - validated as unitary."""
+    return np.array([[1, 1], [1, -1]], dtype=complex) / np.sqrt(2)
+
+@validate_density_matrix
+def create_mixed_state():
+    """Returns maximally mixed state - validated as density matrix."""
+    return np.eye(2, dtype=complex) / 2
+
+# Validation happens automatically on return
+H = create_hadamard()      # OK - unitary
+rho = create_mixed_state() # OK - trace=1, Hermitian, positive semi-definite
+```
+
+### Validate Data Files
+
 ```bash
-cp -r templates/cpp_hpc ~/my-project
-cd ~/my-project
-cmake -B build && cmake --build build
-ctest --test-dir build  # Run tests
+# Validate a numpy matrix
+bible validate state.npy --check unitarity
+
+# Validate HDF5 with all checks
+bible validate results.h5 --check all
+
+# Multiple specific checks
+bible validate matrix.npy -c hermiticity -c trace -c positivity
 ```
 
-### 2. Load Context for AI Sessions
+### Save Data with Provenance
 
-Load modular prompts instead of giant context files:
+```python
+from agentbible.provenance import save_with_metadata, load_with_metadata
+import numpy as np
+
+# Save with full reproducibility metadata
+save_with_metadata(
+    "results.h5",
+    {"density_matrix": rho, "eigenvalues": np.linalg.eigvalsh(rho)},
+    description="Ground state calculation",
+)
+
+# Load with metadata
+data, metadata = load_with_metadata("results.h5")
+print(metadata["git_sha"])      # "a1b2c3d..."
+print(metadata["timestamp"])    # "2026-01-01T12:00:00+00:00"
+print(metadata["packages"])     # {"numpy": "1.26.0", ...}
+```
+
+### Physics-Aware Testing
+
+```python
+from agentbible.testing import physics_test, deterministic_seed
+import numpy as np
+
+@physics_test(checks=["unitarity", "hermiticity"])
+def test_pauli_x():
+    """Automatically validates return value."""
+    return np.array([[0, 1], [1, 0]], dtype=complex)
+
+def test_reproducible(deterministic_seed):
+    """Seeds are set to 42 for reproducibility."""
+    random_value = np.random.rand()
+    assert random_value == 0.3745401188473625  # Always the same
+```
+
+## Features
+
+### Validators
+
+| Decorator | Validates |
+|-----------|-----------|
+| `@validate_unitary` | U @ U.H = I |
+| `@validate_hermitian` | A = A.H |
+| `@validate_density_matrix` | Hermitian, trace=1, positive semi-definite |
+| `@validate_probability` | Value in [0, 1] |
+| `@validate_probabilities` | Array of probabilities |
+| `@validate_normalized` | Sum or norm = 1 |
+| `@validate_positive` | Value > 0 |
+| `@validate_non_negative` | Value >= 0 |
+| `@validate_range(min, max)` | Value in [min, max] |
+| `@validate_finite` | No NaN or Inf |
+
+### CLI Commands
 
 ```bash
-# Just the essentials (~50 lines)
-cat agent_prompts/core-principles.md
-
-# Add physics validation for quantum work
-cat agent_prompts/core-principles.md agent_prompts/physics-validation.md
+bible init <name>           # Create project from template
+bible validate <file>       # Validate physics constraints
+bible context               # Generate AI context
+bible info                  # Show installation info
 ```
 
-### 3. Generate Repository Map
+### Provenance Metadata
 
-Understand any codebase structure without reading every file:
+`save_with_metadata()` automatically captures:
+- Git SHA, branch, dirty status
+- UTC timestamp
+- Random seeds (numpy, python, torch)
+- Hostname, platform, Python version
+- Package versions (numpy, scipy, h5py, torch, etc.)
+
+### Testing Fixtures
+
+| Fixture | Purpose |
+|---------|---------|
+| `deterministic_seed` | Sets numpy/random to seed 42 |
+| `tolerance` | Returns `{"rtol": 1e-10, "atol": 1e-12}` |
+| `quantum_tolerance` | Returns `{"rtol": 1e-6, "atol": 1e-8}` |
+
+## Project Templates
+
+### Python Scientific (`python-scientific`)
+
+Pre-configured with:
+- **ruff** for linting (strict rules)
+- **mypy** in strict mode
+- **pytest** with 70% coverage minimum
+- Physics validation helpers
+- `.cursorrules` for AI agents
 
 ```bash
-./scripts/map_repo.sh > repo_map.txt
+bible init my-project --template python-scientific
 ```
 
-## What's Included
+### C++ HPC/CUDA (`cpp-hpc-cuda`)
 
-```
-research-code-principles/
-├── templates/                  # Clonable project starters
-│   ├── python_research/        # Pre-configured Python environment
-│   └── cpp_hpc/                # Pre-configured C++/CUDA environment
-├── agent_prompts/              # Modular AI context snippets
-│   ├── core-principles.md      # 5 principles (~50 lines)
-│   ├── test-generation.md      # Writing research tests
-│   ├── physics-validation.md   # Quantum constraints
-│   ├── kernel-optimization.md  # CUDA best practices
-│   ├── code-review.md          # Quick checklist
-│   └── error-handling.md       # Fail-fast patterns
-├── .github/workflows/ci.yml    # CI/CD template
-├── .pre-commit-config.yaml     # Pre-commit hooks
-├── scripts/map_repo.sh         # Repository mapper
-├── examples/                   # Proof-of-concepts
-│   ├── quantum-gate-example/   # Quantum gate with tests
-│   └── hpc-vqe-benchmark/      # 117x speedup demonstration
-└── docs/                       # Deep-dive documentation
-    ├── philosophy.md           # Why good code matters
-    ├── agent-coding-context.md # Full AI context (if needed)
-    └── style-guide-reference.md # Exhaustive style guide
+Pre-configured with:
+- **CMake** with zero-warning policy
+- **GoogleTest** for testing
+- **CUDA** support (optional)
+- Physical validation functions
+
+```bash
+bible init my-project --template cpp-hpc-cuda
 ```
 
 ## The 5 Principles
@@ -78,112 +181,34 @@ research-code-principles/
 4. **Simplicity by Design** — Functions ≤50 lines, single responsibility
 5. **Infrastructure Enables Speed** — CI, tests, linting from day one
 
-## Templates
-
-### Python Research Template
-
-Pre-configured with:
-- **ruff** for linting (strict rules)
-- **mypy** in strict mode (type checking)
-- **pytest** with 70% coverage minimum
-- **Physical validation** helpers (unitarity, normalization, density matrices)
-- **Reproducibility fixtures** (fixed seeds)
+## Development
 
 ```bash
-cp -r templates/python_research ~/my-project
+# Clone and setup
+git clone https://github.com/rylanmalarchick/research-code-principles
+cd research-code-principles
+./bootstrap.sh
+
+# Or manually
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev,hdf5]"
+
+# Run tests
+pytest tests/ -v
+
+# Lint and type check
+ruff check agentbible/
+mypy agentbible/
 ```
-
-### C++/HPC Template
-
-Pre-configured with:
-- **CMake** with zero-warning policy (`-Wall -Wextra -Werror` in CI)
-- **GoogleTest** for testing
-- **CudaMemory<T>** RAII wrapper (zero manual cudaFree)
-- **Physical validation** functions (unitarity, normalization)
-- **Optional CUDA** support
-
-```bash
-cp -r templates/cpp_hpc ~/my-project
-```
-
-## Agent Prompts
-
-Instead of loading 500+ lines of context, use modular prompts:
-
-| Prompt | Lines | Use Case |
-|--------|-------|----------|
-| `core-principles.md` | ~50 | Every session |
-| `test-generation.md` | ~60 | Writing tests |
-| `physics-validation.md` | ~60 | Quantum/physics code |
-| `kernel-optimization.md` | ~60 | CUDA kernels |
-| `code-review.md` | ~40 | Reviewing code |
-| `error-handling.md` | ~50 | Fail-fast patterns |
-
-**Combine as needed:**
-```bash
-cat agent_prompts/core-principles.md agent_prompts/test-generation.md > session.md
-```
-
-## Automated Enforcement
-
-### GitHub Actions CI
-
-Copy `.github/workflows/ci.yml` to your project. It:
-- Runs tests with coverage check (70% minimum)
-- Runs linting (ruff for Python, compiler warnings for C++)
-- Runs type checking (mypy)
-- Fails the build on any warning
-
-### Pre-commit Hooks
-
-Copy `.pre-commit-config.yaml` and install:
-
-```bash
-pip install pre-commit
-pre-commit install
-```
-
-Hooks include:
-- Secret detection (prevent credential leaks)
-- Code formatting (ruff, clang-format)
-- Type checking (mypy)
-- Commit message linting (conventional commits)
-
-## Examples
-
-### Quantum Gate Example
-
-Full implementation with tests demonstrating the principles:
-- `examples/quantum-gate-example/gate.py` — Gate implementation
-- `examples/quantum-gate-example/test_gate.py` — Comprehensive tests
-- `examples/quantum-gate-example/prompting-log.md` — How it was built with AI
-
-### HPC VQE Benchmark
-
-Demonstrates the **117x speedup** achieved through systematic optimization:
-- JAX JIT compilation (21.7x)
-- GPU backend (2.8x additional)
-- MPI parallelization (1.9x additional)
-
-See `examples/hpc-vqe-benchmark/`
-
-## Proof Points
-
-These standards are applied across production projects:
-
-| Project | Language | Tests | Key Practices |
-|---------|----------|-------|---------------|
-| **QubitPulseOpt** | Python | 800+ | CI/CD, 74% coverage, type hints |
-| **cuda-quantum-simulator** | CUDA/C++ | 9 suites | RAII, zero manual cudaFree |
-| **quantum-circuit-optimizer** | C++17 | 340+ | OpenQASM parser, DAG optimization |
-| **QuantumVQE** | Python | - | 117x speedup, deterministic seeds |
 
 ## Documentation
 
-For deep dives:
-- `docs/philosophy.md` — Why good code matters (theory)
-- `docs/agent-coding-context.md` — Full AI context (500+ lines)
-- `docs/style-guide-reference.md` — Exhaustive style conventions
+- [Philosophy](docs/philosophy.md) — Why good code matters
+- [Style Guide](docs/style-guide-reference.md) — Coding conventions
+- [Agent Prompts](agent_prompts/) — Modular AI context snippets
+- [CHANGELOG](CHANGELOG.md) — Release history
+- [SECURITY](SECURITY.md) — Security policy
 
 ## License
 
@@ -195,4 +220,4 @@ Rylan Malarchick — [rylan1012@gmail.com](mailto:rylan1012@gmail.com)
 
 ---
 
-**Latest:** v2.0 (Dec 2025) — Restructured as clonable infrastructure
+**v0.1.0** — Initial release (January 2026)
