@@ -9,10 +9,13 @@ Usage:
 
 from __future__ import annotations
 
+import sys
+
 import click
 from rich.console import Console
 
 from agentbible import __version__
+from agentbible.cli.init import run_init
 
 console = Console()
 
@@ -38,6 +41,24 @@ def cli() -> None:
     help="Project template to use.",
 )
 @click.option(
+    "--author",
+    "-a",
+    type=str,
+    help="Author name (defaults to git config user.name).",
+)
+@click.option(
+    "--email",
+    "-e",
+    type=str,
+    help="Author email (defaults to git config user.email).",
+)
+@click.option(
+    "--description",
+    "-d",
+    type=str,
+    help="Project description.",
+)
+@click.option(
     "--no-git",
     is_flag=True,
     help="Skip git initialization.",
@@ -47,7 +68,22 @@ def cli() -> None:
     is_flag=True,
     help="Skip virtual environment creation.",
 )
-def init(name: str, template: str, no_git: bool, no_venv: bool) -> None:
+@click.option(
+    "--force",
+    "-f",
+    is_flag=True,
+    help="Overwrite existing directory.",
+)
+def init(
+    name: str,
+    template: str,
+    author: str | None,
+    email: str | None,
+    description: str | None,
+    no_git: bool,
+    no_venv: bool,
+    force: bool,
+) -> None:
     """Initialize a new project from template.
 
     Creates a new project directory with the specified template,
@@ -56,13 +92,7 @@ def init(name: str, template: str, no_git: bool, no_venv: bool) -> None:
     Example:
         bible init my-quantum-sim --template python-scientific
     """
-    console.print(f"[bold blue]Creating project '{name}' from template '{template}'...[/]")
-    console.print("[yellow]Note: Full implementation coming in Sprint 3[/]")
-    # TODO: Implementation in Sprint 3
-    # - Copy template files
-    # - Customize project name
-    # - Initialize git if not --no-git
-    # - Create venv if not --no-venv
+    sys.exit(run_init(name, template, author, email, description, no_git, no_venv, force))
 
 
 @cli.command()

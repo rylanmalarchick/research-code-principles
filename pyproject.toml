@@ -84,6 +84,9 @@ Changelog = "https://github.com/rylanmalarchick/research-code-principles/blob/ma
 [tool.hatch.build.targets.wheel]
 packages = ["agentbible"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"agentbible/templates" = "agentbible/templates"
+
 [tool.hatch.build.targets.sdist]
 include = [
     "agentbible/",

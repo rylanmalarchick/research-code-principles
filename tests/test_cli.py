@@ -68,19 +68,4 @@ class TestCLI:
         assert __version__ in result.output
         assert "validators" in result.output
 
-    def test_init_command_skeleton(self) -> None:
-        """init command runs (skeleton)."""
-        runner = CliRunner()
-        result = runner.invoke(cli, ["init", "test-project"])
-
-        assert result.exit_code == 0
-        assert "test-project" in result.output
-        assert "Sprint 3" in result.output  # Skeleton message
-
-    def test_init_with_template(self) -> None:
-        """init accepts template option."""
-        runner = CliRunner()
-        result = runner.invoke(cli, ["init", "test-project", "-t", "cpp-hpc-cuda"])
-
-        assert result.exit_code == 0
-        assert "cpp-hpc-cuda" in result.output
+    # Note: Full init tests are in test_init.py

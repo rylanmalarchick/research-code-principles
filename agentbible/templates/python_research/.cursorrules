@@ -1,0 +1,53 @@
+# {{PROJECT_NAME}} - AI Agent Rules
+
+This project follows AgentBible research code principles.
+
+## Mandatory Rules
+
+### 1. Test Before Code
+- REFUSE to write implementation without test specification
+- Write test file FIRST, then implementation
+- Ask "What are the test cases?" before writing functions
+
+### 2. Rule of 50
+- Functions must be ≤ 50 lines
+- If longer, STOP and refactor into smaller functions
+- Each function does ONE thing
+
+### 3. Type Everything
+- Type hints on ALL function signatures
+- Docstrings on ALL public functions (Google style)
+- Run `mypy src/` before committing
+
+### 4. Physical Validation
+- Validate physical constraints explicitly:
+  - Unitarity: U†U = I
+  - Normalization: ⟨ψ|ψ⟩ = 1
+  - Trace: tr(ρ) = 1
+  - Hermiticity: H = H†
+- Use `src/validation.py` helpers
+
+### 5. No Silent Failures
+- NEVER use bare `except:`
+- ALWAYS log or re-raise with context
+- Include what failed, expected value, actual value
+
+### 6. Reproducibility
+- Set random seeds explicitly
+- Document seed values
+- Use `tests/conftest.py` fixtures
+
+## Project Structure
+
+- Source code: `src/`
+- Tests: `tests/`
+- Run `pytest` before committing
+- Minimum 70% test coverage
+
+## Before Committing
+
+```bash
+pytest                  # Tests pass
+ruff check .            # No lint errors
+mypy src/               # No type errors
+```

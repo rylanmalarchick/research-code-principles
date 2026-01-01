@@ -1,0 +1,77 @@
+# {{PROJECT_NAME}}
+
+{{PROJECT_DESCRIPTION}}
+
+Generated with [AgentBible](https://github.com/rylanmalarchick/research-code-principles).
+
+## Quick Start
+
+```bash
+# Activate virtual environment (created by bible init)
+source .venv/bin/activate
+
+# Install with dev dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Run linting
+ruff check .
+
+# Run type checking
+mypy src/
+```
+
+## Project Structure
+
+```
+{{PROJECT_NAME}}/
+├── src/                    # Source code
+│   ├── __init__.py
+│   └── validation.py       # Physical validation utilities
+├── tests/                  # Test suite
+│   ├── conftest.py         # Shared fixtures
+│   └── test_validation.py  # Example tests
+├── .cursorrules            # AI agent instructions
+├── pyproject.toml          # Project configuration
+└── README.md               # This file
+```
+
+## Physical Validation
+
+The `validation.py` module provides:
+
+```python
+from src.validation import check_unitarity, check_normalized, check_density_matrix
+
+# Validate quantum operations
+check_unitarity(gate_matrix)        # U†U = I
+check_normalized(state_vector)       # ⟨ψ|ψ⟩ = 1
+check_density_matrix(rho)            # Hermitian, trace=1, positive semidefinite
+check_hermitian(hamiltonian)         # H = H†
+check_probabilities(measurement)     # non-negative, sum=1
+```
+
+## Development
+
+### Running Tests
+
+```bash
+pytest                      # Run all tests
+pytest -v                   # Verbose output
+pytest -m "not slow"        # Skip slow tests
+pytest --cov=src            # With coverage
+```
+
+### Code Quality
+
+```bash
+ruff check .                # Lint
+ruff format .               # Format
+mypy src/                   # Type check
+```
+
+## License
+
+MIT - Created {{YEAR}}
