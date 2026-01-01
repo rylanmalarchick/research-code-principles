@@ -20,7 +20,7 @@ class TestDeterministicSeed:
     def test_sets_numpy_seed(self) -> None:
         """Sets numpy random seed."""
         gen = deterministic_seed(seed=12345)
-        seed = next(gen)
+        next(gen)  # Consume generator to set seed
 
         val1 = np.random.rand()
 

@@ -13,7 +13,7 @@ from agentbible.provenance.hdf5 import get_provenance_metadata
 # Only import HDF5-specific functions if h5py is available
 h5py = pytest.importorskip("h5py")
 
-from agentbible.provenance import load_with_metadata, save_with_metadata
+from agentbible.provenance import load_with_metadata, save_with_metadata  # noqa: E402
 
 
 class TestGetProvenanceMetadata:
@@ -168,7 +168,7 @@ class TestLoadWithMetadata:
 
         save_with_metadata(filepath, original, description="Roundtrip test")
 
-        loaded, metadata = load_with_metadata(filepath)
+        loaded, _ = load_with_metadata(filepath)
 
         for key in original:
             np.testing.assert_array_equal(loaded[key], original[key])

@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-import pytest
 from click.testing import CliRunner
 
 from agentbible.cli.main import cli
@@ -251,6 +250,15 @@ class TestValidateCLI:
 
         result = runner.invoke(
             cli,
-            ["validate", str(filepath), "--check", "all", "--rtol", "1e-3", "--atol", "1e-6"],
+            [
+                "validate",
+                str(filepath),
+                "--check",
+                "all",
+                "--rtol",
+                "1e-3",
+                "--atol",
+                "1e-6",
+            ],
         )
         assert "1e-03" in result.output or "0.001" in result.output

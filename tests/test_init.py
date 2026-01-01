@@ -203,7 +203,7 @@ class TestInitCommand:
         """init command fails if directory exists."""
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path):
-            os.makedirs("existing-project")
+            Path("existing-project").mkdir(parents=True)
 
             result = runner.invoke(
                 cli, ["init", "existing-project", "--no-git", "--no-venv"]
@@ -216,7 +216,7 @@ class TestInitCommand:
         """init --force overwrites existing directory."""
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path):
-            os.makedirs("existing-project")
+            Path("existing-project").mkdir(parents=True)
             Path("existing-project/old-file.txt").write_text("old content")
 
             result = runner.invoke(
