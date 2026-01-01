@@ -6,7 +6,6 @@ each test defines expected behavior for the validation functions.
 
 import numpy as np
 import pytest
-
 from src.validation import (
     check_density_matrix,
     check_hermitian,

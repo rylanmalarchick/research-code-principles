@@ -38,9 +38,7 @@ def check_unitarity(
         raise ValueError(f"Matrix{label} must be 2D, got shape {matrix.shape}")
 
     if matrix.shape[0] != matrix.shape[1]:
-        raise ValueError(
-            f"Matrix{label} must be square, got shape {matrix.shape}"
-        )
+        raise ValueError(f"Matrix{label} must be square, got shape {matrix.shape}")
 
     identity = np.eye(matrix.shape[0], dtype=complex)
     product = matrix.conj().T @ matrix
@@ -170,6 +168,4 @@ def check_probabilities(
 
     total = np.sum(probs)
     if not np.isclose(total, 1.0, atol=tolerance):
-        raise ValueError(
-            f"Probabilities{label} sum to {total:.6f} (expected 1.0)"
-        )
+        raise ValueError(f"Probabilities{label} sum to {total:.6f} (expected 1.0)")

@@ -117,9 +117,7 @@ class TestValidateUnitary:
         assert my_special_gate.__name__ == "my_special_gate"
         assert my_special_gate.__doc__ == "My docstring."
 
-    def test_error_includes_function_name(
-        self, non_unitary_matrix: np.ndarray
-    ) -> None:
+    def test_error_includes_function_name(self, non_unitary_matrix: np.ndarray) -> None:
         """Error message includes the function name."""
 
         @validate_unitary

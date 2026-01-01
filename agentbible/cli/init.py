@@ -5,15 +5,12 @@ Creates new projects from templates with variable substitution.
 
 from __future__ import annotations
 
-import os
 import re
 import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
-import click
 from rich.console import Console
 
 from agentbible.templates import AVAILABLE_TEMPLATES
@@ -43,7 +40,10 @@ def validate_project_name(name: str) -> tuple[bool, str]:
 
     # Check for valid characters (alphanumeric, dash, underscore)
     if not re.match(r"^[a-zA-Z][a-zA-Z0-9_-]*$", name):
-        return False, "Project name must start with a letter and contain only letters, numbers, dashes, and underscores"
+        return (
+            False,
+            "Project name must start with a letter and contain only letters, numbers, dashes, and underscores",
+        )
 
     return True, ""
 
@@ -233,7 +233,9 @@ def run_init(
     variables = get_template_variables(name, author, email, description)
 
     # Create project
-    console.print(f"[bold blue]Creating project '{name}' from template '{template}'...[/]")
+    console.print(
+        f"[bold blue]Creating project '{name}' from template '{template}'...[/]"
+    )
 
     try:
         dest_dir.mkdir(parents=True)

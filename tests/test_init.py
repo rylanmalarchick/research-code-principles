@@ -79,7 +79,9 @@ class TestVariableSubstitution:
 
     def test_substitute_single_variable(self) -> None:
         """Single variable is substituted."""
-        result = substitute_variables("Project: {{PROJECT_NAME}}", {"PROJECT_NAME": "myproj"})
+        result = substitute_variables(
+            "Project: {{PROJECT_NAME}}", {"PROJECT_NAME": "myproj"}
+        )
         assert result == "Project: myproj"
 
     def test_substitute_multiple_variables(self) -> None:
@@ -131,7 +133,9 @@ class TestInitCommand:
         """init command creates project directory."""
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path):
-            result = runner.invoke(cli, ["init", "test-project", "--no-git", "--no-venv"])
+            result = runner.invoke(
+                cli, ["init", "test-project", "--no-git", "--no-venv"]
+            )
 
             assert result.exit_code == 0
             assert Path("test-project").exists()
@@ -174,7 +178,9 @@ class TestInitCommand:
         """init command creates src directory with module."""
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path):
-            result = runner.invoke(cli, ["init", "test-project", "--no-git", "--no-venv"])
+            result = runner.invoke(
+                cli, ["init", "test-project", "--no-git", "--no-venv"]
+            )
 
             assert result.exit_code == 0
             assert Path("test-project/src").exists()
@@ -184,7 +190,9 @@ class TestInitCommand:
         """init command creates tests directory."""
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path):
-            result = runner.invoke(cli, ["init", "test-project", "--no-git", "--no-venv"])
+            result = runner.invoke(
+                cli, ["init", "test-project", "--no-git", "--no-venv"]
+            )
 
             assert result.exit_code == 0
             assert Path("test-project/tests").exists()
@@ -197,7 +205,9 @@ class TestInitCommand:
         with runner.isolated_filesystem(temp_dir=tmp_path):
             os.makedirs("existing-project")
 
-            result = runner.invoke(cli, ["init", "existing-project", "--no-git", "--no-venv"])
+            result = runner.invoke(
+                cli, ["init", "existing-project", "--no-git", "--no-venv"]
+            )
 
             assert result.exit_code == 1
             assert "already exists" in result.output
@@ -221,7 +231,9 @@ class TestInitCommand:
         """init command rejects invalid project names."""
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path):
-            result = runner.invoke(cli, ["init", "-invalid-name", "--no-git", "--no-venv"])
+            result = runner.invoke(
+                cli, ["init", "-invalid-name", "--no-git", "--no-venv"]
+            )
 
             assert result.exit_code != 0
 
@@ -230,7 +242,15 @@ class TestInitCommand:
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path):
             result = runner.invoke(
-                cli, ["init", "test-project", "-t", "unknown-template", "--no-git", "--no-venv"]
+                cli,
+                [
+                    "init",
+                    "test-project",
+                    "-t",
+                    "unknown-template",
+                    "--no-git",
+                    "--no-venv",
+                ],
             )
 
             # Click should reject this before our code runs
@@ -240,7 +260,9 @@ class TestInitCommand:
         """init command shows next steps."""
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path):
-            result = runner.invoke(cli, ["init", "test-project", "--no-git", "--no-venv"])
+            result = runner.invoke(
+                cli, ["init", "test-project", "--no-git", "--no-venv"]
+            )
 
             assert result.exit_code == 0
             assert "Next steps" in result.output

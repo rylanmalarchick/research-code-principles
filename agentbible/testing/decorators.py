@@ -64,9 +64,7 @@ def _check_positive_semidefinite(matrix: np.ndarray, rtol: float, atol: float) -
     min_eigenvalue = np.min(eigenvalues.real)
 
     if min_eigenvalue < -atol:
-        raise ValidationError(
-            f"Matrix has negative eigenvalue: {min_eigenvalue:.2e}"
-        )
+        raise ValidationError(f"Matrix has negative eigenvalue: {min_eigenvalue:.2e}")
 
 
 def _check_normalization(vector: np.ndarray, rtol: float, atol: float) -> None:

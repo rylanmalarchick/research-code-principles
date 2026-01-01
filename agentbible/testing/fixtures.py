@@ -9,12 +9,13 @@ Provides fixtures for:
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Any, Generator
+from collections.abc import Generator
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 if TYPE_CHECKING:
-    import pytest
+    pass
 
 # Default seed for reproducibility
 DEFAULT_SEED = 42

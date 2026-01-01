@@ -37,7 +37,7 @@ def cli() -> None:
 @click.option(
     "--template",
     "-t",
-    type=click.Choice(["python-scientific", "cpp-hpc-cuda"]),
+    type=click.Choice(["python-scientific"]),
     default="python-scientific",
     help="Project template to use.",
 )
@@ -93,7 +93,9 @@ def init(
     Example:
         bible init my-quantum-sim --template python-scientific
     """
-    sys.exit(run_init(name, template, author, email, description, no_git, no_venv, force))
+    sys.exit(
+        run_init(name, template, author, email, description, no_git, no_venv, force)
+    )
 
 
 @cli.command()
@@ -154,14 +156,16 @@ def context(
     "--check",
     "-c",
     multiple=True,
-    type=click.Choice([
-        "unitarity",
-        "hermiticity",
-        "trace",
-        "positivity",
-        "normalization",
-        "all",
-    ]),
+    type=click.Choice(
+        [
+            "unitarity",
+            "hermiticity",
+            "trace",
+            "positivity",
+            "normalization",
+            "all",
+        ]
+    ),
     help="Validation check to perform.",
 )
 @click.option(

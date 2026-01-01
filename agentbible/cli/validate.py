@@ -6,13 +6,10 @@ Validates physics constraints in numpy/HDF5 data files.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 from rich.console import Console
 from rich.table import Table
-
-from agentbible.validators import ValidationError
 
 console = Console()
 
@@ -42,7 +39,9 @@ def _check_unitarity(matrix: np.ndarray, rtol: float, atol: float) -> tuple[bool
         return False, f"Not unitary (max deviation: {max_diff:.2e})"
 
 
-def _check_hermiticity(matrix: np.ndarray, rtol: float, atol: float) -> tuple[bool, str]:
+def _check_hermiticity(
+    matrix: np.ndarray, rtol: float, atol: float
+) -> tuple[bool, str]:
     """Check if matrix is Hermitian."""
     if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
         return False, "Not a square matrix"
@@ -80,7 +79,9 @@ def _check_positivity(matrix: np.ndarray, rtol: float, atol: float) -> tuple[boo
         return False, f"Negative eigenvalue: {min_eigenvalue:.2e}"
 
 
-def _check_normalization(array: np.ndarray, rtol: float, atol: float) -> tuple[bool, str]:
+def _check_normalization(
+    array: np.ndarray, rtol: float, atol: float
+) -> tuple[bool, str]:
     """Check if array is normalized."""
     norm = np.linalg.norm(array)
     if np.isclose(norm, 1.0, rtol=rtol, atol=atol):
@@ -115,15 +116,15 @@ def _load_file(filepath: Path) -> dict[str, np.ndarray]:
         # HDF5 file
         try:
             import h5py
-        except ImportError:
+        except ImportError as e:
             raise ImportError(
                 "h5py is required for HDF5 files. "
                 "Install with: pip install agentbible[hdf5]"
-            )
+            ) from e
 
         data = {}
         with h5py.File(filepath, "r") as f:
-            for key in f.keys():
+            for key in f:
                 data[key] = np.array(f[key])
         return data
 
@@ -131,9 +132,7 @@ def _load_file(filepath: Path) -> dict[str, np.ndarray]:
         raise ValueError(f"Unsupported file format: {suffix}")
 
 
-def _determine_applicable_checks(
-    array: np.ndarray, checks: list[str]
-) -> list[str]:
+def _determine_applicable_checks(array: np.ndarray, checks: list[str]) -> list[str]:
     """Determine which checks are applicable to an array."""
     if "all" in checks:
         applicable = []
@@ -175,7 +174,9 @@ def run_validate(
     all_passed = True
 
     for name, array in data.items():
-        console.print(f"[bold]Dataset: {name}[/] (shape: {array.shape}, dtype: {array.dtype})")
+        console.print(
+            f"[bold]Dataset: {name}[/] (shape: {array.shape}, dtype: {array.dtype})"
+        )
 
         # Determine applicable checks
         applicable = _determine_applicable_checks(array, checks)

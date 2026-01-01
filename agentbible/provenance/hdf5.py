@@ -11,9 +11,7 @@ from __future__ import annotations
 
 import datetime
 import json
-import os
 import platform
-import random
 import subprocess
 import sys
 from pathlib import Path
@@ -246,7 +244,7 @@ def load_with_metadata(
 
     with h5py.File(filepath, "r") as f:
         # Load all datasets
-        for name in f.keys():
+        for name in f:
             data[name] = np.array(f[name])
 
         # Load metadata from attributes
