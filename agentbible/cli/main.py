@@ -16,6 +16,7 @@ from rich.console import Console
 
 from agentbible import __version__
 from agentbible.cli.init import run_init
+from agentbible.cli.validate import run_validate
 
 console = Console()
 
@@ -192,14 +193,7 @@ def validate(
         bible validate matrix.npy -c unitarity -c hermiticity
     """
     checks = list(check) if check else ["all"]
-    console.print(f"[bold blue]Validating '{file}'...[/]")
-    console.print(f"  Checks: {', '.join(checks)}")
-    console.print(f"  Tolerance: rtol={rtol}, atol={atol}")
-    console.print("[yellow]Note: Full implementation coming in Sprint 4[/]")
-    # TODO: Implementation in Sprint 4
-    # - Load numpy or HDF5 file
-    # - Run specified checks
-    # - Report results
+    sys.exit(run_validate(file, checks, rtol, atol))
 
 
 @cli.command()
@@ -209,6 +203,8 @@ def info() -> None:
     console.print()
     console.print("[bold]Installed components:[/]")
     console.print("  - validators: Physics validation decorators")
+    console.print("  - provenance: HDF5 data tracking with metadata")
+    console.print("  - testing: Physics-aware pytest fixtures")
     console.print("  - cli: Command-line interface")
     console.print()
     console.print("[bold]Available commands:[/]")
