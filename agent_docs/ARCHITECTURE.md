@@ -18,8 +18,8 @@
 ```
 research-code-principles/
 │
-├── .cursorrules                    ⬜ AI agent enforcement rules
-├── .devcontainer/                  ⬜ VS Code dev container
+├── .cursorrules                    ✅ AI agent enforcement rules
+├── .devcontainer/                  ✅ VS Code dev container
 │   ├── devcontainer.json
 │   ├── Dockerfile
 │   └── post-create.sh
@@ -32,7 +32,7 @@ research-code-principles/
 │
 ├── .gitignore                      ✅
 ├── .pre-commit-config.yaml         ✅ Pre-commit hooks
-├── bootstrap.sh                    ⬜ One-command setup script
+├── bootstrap.sh                    ✅ One-command setup script
 ├── CHANGELOG.md                    ⬜ Release history
 ├── CONTRIBUTING.md                 ✅
 ├── LICENSE                         ✅ MIT
@@ -42,7 +42,7 @@ research-code-principles/
 ├── agent_docs/                     🔄 Meta-docs for repo development
 │   ├── SCOPE_OF_WORK.md            ✅ Overall vision
 │   ├── sprint-1-foundation.md      ✅ Sprint 1 details
-│   ├── sprint-2-package.md         ⬜ Sprint 2 details
+│   ├── sprint-2-package.md         ✅ Sprint 2 details
 │   ├── ARCHITECTURE.md             ✅ This file
 │   └── README.md                   ⬜ How to use agent_docs
 │
@@ -55,19 +55,18 @@ research-code-principles/
 │   ├── code-review.md              ✅
 │   └── error-handling.md           ✅
 │
-├── agentbible/                     ⬜ Python package (pip installable)
+├── agentbible/                     ✅ Python package (pip installable)
 │   ├── __init__.py
 │   ├── __main__.py                 # python -m agentbible
 │   ├── cli/
 │   │   ├── __init__.py
-│   │   ├── main.py                 # Click entry point
-│   │   ├── init.py                 # bible init command
-│   │   ├── context.py              # bible context command
-│   │   └── validate.py             # bible validate command
+│   │   ├── main.py                 # Click entry point (skeleton)
 │   ├── validators/
 │   │   ├── __init__.py
+│   │   ├── base.py                 # ValidationError, utilities
 │   │   ├── quantum.py              # @validate_unitary, @validate_hermitian
 │   │   ├── probability.py          # @validate_probability, @validate_normalized
+│   │   └── bounds.py               # @validate_positive, @validate_range
 │   │   └── bounds.py               # @validate_positive, @validate_range
 │   ├── provenance/
 │   │   ├── __init__.py
@@ -120,12 +119,15 @@ research-code-principles/
 │       ├── tests/
 │       └── .cursorrules            ⬜ Add template-specific rules
 │
-├── tests/                          🔄 Package tests
-│   ├── test_validators.py          ⬜ Test validator decorators
-│   ├── test_cli.py                 ⬜ Test CLI commands
-│   └── test_provenance.py          ⬜ Test HDF5 metadata
-│
-└── pyproject.toml                  ⬜ Package definition
+├── tests/                          ✅ Package tests
+│   ├── conftest.py                 ✅ Shared fixtures
+│   ├── test_validators_quantum.py  ✅ Quantum validator tests
+│   ├── test_validators_probability.py ✅ Probability validator tests
+│   ├── test_validators_bounds.py   ✅ Bounds validator tests
+│   ├── test_cli.py                 ✅ CLI smoke tests
+│   └── test_provenance.py          ⬜ Test HDF5 metadata (Sprint 4)
+
+└── pyproject.toml                  ✅ Package definition
 ```
 
 ---
