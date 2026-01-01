@@ -144,6 +144,7 @@ check_untyped_defs = true
 no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_configs = true
+disable_error_code = ["type-arg"]  # numpy.ndarray generic params vary by numpy version
 exclude = [
     "^agentbible/templates/",  # Template files are not meant to be type-checked here
 ]
