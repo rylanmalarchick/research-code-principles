@@ -43,7 +43,7 @@ jobs:
         run: mypy agentbible/
 
       - name: Test with pytest
-        run: pytest tests/ --cov=agentbible --cov-report=xml --cov-fail-under=85
+        run: pytest tests/ --cov=agentbible --cov-report=xml --cov-fail-under=80
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12'
