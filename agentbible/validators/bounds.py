@@ -18,7 +18,7 @@ import functools
 from typing import Any, Callable, TypeVar, overload
 
 from agentbible.errors import BoundsError, NonFiniteError
-from agentbible.validators.base import ValidationError, get_numpy
+from agentbible.validators.base import get_numpy
 
 F = TypeVar("F", bound=Callable[..., Any])
 

@@ -25,7 +25,6 @@ from agentbible.errors import (
     UnitarityError,
 )
 from agentbible.validators.base import (
-    ValidationError,
     get_numpy,
     is_square_matrix,
 )

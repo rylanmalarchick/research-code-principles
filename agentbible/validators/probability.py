@@ -21,7 +21,7 @@ from agentbible.errors import (
     NormalizationError,
     ProbabilityBoundsError,
 )
-from agentbible.validators.base import ValidationError, get_numpy
+from agentbible.validators.base import get_numpy
 
 F = TypeVar("F", bound=Callable[..., Any])
 

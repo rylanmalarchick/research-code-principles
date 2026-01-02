@@ -189,7 +189,7 @@ def _get_hardware_info() -> dict[str, Any]:
 
         # Try to get CPU model from /proc/cpuinfo (Linux)
         try:
-            with open("/proc/cpuinfo", "r") as f:
+            with Path("/proc/cpuinfo").open() as f:
                 for line in f:
                     if line.startswith("model name"):
                         hw_info["cpu_model"] = line.split(":")[1].strip()
@@ -206,7 +206,7 @@ def _get_hardware_info() -> dict[str, Any]:
     # Memory info
     try:
         # Try to get memory from /proc/meminfo (Linux)
-        with open("/proc/meminfo", "r") as f:
+        with Path("/proc/meminfo").open() as f:
             for line in f:
                 if line.startswith("MemTotal:"):
                     # Convert from KB to GB
