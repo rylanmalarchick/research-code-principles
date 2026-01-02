@@ -362,7 +362,9 @@ def save_with_metadata(
 
         # Save metadata as JSON string in root attributes
         f.attrs["provenance"] = json.dumps(metadata)
-        f.attrs["provenance_version"] = "2.0"  # v2.0 adds pip_freeze, hardware, git_diff
+        f.attrs["provenance_version"] = (
+            "2.0"  # v2.0 adds pip_freeze, hardware, git_diff
+        )
 
 
 def load_with_metadata(
