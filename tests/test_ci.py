@@ -671,15 +671,15 @@ class TestWaitForRuns:
     @patch("time.sleep")
     @patch("agentbible.cli.ci.get_workflow_runs")
     def test_returns_empty_when_no_runs(
-        self, mock_runs: MagicMock, mock_sleep: MagicMock
+        self, mock_runs: MagicMock, _mock_sleep: MagicMock
     ) -> None:
         """Returns True when no runs exist."""
         mock_runs.return_value = []
 
-        passed, runs = wait_for_runs()
+        passed, result_runs = wait_for_runs()
 
         assert passed
-        assert runs == []
+        assert result_runs == []
 
     @patch("time.sleep")
     @patch("agentbible.cli.ci.get_workflow_runs")
@@ -709,7 +709,7 @@ class TestWaitForRuns:
         )
         mock_runs.side_effect = [[in_progress_run], [completed_run]]
 
-        passed, runs = wait_for_runs(timeout_seconds=60, poll_interval=1)
+        passed, _result_runs = wait_for_runs(timeout_seconds=60, poll_interval=1)
 
         assert passed
         assert mock_sleep.call_count == 1
@@ -717,7 +717,7 @@ class TestWaitForRuns:
     @patch("time.sleep")
     @patch("agentbible.cli.ci.get_workflow_runs")
     def test_returns_false_on_failure(
-        self, mock_runs: MagicMock, mock_sleep: MagicMock
+        self, mock_runs: MagicMock, _mock_sleep: MagicMock
     ) -> None:
         """Returns False when runs fail."""
         mock_runs.return_value = [
@@ -742,7 +742,7 @@ class TestWaitForRuns:
     @patch("time.sleep")
     @patch("agentbible.cli.ci.get_workflow_runs")
     def test_timeout(
-        self, mock_runs: MagicMock, mock_sleep: MagicMock, mock_time: MagicMock
+        self, mock_runs: MagicMock, _mock_sleep: MagicMock, mock_time: MagicMock
     ) -> None:
         """Returns False on timeout."""
         in_progress_run = WorkflowRun(
@@ -759,14 +759,14 @@ class TestWaitForRuns:
         # Simulate timeout: first call is 0, second is past timeout
         mock_time.side_effect = [0, 0, 1000]
 
-        passed, runs = wait_for_runs(timeout_seconds=60, poll_interval=1)
+        passed, _result_runs = wait_for_runs(timeout_seconds=60, poll_interval=1)
 
         assert not passed
 
     @patch("time.sleep")
     @patch("agentbible.cli.ci.get_workflow_runs")
     def test_branch_filter_passed(
-        self, mock_runs: MagicMock, mock_sleep: MagicMock
+        self, mock_runs: MagicMock, _mock_sleep: MagicMock
     ) -> None:
         """Branch filter is passed to get_workflow_runs."""
         mock_runs.return_value = []
@@ -878,7 +878,7 @@ class TestRunCiReleaseFlow:
         mock_subprocess.return_value = MagicMock(stdout="", returncode=0)
 
         # Will fail at tag step, but we're testing normalization
-        exit_code = run_ci_release("v1.0.0", bump_files=False, push=False, verify=False, create_release=False)
+        run_ci_release("v1.0.0", bump_files=False, push=False, verify=False, create_release=False)
 
         # Check that tag command used v1.0.0
         tag_calls = [c for c in mock_subprocess.call_args_list if "tag" in str(c)]
