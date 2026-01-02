@@ -46,7 +46,7 @@ class TestValidatePositive:
         with pytest.raises(ValidationError) as exc_info:
             get_value()
 
-        assert "not positive" in str(exc_info.value)
+        assert "not positive" in str(exc_info.value).lower()
         assert "> 0" in str(exc_info.value)
 
     def test_invalid_negative(self) -> None:
@@ -180,7 +180,7 @@ class TestValidateRange:
         with pytest.raises(ValidationError) as exc_info:
             get_value()
 
-        assert "below minimum" in str(exc_info.value)
+        assert "below minimum" in str(exc_info.value).lower()
 
     def test_invalid_above_max(self) -> None:
         """Value above maximum raises ValidationError."""
@@ -192,7 +192,7 @@ class TestValidateRange:
         with pytest.raises(ValidationError) as exc_info:
             get_value()
 
-        assert "above maximum" in str(exc_info.value)
+        assert "above maximum" in str(exc_info.value).lower()
 
     def test_exclusive_bounds(self) -> None:
         """Exclusive bounds work correctly."""
@@ -320,7 +320,7 @@ class TestValidateFinite:
         with pytest.raises(ValidationError) as exc_info:
             get_values()
 
-        assert "non-finite" in str(exc_info.value)
+        assert "non-finite" in str(exc_info.value).lower()
         assert "NaN" in str(exc_info.value)
 
     def test_invalid_inf(self, array_with_inf: np.ndarray) -> None:
@@ -333,7 +333,7 @@ class TestValidateFinite:
         with pytest.raises(ValidationError) as exc_info:
             get_values()
 
-        assert "non-finite" in str(exc_info.value)
+        assert "non-finite" in str(exc_info.value).lower()
         assert "Inf" in str(exc_info.value)
 
     def test_invalid_negative_inf(self) -> None:

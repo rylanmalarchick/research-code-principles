@@ -1,0 +1,37 @@
+# C++/HPC Project Rules
+
+This is a C++17/CUDA research project following AgentBible principles.
+
+## Mandatory
+
+- Write tests before implementation (specification-first)
+- Functions ≤ 50 lines
+- Zero warnings policy (-Wall -Wextra -Wpedantic)
+- RAII for all resource management (no manual new/delete, cudaFree)
+- Validate physical constraints (unitarity, normalization, etc.)
+
+## Project Structure
+
+- Headers in `include/`
+- Source code in `src/`
+- Tests in `tests/`
+- Run `ctest --test-dir build` before committing
+
+## Code Style
+
+- Use `const` and `constexpr` where possible
+- Prefer `std::vector` over raw arrays
+- Use `[[nodiscard]]` for functions with important return values
+- Document public APIs with Doxygen comments
+
+## CUDA Guidelines
+
+- Use `CudaMemory<T>` RAII wrapper for GPU memory
+- Check all CUDA calls with `CUDA_CHECK()` macro
+- Compile with `-DENABLE_CUDA=ON` for GPU support
+
+## Testing
+
+- All tests must pass: `ctest --test-dir build --output-on-failure`
+- Test edge cases: empty inputs, zero dimensions, NaN values
+- Use GoogleTest fixtures for common setup

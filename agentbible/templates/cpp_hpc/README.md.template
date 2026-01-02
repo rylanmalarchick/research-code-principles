@@ -1,0 +1,90 @@
+# {{PROJECT_NAME}}
+
+{{PROJECT_DESCRIPTION}}
+
+A C++17/CUDA research project generated with [AgentBible](https://github.com/rylanmalarchick/research-code-principles).
+
+## Quick Start
+
+```bash
+# Configure (without CUDA)
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+# Configure (with CUDA)
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_CUDA=ON
+
+# Build
+cmake --build build -j$(nproc)
+
+# Run tests
+ctest --test-dir build --output-on-failure
+
+# Run main executable
+./build/{{PROJECT_NAME_UNDERSCORE}}
+```
+
+## Project Structure
+
+```
+{{PROJECT_NAME}}/
+├── CMakeLists.txt          # Build configuration
+├── include/
+│   ├── CudaMemory.hpp      # RAII CUDA wrapper
+│   └── core.hpp            # Validation utilities
+├── src/
+│   ├── core.cpp            # Validation implementations
+│   └── main.cpp            # Entry point
+└── tests/
+    ├── test_main.cpp       # GoogleTest main
+    ├── test_core.cpp       # Validation tests
+    └── test_cuda_memory.cpp # CUDA tests
+```
+
+## Features
+
+### Zero-Warning Policy
+
+Strict compiler warnings are enabled:
+```cmake
+-Wall -Wextra -Wpedantic -Wshadow -Wconversion ...
+```
+
+In CI (when `CI` environment variable is set), warnings are treated as errors.
+
+### RAII for CUDA Memory
+
+The `CudaMemory<T>` class ensures GPU memory is automatically freed:
+
+```cpp
+#include "CudaMemory.hpp"
+
+void simulate() {
+    // Allocate 2^20 complex numbers on GPU
+    research::CudaMemory<cuDoubleComplex> d_state(1 << 20);
+    
+    // Use d_state.get() for raw pointer in kernels
+    myKernel<<<blocks, threads>>>(d_state.get());
+    
+    // Memory automatically freed when d_state goes out of scope
+}
+```
+
+### Physical Validation
+
+Built-in validation for quantum/physics operations:
+
+```cpp
+#include "core.hpp"
+
+research::checkUnitarity(gateMatrix, dimension);  // U†U = I
+research::checkNormalized(stateVector);            // ⟨ψ|ψ⟩ = 1
+research::checkHermitian(hamiltonian, dimension);  // H = H†
+```
+
+## Author
+
+{{AUTHOR_NAME}} <{{AUTHOR_EMAIL}}>
+
+## License
+
+MIT License - Copyright (c) {{YEAR}}

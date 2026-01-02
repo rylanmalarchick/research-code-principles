@@ -2,7 +2,7 @@
 
 **Sprint:** 4 of 6  
 **Focus:** Research-grade data tracking and physics testing utilities  
-**Status:** Active  
+**Status:** Complete  
 **Estimated Sessions:** 2-3
 
 ---
@@ -148,18 +148,18 @@ bible validate state.npy --check normalization --rtol 1e-6
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Create `agent_docs/sprint-4-provenance.md` | Active | This file |
-| Create `agentbible/provenance/__init__.py` | Pending | Module init |
-| Create `agentbible/provenance/hdf5.py` | Pending | Core logic |
-| Create `agentbible/testing/__init__.py` | Pending | Module init |
-| Create `agentbible/testing/fixtures.py` | Pending | Pytest fixtures |
-| Create `agentbible/testing/decorators.py` | Pending | @physics_test |
-| Create `agentbible/cli/validate.py` | Pending | Validate command |
-| Update `agentbible/cli/main.py` | Pending | Wire validate |
-| Create `tests/test_provenance.py` | Pending | Provenance tests |
-| Create `tests/test_testing.py` | Pending | Testing module tests |
-| Update `pyproject.toml` | Pending | Add h5py dependency |
-| Update ARCHITECTURE.md | Pending | Mark complete |
+| Create `agent_docs/sprint-4-provenance.md` | ✅ | This file |
+| Create `agentbible/provenance/__init__.py` | ✅ | Module init |
+| Create `agentbible/provenance/hdf5.py` | ✅ | 416 lines, v2.0 with pip_freeze, hardware, git_diff |
+| Create `agentbible/testing/__init__.py` | ✅ | Module init |
+| Create `agentbible/testing/fixtures.py` | ✅ | 158 lines |
+| Create `agentbible/testing/decorators.py` | ✅ | 171 lines, @physics_test |
+| Create `agentbible/cli/validate.py` | ✅ | 220 lines |
+| Update `agentbible/cli/main.py` | ✅ | Wire validate |
+| Create `tests/test_provenance.py` | ✅ | Provenance tests |
+| Create `tests/test_testing.py` | ✅ | Testing module tests |
+| Update `pyproject.toml` | ✅ | h5py in [hdf5] extra |
+| Commit and push | ⬜ | End of sprint |
 
 ---
 
@@ -187,13 +187,13 @@ bible validate tests/fixtures/density.npy --check all
 
 ## Acceptance Criteria
 
-- [ ] `save_with_metadata()` creates HDF5 with git SHA, seeds, timestamp
-- [ ] `load_with_metadata()` returns data and metadata dict
-- [ ] `@physics_test(checks=[...])` validates returned values
-- [ ] `deterministic_seed` fixture sets numpy/random seeds
-- [ ] `bible validate file.npy --check unitarity` works
-- [ ] Tests pass with 90%+ coverage on new modules
-- [ ] Works without h5py installed (graceful degradation)
+- [x] `save_with_metadata()` creates HDF5 with git SHA, seeds, timestamp
+- [x] `load_with_metadata()` returns data and metadata dict
+- [x] `@physics_test(checks=[...])` validates returned values
+- [x] `deterministic_seed` fixture sets numpy/random seeds
+- [x] `bible validate file.npy --check unitarity` works
+- [x] Tests pass with 90%+ coverage on new modules
+- [x] Works without h5py installed (graceful degradation)
 
 ---
 

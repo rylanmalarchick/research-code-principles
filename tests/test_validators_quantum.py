@@ -70,7 +70,7 @@ class TestValidateUnitary:
         with pytest.raises(ValidationError) as exc_info:
             make_gate()
 
-        assert "not unitary" in str(exc_info.value)
+        assert "not unitary" in str(exc_info.value).lower()
         assert "U†U = I" in str(exc_info.value)
 
     def test_invalid_non_square(self) -> None:
@@ -186,7 +186,7 @@ class TestValidateHermitian:
         with pytest.raises(ValidationError) as exc_info:
             make_matrix()
 
-        assert "not Hermitian" in str(exc_info.value)
+        assert "not hermitian" in str(exc_info.value).lower()
         assert "H = H†" in str(exc_info.value)
 
     def test_invalid_non_square(self) -> None:
@@ -262,7 +262,7 @@ class TestValidateDensityMatrix:
         with pytest.raises(ValidationError) as exc_info:
             make_state()
 
-        assert "Hermitian" in str(exc_info.value)
+        assert "hermitian" in str(exc_info.value).lower()
 
     def test_invalid_wrong_trace(
         self, invalid_trace_density_matrix: np.ndarray
@@ -290,7 +290,7 @@ class TestValidateDensityMatrix:
         with pytest.raises(ValidationError) as exc_info:
             make_state()
 
-        assert "positive semi-definite" in str(exc_info.value)
+        assert "positive semi-definite" in str(exc_info.value).lower()
 
     def test_valid_bell_state(self) -> None:
         """Bell state density matrix is valid."""

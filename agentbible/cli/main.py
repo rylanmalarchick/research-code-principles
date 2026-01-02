@@ -37,7 +37,7 @@ def cli() -> None:
 @click.option(
     "--template",
     "-t",
-    type=click.Choice(["python-scientific"]),
+    type=click.Choice(["python-scientific", "cpp-hpc-cuda"]),
     default="python-scientific",
     help="Project template to use.",
 )

@@ -4,6 +4,11 @@ Provides decorators for validating probability-related properties:
 - Single probability: value in [0, 1]
 - Probability array: all values in [0, 1]
 - Normalization: values sum to 1
+
+All validators include:
+- Numerical sanity checks (NaN/Inf detection before probability checks)
+- Support for rtol and atol tolerances
+- Educational error messages with guidance
 """
 
 from __future__ import annotations
@@ -11,9 +16,49 @@ from __future__ import annotations
 import functools
 from typing import Any, Callable, TypeVar, overload
 
+from agentbible.errors import (
+    NonFiniteError,
+    NormalizationError,
+    ProbabilityBoundsError,
+)
 from agentbible.validators.base import ValidationError, get_numpy
 
 F = TypeVar("F", bound=Callable[..., Any])
+
+
+def _check_finite_scalar(value: float, function_name: str) -> None:
+    """Check scalar value for NaN/Inf."""
+    import math
+
+    if math.isnan(value) or math.isinf(value):
+        detail = "NaN" if math.isnan(value) else "Inf"
+        raise NonFiniteError(
+            "Value is not finite",
+            expected="Finite value (no NaN or Inf)",
+            got=detail,
+            function_name=function_name,
+        )
+
+
+def _check_finite_array(arr: Any, function_name: str) -> None:
+    """Check array for NaN/Inf values before probability validation."""
+    np = get_numpy()
+    if not np.all(np.isfinite(arr)):
+        nan_count = int(np.sum(np.isnan(arr)))
+        inf_count = int(np.sum(np.isinf(arr)))
+        details = []
+        if nan_count > 0:
+            details.append(f"{nan_count} NaN")
+        if inf_count > 0:
+            details.append(f"{inf_count} Inf")
+
+        raise NonFiniteError(
+            "Array contains non-finite values",
+            expected="All finite values (no NaN or Inf)",
+            got=", ".join(details),
+            function_name=function_name,
+            shape=arr.shape if hasattr(arr, "shape") else None,
+        )
 
 
 @overload
@@ -66,11 +111,14 @@ def validate_probability(
             # Convert to float for comparison
             value = float(result)
 
+            # Check for NaN/Inf FIRST
+            _check_finite_scalar(value, fn.__name__)
+
             # Check bounds with tolerance
             if value < -atol or value > 1.0 + atol:
-                raise ValidationError(
+                raise ProbabilityBoundsError(
                     "Value is not a valid probability",
-                    expected="0 ≤ p ≤ 1",
+                    expected="0 ≤ p ≤ 1 (probability must be in unit interval)",
                     got=f"p = {value}",
                     function_name=fn.__name__,
                     tolerance={"atol": atol},
@@ -137,13 +185,17 @@ def validate_probabilities(
             np = get_numpy()
 
             arr = np.asarray(result)
-            min_val = np.min(arr)
-            max_val = np.max(arr)
+
+            # Check for NaN/Inf FIRST
+            _check_finite_array(arr, fn.__name__)
+
+            min_val = float(np.min(arr))
+            max_val = float(np.max(arr))
 
             if min_val < -atol:
-                raise ValidationError(
+                raise ProbabilityBoundsError(
                     "Array contains values below 0",
-                    expected="All values in [0, 1]",
+                    expected="All values in [0, 1] (probabilities must be non-negative)",
                     got=f"min = {min_val}",
                     function_name=fn.__name__,
                     tolerance={"atol": atol},
@@ -151,9 +203,9 @@ def validate_probabilities(
                 )
 
             if max_val > 1.0 + atol:
-                raise ValidationError(
+                raise ProbabilityBoundsError(
                     "Array contains values above 1",
-                    expected="All values in [0, 1]",
+                    expected="All values in [0, 1] (probabilities cannot exceed 1)",
                     got=f"max = {max_val}",
                     function_name=fn.__name__,
                     tolerance={"atol": atol},
@@ -225,25 +277,30 @@ def validate_normalized(
             np = get_numpy()
 
             arr = np.asarray(result)
+
+            # Check for NaN/Inf FIRST
+            _check_finite_array(arr, fn.__name__)
+
             total = np.sum(arr, axis=axis)
 
             if axis is None:
                 # Total sum should be 1
-                if not np.isclose(total, 1.0, rtol=rtol, atol=atol):
-                    raise ValidationError(
+                total_float = float(total)
+                if not np.isclose(total_float, 1.0, rtol=rtol, atol=atol):
+                    raise NormalizationError(
                         "Array is not normalized",
-                        expected="sum = 1",
-                        got=f"sum = {total}",
+                        expected="sum = 1 (probability distribution must sum to 1)",
+                        got=f"sum = {total_float}",
                         function_name=fn.__name__,
                         tolerance={"rtol": rtol, "atol": atol},
                         shape=arr.shape,
                     )
             else:
                 # Each slice along axis should sum to 1
-                expected = np.ones_like(total)
-                if not np.allclose(total, expected, rtol=rtol, atol=atol):
-                    max_deviation = np.max(np.abs(total - expected))
-                    raise ValidationError(
+                expected_ones = np.ones_like(total)
+                if not np.allclose(total, expected_ones, rtol=rtol, atol=atol):
+                    max_deviation = float(np.max(np.abs(total - expected_ones)))
+                    raise NormalizationError(
                         f"Array is not normalized along axis {axis}",
                         expected="sum along axis = 1",
                         got=f"max|sum - 1| = {max_deviation}",

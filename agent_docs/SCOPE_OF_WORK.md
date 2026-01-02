@@ -3,7 +3,7 @@
 **Project:** research-code-principles → agentbible  
 **Author:** Rylan Malarchick  
 **Created:** December 2025  
-**Status:** Sprint 2 - Package Core Complete
+**Status:** Sprint 6 - Documentation & Polish Complete (v0.1.1)
 
 ---
 
@@ -112,10 +112,10 @@ bible validate results.h5 --check all
 |--------|-------|----------|--------|
 | **1** | Foundation (bootstrap, .cursorrules, .devcontainer) | 2-3 sessions | **Complete** |
 | **2** | Package Core (agentbible/, validators, CLI skeleton) | 3-4 sessions | **Complete** |
-| **3** | CLI Scaffolding (bible init with templates) | 2-3 sessions | Planned |
-| **4** | Provenance & Testing (HDF5, pytest-rcp) | 2-3 sessions | Planned |
-| **5** | CI/CD & Security (pip-audit, trusted publishing) | 1-2 sessions | Planned |
-| **6** | Documentation & Polish (docs site, badges) | 1-2 sessions | Planned |
+| **3** | CLI Scaffolding (bible init with templates) | 2-3 sessions | **Complete** |
+| **4** | Provenance & Testing (HDF5, pytest-rcp) | 2-3 sessions | **Complete** |
+| **5** | CI/CD & Security (pip-audit, trusted publishing) | 1-2 sessions | **Complete** |
+| **6** | Documentation & Polish (docs site, badges) | 1-2 sessions | **Complete** |
 
 ---
 

@@ -29,6 +29,7 @@ def _get_git_info() -> dict[str, Any]:
         "git_sha": None,
         "git_branch": None,
         "git_dirty": None,
+        "git_diff": None,
     }
 
     try:
@@ -60,7 +61,30 @@ def _get_git_info() -> dict[str, Any]:
             timeout=5,
         )
         if result.returncode == 0:
-            git_info["git_dirty"] = len(result.stdout.strip()) > 0
+            is_dirty = len(result.stdout.strip()) > 0
+            git_info["git_dirty"] = is_dirty
+
+            # If dirty, capture the diff for reproducibility
+            if is_dirty:
+                diff_result = subprocess.run(
+                    ["git", "diff", "--no-color"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,  # Longer timeout for potentially large diffs
+                )
+                if diff_result.returncode == 0:
+                    diff_text = diff_result.stdout
+                    # Limit diff size to 100KB to avoid bloated HDF5 files
+                    max_diff_size = 100_000
+                    if len(diff_text) > max_diff_size:
+                        git_info["git_diff"] = (
+                            diff_text[:max_diff_size]
+                            + f"\n... [TRUNCATED: diff was {len(diff_text)} bytes] ..."
+                        )
+                        git_info["git_diff_truncated"] = True
+                    else:
+                        git_info["git_diff"] = diff_text
+                        git_info["git_diff_truncated"] = False
 
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
         pass
@@ -112,15 +136,138 @@ def _get_package_versions() -> dict[str, str]:
     return packages
 
 
+def _get_pip_freeze() -> list[str]:
+    """Get full pip freeze output for exact reproducibility.
+
+    Returns:
+        List of package specs (e.g., ["numpy==1.24.0", "scipy==1.11.0"])
+    """
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "freeze"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode == 0:
+            # Filter out empty lines and editable installs (too long)
+            lines = result.stdout.strip().split("\n")
+            return [line for line in lines if line and not line.startswith("-e ")]
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        pass
+
+    return []
+
+
+def _get_hardware_info() -> dict[str, Any]:
+    """Get hardware information for reproducibility.
+
+    Returns:
+        Dictionary with CPU, memory, and GPU info
+    """
+    hw_info: dict[str, Any] = {
+        "cpu_model": None,
+        "cpu_count_physical": None,
+        "cpu_count_logical": None,
+        "memory_total_gb": None,
+        "gpu_info": None,
+    }
+
+    # CPU info
+    try:
+        import os
+
+        hw_info["cpu_count_logical"] = os.cpu_count()
+
+        # Try to get physical core count
+        try:
+            import multiprocessing
+
+            hw_info["cpu_count_physical"] = multiprocessing.cpu_count()
+        except Exception:
+            pass
+
+        # Try to get CPU model from /proc/cpuinfo (Linux)
+        try:
+            with open("/proc/cpuinfo", "r") as f:
+                for line in f:
+                    if line.startswith("model name"):
+                        hw_info["cpu_model"] = line.split(":")[1].strip()
+                        break
+        except (FileNotFoundError, OSError):
+            # Try platform.processor() as fallback
+            processor = platform.processor()
+            if processor:
+                hw_info["cpu_model"] = processor
+
+    except Exception:
+        pass
+
+    # Memory info
+    try:
+        # Try to get memory from /proc/meminfo (Linux)
+        with open("/proc/meminfo", "r") as f:
+            for line in f:
+                if line.startswith("MemTotal:"):
+                    # Convert from KB to GB
+                    mem_kb = int(line.split()[1])
+                    hw_info["memory_total_gb"] = round(mem_kb / (1024 * 1024), 2)
+                    break
+    except (FileNotFoundError, OSError, ValueError):
+        pass
+
+    # GPU info (try nvidia-smi for NVIDIA GPUs, then check torch)
+    try:
+        result = subprocess.run(
+            ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            gpus = []
+            for line in result.stdout.strip().split("\n"):
+                parts = line.split(",")
+                if len(parts) >= 2:
+                    gpus.append({"name": parts[0].strip(), "memory": parts[1].strip()})
+            if gpus:
+                hw_info["gpu_info"] = gpus
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        # Try torch.cuda as fallback
+        try:
+            import torch
+
+            if torch.cuda.is_available():
+                gpus = []
+                for i in range(torch.cuda.device_count()):
+                    props = torch.cuda.get_device_properties(i)
+                    gpus.append(
+                        {
+                            "name": props.name,
+                            "memory": f"{props.total_memory / (1024**3):.1f} GB",
+                        }
+                    )
+                if gpus:
+                    hw_info["gpu_info"] = gpus
+        except (ImportError, RuntimeError):
+            pass
+
+    return hw_info
+
+
 def get_provenance_metadata(
     description: str = "",
     extra: dict[str, Any] | None = None,
+    include_pip_freeze: bool = True,
+    include_hardware: bool = True,
 ) -> Metadata:
     """Generate provenance metadata dictionary.
 
     Args:
         description: User-provided description of the data
         extra: Additional metadata to include
+        include_pip_freeze: Whether to include full pip freeze output
+        include_hardware: Whether to include hardware info
 
     Returns:
         Dictionary containing provenance metadata
@@ -130,7 +277,7 @@ def get_provenance_metadata(
         "description": description,
         # Timestamp
         "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        # Git info
+        # Git info (includes git_diff if repo is dirty)
         **_get_git_info(),
         # Random seeds
         "numpy_seed": _get_numpy_seed(),
@@ -140,9 +287,17 @@ def get_provenance_metadata(
         "hostname": platform.node(),
         "platform": platform.platform(),
         "python_version": sys.version,
-        # Package versions
+        # Package versions (key packages for quick reference)
         "packages": _get_package_versions(),
     }
+
+    # Full pip freeze for exact reproducibility
+    if include_pip_freeze:
+        metadata["pip_freeze"] = _get_pip_freeze()
+
+    # Hardware info for understanding performance context
+    if include_hardware:
+        metadata["hardware"] = _get_hardware_info()
 
     # Add extra metadata if provided
     if extra:
@@ -156,6 +311,8 @@ def save_with_metadata(
     data: dict[str, np.ndarray],
     description: str = "",
     extra: dict[str, Any] | None = None,
+    include_pip_freeze: bool = True,
+    include_hardware: bool = True,
 ) -> None:
     """Save numpy arrays to HDF5 with provenance metadata.
 
@@ -164,6 +321,8 @@ def save_with_metadata(
         data: Dictionary mapping dataset names to numpy arrays
         description: User-provided description of the data
         extra: Additional metadata to include
+        include_pip_freeze: Whether to include full pip freeze output
+        include_hardware: Whether to include hardware info
 
     Raises:
         ImportError: If h5py is not installed
@@ -190,7 +349,9 @@ def save_with_metadata(
         raise ValueError("data dictionary cannot be empty")
 
     filepath = Path(filepath)
-    metadata = get_provenance_metadata(description, extra)
+    metadata = get_provenance_metadata(
+        description, extra, include_pip_freeze, include_hardware
+    )
 
     with h5py.File(filepath, "w") as f:
         # Save each array as a dataset
@@ -201,7 +362,7 @@ def save_with_metadata(
 
         # Save metadata as JSON string in root attributes
         f.attrs["provenance"] = json.dumps(metadata)
-        f.attrs["provenance_version"] = "1.0"
+        f.attrs["provenance_version"] = "2.0"  # v2.0 adds pip_freeze, hardware, git_diff
 
 
 def load_with_metadata(

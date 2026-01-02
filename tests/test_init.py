@@ -199,6 +199,46 @@ class TestInitCommand:
             assert Path("test-project/tests/__init__.py").exists()
             assert Path("test-project/tests/conftest.py").exists()
 
+    def test_init_cpp_template(self, tmp_path: Path) -> None:
+        """init command creates C++ project from cpp-hpc-cuda template."""
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(
+                cli,
+                [
+                    "init",
+                    "my-cpp-project",
+                    "-t",
+                    "cpp-hpc-cuda",
+                    "--no-git",
+                    "-a",
+                    "Test Author",
+                    "-e",
+                    "test@example.com",
+                ],
+            )
+
+            assert result.exit_code == 0
+            assert Path("my-cpp-project").exists()
+            assert Path("my-cpp-project/CMakeLists.txt").exists()
+            assert Path("my-cpp-project/README.md").exists()
+            assert Path("my-cpp-project/.cursorrules").exists()
+            assert Path("my-cpp-project/include/core.hpp").exists()
+            assert Path("my-cpp-project/src/core.cpp").exists()
+            assert Path("my-cpp-project/tests/test_core.cpp").exists()
+
+            # Check variable substitution in CMakeLists.txt
+            cmake = Path("my-cpp-project/CMakeLists.txt").read_text()
+            assert "my_cpp_project" in cmake  # PROJECT_NAME_UNDERSCORE
+            assert "my-cpp-project" in cmake  # PROJECT_NAME
+
+            # Check README has project name
+            readme = Path("my-cpp-project/README.md").read_text()
+            assert "my-cpp-project" in readme
+
+            # Check next steps show cmake instructions
+            assert "cmake" in result.output.lower()
+
     def test_init_rejects_existing_directory(self, tmp_path: Path) -> None:
         """init command fails if directory exists."""
         runner = CliRunner()

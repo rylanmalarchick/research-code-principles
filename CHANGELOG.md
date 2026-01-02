@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-01-01
+
+### Added
+
+#### Documentation Site
+- MkDocs documentation site with Material theme
+- Getting Started guides (installation, quickstart, templates)
+- User guides for validators, provenance, testing, and CLI
+- API reference documentation
+- Philosophy and style guide pages
+- GitHub Pages deployment workflow (`.github/workflows/docs.yml`)
+
+#### CI/CD Enhancements
+- Dependabot configuration for automated dependency updates (`.github/dependabot.yml`)
+- Sprint 5 CI/CD documentation (`agent_docs/sprint-5-cicd.md`)
+
+#### Templates
+- C++ HPC/CUDA template (`cpp-hpc-cuda`) with CMake, GoogleTest support
+- Template test coverage
+
+### Changed
+
+- README badges now include PyPI version, codecov coverage, and docs link
+- Documentation section in README links to hosted docs site
+- Updated SCOPE_OF_WORK.md to reflect Sprint 1-6 completion
+
+### Developer Notes
+
+This release completes the initial 6-sprint development cycle:
+1. Foundation (bootstrap, .cursorrules, .devcontainer) 
+2. Package Core (validators, CLI skeleton)
+3. CLI Scaffolding (bible init, templates)
+4. Provenance & Testing (HDF5 metadata, @physics_test)
+5. CI/CD & Security (GitHub Actions, pip-audit, trusted publishing)
+6. Documentation & Polish (MkDocs site, badges)
+
 ## [0.1.0] - 2026-01-01
 
 ### Added
@@ -80,5 +116,6 @@ This is the initial release combining 6 development sprints:
 5. CI/CD & Security (GitHub Actions, pip-audit, trusted publishing)
 6. Documentation & Polish (README, CHANGELOG, badges)
 
-[Unreleased]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/rylanmalarchick/research-code-principles/releases/tag/v0.1.0

@@ -5,6 +5,11 @@ Provides decorators for validating numerical bounds:
 - Non-negative: value >= 0
 - Range: value in [min, max]
 - Finite: no NaN or Inf values
+
+All validators include:
+- Numerical sanity checks (NaN/Inf detection before bounds checks)
+- Support for rtol and atol tolerances where applicable
+- Educational error messages with guidance
 """
 
 from __future__ import annotations
@@ -12,9 +17,35 @@ from __future__ import annotations
 import functools
 from typing import Any, Callable, TypeVar, overload
 
+from agentbible.errors import BoundsError, NonFiniteError
 from agentbible.validators.base import ValidationError, get_numpy
 
 F = TypeVar("F", bound=Callable[..., Any])
+
+
+def _check_finite_first(arr: Any, function_name: str) -> None:
+    """Check array for NaN/Inf values before bounds validation.
+
+    This provides clearer error messages when the root cause is numerical
+    instability rather than bounds violations.
+    """
+    np = get_numpy()
+    if not np.all(np.isfinite(arr)):
+        nan_count = int(np.sum(np.isnan(arr)))
+        inf_count = int(np.sum(np.isinf(arr)))
+        details = []
+        if nan_count > 0:
+            details.append(f"{nan_count} NaN")
+        if inf_count > 0:
+            details.append(f"{inf_count} Inf")
+
+        raise NonFiniteError(
+            "Array contains non-finite values",
+            expected="All finite values (no NaN or Inf)",
+            got=", ".join(details),
+            function_name=function_name,
+            shape=arr.shape if hasattr(arr, "shape") else None,
+        )
 
 
 @overload
@@ -68,13 +99,17 @@ def validate_positive(
             np = get_numpy()
 
             arr = np.asarray(result)
-            min_val = np.min(arr)
+
+            # Check for NaN/Inf FIRST (before bounds checks)
+            _check_finite_first(arr, fn.__name__)
+
+            min_val = float(np.min(arr))
 
             if min_val <= -atol:
                 shape = arr.shape if arr.ndim > 0 else None
-                raise ValidationError(
+                raise BoundsError(
                     "Value is not positive",
-                    expected="> 0",
+                    expected="> 0 (strictly positive)",
                     got=f"min = {min_val}",
                     function_name=fn.__name__,
                     tolerance={"atol": atol} if atol > 0 else None,
@@ -141,13 +176,17 @@ def validate_non_negative(
             np = get_numpy()
 
             arr = np.asarray(result)
-            min_val = np.min(arr)
+
+            # Check for NaN/Inf FIRST (before bounds checks)
+            _check_finite_first(arr, fn.__name__)
+
+            min_val = float(np.min(arr))
 
             if min_val < -atol:
                 shape = arr.shape if arr.ndim > 0 else None
-                raise ValidationError(
+                raise BoundsError(
                     "Value is negative",
-                    expected=">= 0",
+                    expected=">= 0 (non-negative)",
                     got=f"min = {min_val}",
                     function_name=fn.__name__,
                     tolerance={"atol": atol} if atol > 0 else None,
@@ -203,8 +242,12 @@ def validate_range(
             np = get_numpy()
 
             arr = np.asarray(result)
-            actual_min = np.min(arr)
-            actual_max = np.max(arr)
+
+            # Check for NaN/Inf FIRST (before bounds checks)
+            _check_finite_first(arr, fn.__name__)
+
+            actual_min = float(np.min(arr))
+            actual_max = float(np.max(arr))
 
             # Build expected string
             if min_val is not None and max_val is not None:
@@ -221,7 +264,7 @@ def validate_range(
             if min_val is not None:
                 if inclusive:
                     if actual_min < min_val - atol:
-                        raise ValidationError(
+                        raise BoundsError(
                             "Value below minimum",
                             expected=expected,
                             got=f"min = {actual_min}",
@@ -231,7 +274,7 @@ def validate_range(
                         )
                 else:
                     if actual_min <= min_val + atol:
-                        raise ValidationError(
+                        raise BoundsError(
                             "Value at or below minimum",
                             expected=expected,
                             got=f"min = {actual_min}",
@@ -244,7 +287,7 @@ def validate_range(
             if max_val is not None:
                 if inclusive:
                     if actual_max > max_val + atol:
-                        raise ValidationError(
+                        raise BoundsError(
                             "Value above maximum",
                             expected=expected,
                             got=f"max = {actual_max}",
@@ -254,7 +297,7 @@ def validate_range(
                         )
                 else:
                     if actual_max >= max_val - atol:
-                        raise ValidationError(
+                        raise BoundsError(
                             "Value at or above maximum",
                             expected=expected,
                             got=f"max = {actual_max}",
@@ -318,17 +361,17 @@ def validate_finite(
             arr = np.asarray(result)
 
             if not np.all(np.isfinite(arr)):
-                nan_count = np.sum(np.isnan(arr))
-                inf_count = np.sum(np.isinf(arr))
+                nan_count = int(np.sum(np.isnan(arr)))
+                inf_count = int(np.sum(np.isinf(arr)))
                 details = []
                 if nan_count > 0:
                     details.append(f"{nan_count} NaN")
                 if inf_count > 0:
                     details.append(f"{inf_count} Inf")
 
-                raise ValidationError(
+                raise NonFiniteError(
                     "Array contains non-finite values",
-                    expected="All finite values",
+                    expected="All finite values (no NaN or Inf)",
                     got=", ".join(details),
                     function_name=fn.__name__,
                     shape=arr.shape if arr.ndim > 0 else None,

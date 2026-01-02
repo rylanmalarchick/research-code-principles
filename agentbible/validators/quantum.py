@@ -4,6 +4,11 @@ Provides decorators for validating quantum mechanical properties:
 - Unitarity: U†U = I
 - Hermiticity: H = H†
 - Density matrix: Hermitian, trace 1, positive semi-definite
+
+All validators include:
+- Numerical sanity checks (NaN/Inf detection before physics checks)
+- Support for both rtol and atol tolerances
+- Educational error messages with academic references
 """
 
 from __future__ import annotations
@@ -11,6 +16,14 @@ from __future__ import annotations
 import functools
 from typing import Any, Callable, TypeVar, overload
 
+from agentbible.errors import (
+    DensityMatrixError,
+    HermiticityError,
+    NonFiniteError,
+    PositivityError,
+    TraceError,
+    UnitarityError,
+)
 from agentbible.validators.base import (
     ValidationError,
     get_numpy,
@@ -18,6 +31,31 @@ from agentbible.validators.base import (
 )
 
 F = TypeVar("F", bound=Callable[..., Any])
+
+
+def _check_finite(arr: Any, function_name: str) -> None:
+    """Check array for NaN/Inf values before physics validation.
+
+    This is called before any physics checks to provide clearer error messages
+    when the root cause is numerical instability rather than physics violations.
+    """
+    np = get_numpy()
+    if not np.all(np.isfinite(arr)):
+        nan_count = int(np.sum(np.isnan(arr)))
+        inf_count = int(np.sum(np.isinf(arr)))
+        details = []
+        if nan_count > 0:
+            details.append(f"{nan_count} NaN")
+        if inf_count > 0:
+            details.append(f"{inf_count} Inf")
+
+        raise NonFiniteError(
+            "Matrix contains non-finite values",
+            expected="All finite values (no NaN or Inf)",
+            got=", ".join(details),
+            function_name=function_name,
+            shape=arr.shape,
+        )
 
 
 @overload
@@ -77,9 +115,12 @@ def validate_unitary(
             # Convert to numpy array if needed
             arr = np.asarray(result)
 
+            # Check for NaN/Inf FIRST (before physics checks)
+            _check_finite(arr, fn.__name__)
+
             # Check shape
             if not is_square_matrix(arr):
-                raise ValidationError(
+                raise UnitarityError(
                     "Matrix is not unitary",
                     expected="Square matrix",
                     got=f"Shape {arr.shape}",
@@ -91,12 +132,12 @@ def validate_unitary(
             # Check unitarity: U†U = I
             identity = np.eye(arr.shape[0], dtype=arr.dtype)
             product = arr.conj().T @ arr
-            max_deviation = np.max(np.abs(product - identity))
+            max_deviation = float(np.max(np.abs(product - identity)))
 
             if not np.allclose(product, identity, rtol=rtol, atol=atol):
-                raise ValidationError(
+                raise UnitarityError(
                     "Matrix is not unitary",
-                    expected="U†U = I",
+                    expected="U†U = I (conjugate transpose times matrix equals identity)",
                     got=f"max|U†U - I| = {max_deviation:.2e}",
                     function_name=fn.__name__,
                     tolerance={"rtol": rtol, "atol": atol},
@@ -170,9 +211,12 @@ def validate_hermitian(
             # Convert to numpy array if needed
             arr = np.asarray(result)
 
+            # Check for NaN/Inf FIRST (before physics checks)
+            _check_finite(arr, fn.__name__)
+
             # Check shape
             if not is_square_matrix(arr):
-                raise ValidationError(
+                raise HermiticityError(
                     "Matrix is not Hermitian",
                     expected="Square matrix",
                     got=f"Shape {arr.shape}",
@@ -183,12 +227,12 @@ def validate_hermitian(
 
             # Check Hermiticity: H = H†
             conjugate_transpose = arr.conj().T
-            max_deviation = np.max(np.abs(arr - conjugate_transpose))
+            max_deviation = float(np.max(np.abs(arr - conjugate_transpose)))
 
             if not np.allclose(arr, conjugate_transpose, rtol=rtol, atol=atol):
-                raise ValidationError(
+                raise HermiticityError(
                     "Matrix is not Hermitian",
-                    expected="H = H†",
+                    expected="H = H† (matrix equals its conjugate transpose)",
                     got=f"max|H - H†| = {max_deviation:.2e}",
                     function_name=fn.__name__,
                     tolerance={"rtol": rtol, "atol": atol},
@@ -265,9 +309,12 @@ def validate_density_matrix(
             # Convert to numpy array if needed
             arr = np.asarray(result)
 
+            # Check for NaN/Inf FIRST (before physics checks)
+            _check_finite(arr, fn.__name__)
+
             # Check shape
             if not is_square_matrix(arr):
-                raise ValidationError(
+                raise DensityMatrixError(
                     "Matrix is not a valid density matrix",
                     expected="Square matrix",
                     got=f"Shape {arr.shape}",
@@ -279,23 +326,28 @@ def validate_density_matrix(
             # Check Hermiticity: ρ = ρ†
             conjugate_transpose = arr.conj().T
             if not np.allclose(arr, conjugate_transpose, rtol=rtol, atol=atol):
-                max_deviation = np.max(np.abs(arr - conjugate_transpose))
-                raise ValidationError(
+                max_deviation = float(np.max(np.abs(arr - conjugate_transpose)))
+                raise DensityMatrixError(
                     "Density matrix is not Hermitian",
-                    expected="ρ = ρ†",
+                    expected="ρ = ρ† (matrix equals its conjugate transpose)",
                     got=f"max|ρ - ρ†| = {max_deviation:.2e}",
                     function_name=fn.__name__,
                     tolerance={"rtol": rtol, "atol": atol},
                     shape=arr.shape,
+                    guidance=(
+                        "Density matrices must be self-adjoint. Check that:\n"
+                        "    - Off-diagonal elements are complex conjugates of each other\n"
+                        "    - Diagonal elements are real"
+                    ),
                 )
 
             # Check trace: tr(ρ) = 1
-            trace = np.trace(arr)
+            trace = complex(np.trace(arr))
             if not np.isclose(trace, 1.0, rtol=rtol, atol=atol):
-                raise ValidationError(
+                raise TraceError(
                     "Density matrix does not have unit trace",
-                    expected="tr(ρ) = 1",
-                    got=f"tr(ρ) = {trace:.6f}",
+                    expected="tr(ρ) = 1 (probabilities must sum to 1)",
+                    got=f"tr(ρ) = {trace.real:.6f}",
                     function_name=fn.__name__,
                     tolerance={"rtol": rtol, "atol": atol},
                     shape=arr.shape,
@@ -303,12 +355,12 @@ def validate_density_matrix(
 
             # Check positive semi-definite: all eigenvalues ≥ 0
             eigenvalues = np.linalg.eigvalsh(arr)
-            min_eigenvalue = np.min(eigenvalues)
+            min_eigenvalue = float(np.min(eigenvalues))
             # Allow small negative eigenvalues within tolerance
             if min_eigenvalue < -atol:
-                raise ValidationError(
+                raise PositivityError(
                     "Density matrix is not positive semi-definite",
-                    expected="All eigenvalues ≥ 0",
+                    expected="All eigenvalues ≥ 0 (physical states have non-negative probabilities)",
                     got=f"min(eigenvalue) = {min_eigenvalue:.2e}",
                     function_name=fn.__name__,
                     tolerance={"rtol": rtol, "atol": atol},

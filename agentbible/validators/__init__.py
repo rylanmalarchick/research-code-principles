@@ -14,7 +14,20 @@ Example:
     >>> gate = create_gate()  # Validates automatically
 """
 
-from agentbible.validators.base import ValidationError
+from agentbible.errors import (
+    BoundsError,
+    DensityMatrixError,
+    HermiticityError,
+    NonFiniteError,
+    NormalizationError,
+    PhysicsConstraintError,
+    PositivityError,
+    ProbabilityBoundsError,
+    StateVectorNormError,
+    TraceError,
+    UnitarityError,
+    ValidationError,
+)
 from agentbible.validators.bounds import (
     validate_finite,
     validate_non_negative,
@@ -33,17 +46,31 @@ from agentbible.validators.quantum import (
 )
 
 __all__ = [
-    # Base
+    # Base errors
     "ValidationError",
-    # Quantum
+    "PhysicsConstraintError",
+    # Quantum errors
+    "UnitarityError",
+    "HermiticityError",
+    "DensityMatrixError",
+    "TraceError",
+    "PositivityError",
+    # Probability errors
+    "ProbabilityBoundsError",
+    "NormalizationError",
+    "StateVectorNormError",
+    # Numerical errors
+    "NonFiniteError",
+    "BoundsError",
+    # Quantum validators
     "validate_unitary",
     "validate_hermitian",
     "validate_density_matrix",
-    # Probability
+    # Probability validators
     "validate_probability",
     "validate_probabilities",
     "validate_normalized",
-    # Bounds
+    # Bounds validators
     "validate_positive",
     "validate_non_negative",
     "validate_range",

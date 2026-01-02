@@ -53,7 +53,7 @@ class TestValidateProbability:
         with pytest.raises(ValidationError) as exc_info:
             get_prob()
 
-        assert "not a valid probability" in str(exc_info.value)
+        assert "not a valid probability" in str(exc_info.value).lower()
         assert "0 ≤ p ≤ 1" in str(exc_info.value)
 
     def test_invalid_greater_than_one(self) -> None:
@@ -66,7 +66,7 @@ class TestValidateProbability:
         with pytest.raises(ValidationError) as exc_info:
             get_prob()
 
-        assert "not a valid probability" in str(exc_info.value)
+        assert "not a valid probability" in str(exc_info.value).lower()
 
     def test_decorator_with_parentheses(self) -> None:
         """Decorator works with explicit parentheses."""
@@ -137,7 +137,7 @@ class TestValidateProbabilities:
         with pytest.raises(ValidationError) as exc_info:
             get_probs()
 
-        assert "below 0" in str(exc_info.value)
+        assert "below 0" in str(exc_info.value).lower()
 
     def test_invalid_greater_than_one(self) -> None:
         """Array with value > 1 raises ValidationError."""
@@ -149,7 +149,7 @@ class TestValidateProbabilities:
         with pytest.raises(ValidationError) as exc_info:
             get_probs()
 
-        assert "above 1" in str(exc_info.value)
+        assert "above 1" in str(exc_info.value).lower()
 
     def test_2d_array(self) -> None:
         """Works with 2D arrays."""
@@ -193,7 +193,7 @@ class TestValidateNormalized:
         with pytest.raises(ValidationError) as exc_info:
             get_dist()
 
-        assert "not normalized" in str(exc_info.value)
+        assert "not normalized" in str(exc_info.value).lower()
         assert "sum = 1" in str(exc_info.value)
 
     def test_axis_normalization(self) -> None:
@@ -228,7 +228,7 @@ class TestValidateNormalized:
         with pytest.raises(ValidationError) as exc_info:
             get_bad()
 
-        assert "axis 1" in str(exc_info.value)
+        assert "axis 1" in str(exc_info.value).lower()
 
     def test_custom_tolerance(self) -> None:
         """Custom tolerance is respected."""

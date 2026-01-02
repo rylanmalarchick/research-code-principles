@@ -18,13 +18,25 @@ Example:
 
 from __future__ import annotations
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Rylan Malarchick"
 __email__ = "rylan1012@gmail.com"
 
+# Public API - errors
+from agentbible.errors import (
+    DensityMatrixError,
+    HermiticityError,
+    NonFiniteError,
+    PhysicsConstraintError,
+    PositivityError,
+    ProbabilityBoundsError,
+    TraceError,
+    UnitarityError,
+    ValidationError,
+)
+
 # Public API - validators
 from agentbible.validators import (
-    ValidationError,
     validate_density_matrix,
     validate_finite,
     validate_hermitian,
@@ -42,8 +54,17 @@ __all__ = [
     "__version__",
     "__author__",
     "__email__",
-    # Exceptions
+    # Base exceptions
     "ValidationError",
+    "PhysicsConstraintError",
+    # Physics-specific exceptions (with references)
+    "UnitarityError",
+    "HermiticityError",
+    "DensityMatrixError",
+    "TraceError",
+    "PositivityError",
+    "ProbabilityBoundsError",
+    "NonFiniteError",
     # Quantum validators
     "validate_unitary",
     "validate_hermitian",

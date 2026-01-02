@@ -1,7 +1,10 @@
 # AgentBible
 
 [![CI](https://github.com/rylanmalarchick/research-code-principles/actions/workflows/ci.yml/badge.svg)](https://github.com/rylanmalarchick/research-code-principles/actions/workflows/ci.yml)
+[![Docs](https://github.com/rylanmalarchick/research-code-principles/actions/workflows/docs.yml/badge.svg)](https://rylanmalarchick.github.io/research-code-principles/)
+[![PyPI version](https://badge.fury.io/py/agentbible.svg)](https://pypi.org/project/agentbible/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![codecov](https://codecov.io/gh/rylanmalarchick/research-code-principles/branch/main/graph/badge.svg)](https://codecov.io/gh/rylanmalarchick/research-code-principles)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Production-grade infrastructure for AI-assisted research software.**
@@ -204,6 +207,12 @@ mypy agentbible/
 
 ## Documentation
 
+Full documentation: [rylanmalarchick.github.io/research-code-principles](https://rylanmalarchick.github.io/research-code-principles/)
+
+- [Getting Started](https://rylanmalarchick.github.io/research-code-principles/getting-started/installation/)
+- [Validators Guide](https://rylanmalarchick.github.io/research-code-principles/guide/validators/)
+- [Provenance Guide](https://rylanmalarchick.github.io/research-code-principles/guide/provenance/)
+- [API Reference](https://rylanmalarchick.github.io/research-code-principles/api/validators/)
 - [Philosophy](docs/philosophy.md) — Why good code matters
 - [Style Guide](docs/style-guide-reference.md) — Coding conventions
 - [Agent Prompts](agent_prompts/) — Modular AI context snippets
@@ -220,4 +229,4 @@ Rylan Malarchick — [rylan1012@gmail.com](mailto:rylan1012@gmail.com)
 
 ---
 
-**v0.1.0** — Initial release (January 2026)
+**v0.1.1** — Documentation site, Dependabot, C++ template (January 2026)

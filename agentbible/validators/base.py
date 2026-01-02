@@ -12,52 +12,10 @@ from typing import Any, Callable, TypeVar
 import numpy as np
 from numpy.typing import NDArray
 
+# Import ValidationError from errors module (canonical location)
+from agentbible.errors import ValidationError
+
 F = TypeVar("F", bound=Callable[..., Any])
-
-
-class ValidationError(Exception):
-    """Raised when a physics validation check fails.
-
-    Attributes:
-        message: Description of what validation failed.
-        expected: What the value should satisfy.
-        got: What was actually observed.
-        function_name: Name of the decorated function.
-        tolerance: Tolerance values used in comparison.
-    """
-
-    def __init__(
-        self,
-        message: str,
-        *,
-        expected: str | None = None,
-        got: str | None = None,
-        function_name: str | None = None,
-        tolerance: dict[str, float] | None = None,
-        shape: tuple[int, ...] | None = None,
-    ) -> None:
-        self.message = message
-        self.expected = expected
-        self.got = got
-        self.function_name = function_name
-        self.tolerance = tolerance
-        self.shape = shape
-
-        # Build detailed error message
-        parts = [message]
-        if expected:
-            parts.append(f"  Expected: {expected}")
-        if got:
-            parts.append(f"  Got: {got}")
-        if tolerance:
-            tol_str = ", ".join(f"{k}={v}" for k, v in tolerance.items())
-            parts.append(f"  Tolerance: {tol_str}")
-        if shape:
-            parts.append(f"  Shape: {shape}")
-        if function_name:
-            parts.append(f"  Function: {function_name}")
-
-        super().__init__("\n".join(parts))
 
 
 def get_numpy() -> Any:
