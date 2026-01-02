@@ -543,9 +543,7 @@ class TestRunGh:
     @patch("subprocess.run")
     def test_no_check_returns_result(self, mock_run: MagicMock) -> None:
         """Returns result without raising when check=False."""
-        mock_run.return_value = MagicMock(
-            returncode=1, stderr="error", stdout=""
-        )
+        mock_run.return_value = MagicMock(returncode=1, stderr="error", stdout="")
 
         result = _run_gh(["run", "list"], check=False)
 
@@ -878,7 +876,9 @@ class TestRunCiReleaseFlow:
         mock_subprocess.return_value = MagicMock(stdout="", returncode=0)
 
         # Will fail at tag step, but we're testing normalization
-        run_ci_release("v1.0.0", bump_files=False, push=False, verify=False, create_release=False)
+        run_ci_release(
+            "v1.0.0", bump_files=False, push=False, verify=False, create_release=False
+        )
 
         # Check that tag command used v1.0.0
         tag_calls = [c for c in mock_subprocess.call_args_list if "tag" in str(c)]
@@ -887,7 +887,11 @@ class TestRunCiReleaseFlow:
     @patch("subprocess.run")
     @patch("agentbible.cli.ci.check_gh_available")
     def test_bump_files_commits(
-        self, mock_check: MagicMock, mock_subprocess: MagicMock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+        self,
+        mock_check: MagicMock,
+        mock_subprocess: MagicMock,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Bumps version files and commits."""
         monkeypatch.chdir(tmp_path)
@@ -1039,7 +1043,9 @@ class TestRunCiReleaseFlow:
 
         mock_subprocess.side_effect = subprocess_side_effect
 
-        exit_code = run_ci_release("1.0.0", bump_files=False, push=True, verify=False, create_release=False)
+        exit_code = run_ci_release(
+            "1.0.0", bump_files=False, push=True, verify=False, create_release=False
+        )
 
         assert exit_code == 1
 
