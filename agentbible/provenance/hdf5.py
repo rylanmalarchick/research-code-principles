@@ -219,7 +219,11 @@ def _get_hardware_info() -> dict[str, Any]:
     # GPU info (try nvidia-smi for NVIDIA GPUs, then check torch)
     try:
         result = subprocess.run(
-            ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"],
+            [
+                "nvidia-smi",
+                "--query-gpu=name,memory.total,driver_version",
+                "--format=csv,noheader",
+            ],
             capture_output=True,
             text=True,
             timeout=5,
@@ -228,10 +232,27 @@ def _get_hardware_info() -> dict[str, Any]:
             gpus = []
             for line in result.stdout.strip().split("\n"):
                 parts = line.split(",")
-                if len(parts) >= 2:
+                if len(parts) >= 3:
+                    gpus.append(
+                        {
+                            "name": parts[0].strip(),
+                            "memory": parts[1].strip(),
+                            "driver_version": parts[2].strip(),
+                        }
+                    )
+                elif len(parts) >= 2:
                     gpus.append({"name": parts[0].strip(), "memory": parts[1].strip()})
             if gpus:
                 hw_info["gpu_info"] = gpus
+                # Also get CUDA version if available
+                cuda_result = subprocess.run(
+                    ["nvidia-smi", "--query-gpu=cuda_version", "--format=csv,noheader"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+                if cuda_result.returncode == 0 and cuda_result.stdout.strip():
+                    hw_info["cuda_version"] = cuda_result.stdout.strip().split("\n")[0]
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
         # Try torch.cuda as fallback
         try:

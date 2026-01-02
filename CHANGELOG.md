@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-01-01
+
+### Added
+
+#### Validation Levels
+- `ValidationLevel` enum with three levels: `debug`, `lite`, `off`
+- `AGENTBIBLE_VALIDATION_LEVEL` environment variable for global control
+- All validators now support `level` parameter:
+  - `debug` (default): Full physics validation
+  - `lite`: Only NaN/Inf checks (fast, catches numerical instability)
+  - `off`: Skip all validation (with warning) - for benchmarking only
+- `get_validation_level()` helper function
+
+#### Code Audit CLI
+- `bible audit` command for code quality checks
+  - Rule of 50: Detects functions exceeding configurable line limit
+  - Docstring presence: Checks public functions/classes for docstrings
+  - Type hints: Validates function signatures have type annotations
+- JSON output for CI integration (`--json` flag)
+- Strict mode (`--strict`) promotes warnings to errors
+- Exclude patterns support (`-e`, `--exclude`)
+- Custom line limits (`--max-lines`)
+
+#### Documentation
+- `ROADMAP.md` with v0.2.0, v0.3.0, v0.4.0 planned features
+- Improved README with problem-first framing, before/after examples
+
+#### Provenance
+- CUDA driver version capture in hardware metadata
+
+### Changed
+
+- README rewritten with "Why AgentBible Exists" problem-first framing
+- Added before/after code example showing bug detection
+- Added "Who This Is For" section (researchers, quantum/ML developers, PhD students)
+
+### Fixed
+
+- Test assertion for probability error message (unicode vs ASCII)
+
 ## [0.1.1] - 2026-01-01
 
 ### Added
@@ -116,6 +156,7 @@ This is the initial release combining 6 development sprints:
 5. CI/CD & Security (GitHub Actions, pip-audit, trusted publishing)
 6. Documentation & Polish (README, CHANGELOG, badges)
 
-[Unreleased]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/rylanmalarchick/research-code-principles/releases/tag/v0.1.0

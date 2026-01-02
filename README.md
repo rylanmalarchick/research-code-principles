@@ -7,21 +7,65 @@
 [![codecov](https://codecov.io/gh/rylanmalarchick/research-code-principles/branch/main/graph/badge.svg)](https://codecov.io/gh/rylanmalarchick/research-code-principles)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Production-grade infrastructure for AI-assisted research software.**
+## Why AgentBible Exists
 
-AgentBible provides physics validation decorators, project scaffolding, provenance tracking, and testing utilities for scientific Python projects.
+When Copilot or Claude generates quantum computing code, how do you know it's physically correct?
+When you run an experiment, how do you reproduce it 6 months later?
 
-## Installation
+**AgentBible solves both problems:**
+
+- **Physics validators** catch invalid code at runtime (`@validate_unitary`, `@validate_density_matrix`, etc.)
+- **Automatic provenance** captures everything needed for reproducibility (git SHA, random seeds, package versions, hardware info)
+
+**Result:** Research code you can trust and reproduce.
+
+## Install Now
 
 ```bash
 pip install agentbible
+```
 
+```bash
 # With HDF5 provenance support
 pip install agentbible[hdf5]
 
 # Full development install
 pip install agentbible[all]
 ```
+
+## The Problem AgentBible Solves
+
+```python
+# WITHOUT AgentBible - silent bug, hours of debugging
+def create_hadamard():
+    return np.array([[1, 1], [1, 0]]) / np.sqrt(2)  # Bug: should be [1, -1]
+    # This is NOT unitary. You won't catch it until your quantum simulation
+    # produces nonsense results and you spend hours debugging.
+
+H = create_hadamard()  # No error - bug silently propagates
+```
+
+```python
+# WITH AgentBible - catches it immediately
+from agentbible import validate_unitary
+
+@validate_unitary
+def create_hadamard():
+    return np.array([[1, 1], [1, 0]]) / np.sqrt(2)  # Same bug
+
+H = create_hadamard()
+# UnitarityError: Matrix is not unitary
+#   Expected: U@U.H = I (conjugate transpose times matrix equals identity)
+#   Got: max|U@U - I| = 5.00e-01
+#   Function: create_hadamard
+#
+#   Reference: Nielsen & Chuang, 'Quantum Computation and Quantum Information'
+#   Guidance: Your quantum gate is not reversible. Common causes:
+#       - Missing normalization factor (e.g., 1/sqrt(2) for Hadamard)
+#       - Incorrect matrix elements or signs
+```
+
+**The bug is caught immediately, with an educational error message.**
 
 ## Quick Start
 
@@ -87,6 +131,8 @@ data, metadata = load_with_metadata("results.h5")
 print(metadata["git_sha"])      # "a1b2c3d..."
 print(metadata["timestamp"])    # "2026-01-01T12:00:00+00:00"
 print(metadata["packages"])     # {"numpy": "1.26.0", ...}
+print(metadata["pip_freeze"])   # Full pip freeze for exact reproduction
+print(metadata["hardware"])     # CPU model, GPU info, memory
 ```
 
 ### Physics-Aware Testing
@@ -106,6 +152,22 @@ def test_reproducible(deterministic_seed):
     assert random_value == 0.3745401188473625  # Always the same
 ```
 
+## Who This Is For
+
+**AgentBible is for:**
+
+- Researchers using AI agents (Claude, Copilot, Cursor) to write scientific code
+- Quantum computing developers who need correctness guarantees
+- ML/Physics/HPC developers who care about reproducibility
+- PhD students who want rigorous software from day one
+- Anyone who has lost hours debugging a subtle numerical bug
+
+**AgentBible is NOT for:**
+
+- Enterprise web applications
+- Frontend/GUI projects
+- Code that doesn't involve numerical computation
+
 ## Features
 
 ### Validators
@@ -123,6 +185,11 @@ def test_reproducible(deterministic_seed):
 | `@validate_range(min, max)` | Value in [min, max] |
 | `@validate_finite` | No NaN or Inf |
 
+All validators:
+- Check for NaN/Inf **before** physics checks (catches numerical instability first)
+- Support both `rtol` and `atol` tolerances
+- Provide educational error messages with academic references
+
 ### CLI Commands
 
 ```bash
@@ -135,11 +202,14 @@ bible info                  # Show installation info
 ### Provenance Metadata
 
 `save_with_metadata()` automatically captures:
-- Git SHA, branch, dirty status
-- UTC timestamp
+
+- Git SHA, branch, dirty status, and diff (if uncommitted changes)
+- UTC timestamp (ISO 8601)
 - Random seeds (numpy, python, torch)
 - Hostname, platform, Python version
 - Package versions (numpy, scipy, h5py, torch, etc.)
+- Full `pip freeze` output for exact environment reproduction
+- Hardware info (CPU model, core count, memory, GPU details)
 
 ### Testing Fixtures
 
@@ -178,11 +248,37 @@ bible init my-project --template cpp-hpc-cuda
 
 ## The 5 Principles
 
-1. **Correctness First** — Physical accuracy is non-negotiable
-2. **Specification Before Code** — Tests define the contract
-3. **Fail Fast with Clarity** — Validate inputs, descriptive errors
-4. **Simplicity by Design** — Functions ≤50 lines, single responsibility
-5. **Infrastructure Enables Speed** — CI, tests, linting from day one
+1. **Correctness First** - Physical accuracy is non-negotiable
+2. **Specification Before Code** - Tests define the contract
+3. **Fail Fast with Clarity** - Validate inputs, descriptive errors
+4. **Simplicity by Design** - Functions <= 50 lines, single responsibility
+5. **Infrastructure Enables Speed** - CI, tests, linting from day one
+
+## Status
+
+**v0.1.1** (Alpha) - Core validators working, API stable, ready for real use.
+
+See the full [ROADMAP.md](ROADMAP.md) for what's coming next.
+
+## Documentation
+
+Full documentation: [rylanmalarchick.github.io/research-code-principles](https://rylanmalarchick.github.io/research-code-principles/)
+
+- [Getting Started](https://rylanmalarchick.github.io/research-code-principles/getting-started/installation/)
+- [Validators Guide](https://rylanmalarchick.github.io/research-code-principles/guide/validators/)
+- [Provenance Guide](https://rylanmalarchick.github.io/research-code-principles/guide/provenance/)
+- [API Reference](https://rylanmalarchick.github.io/research-code-principles/api/validators/)
+- [Philosophy](docs/philosophy.md) - Why good code matters
+- [Style Guide](docs/style-guide-reference.md) - Coding conventions
+- [CHANGELOG](CHANGELOG.md) - Release history
+
+## Getting Help
+
+- **Questions?** [Open a GitHub Issue](https://github.com/rylanmalarchick/research-code-principles/issues)
+- **Found a bug?** [Report it here](https://github.com/rylanmalarchick/research-code-principles/issues/new)
+- **Want to contribute?** See [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Security issues?** See [SECURITY.md](SECURITY.md)
+- **Email:** [rylan1012@gmail.com](mailto:rylan1012@gmail.com)
 
 ## Development
 
@@ -205,28 +301,14 @@ ruff check agentbible/
 mypy agentbible/
 ```
 
-## Documentation
-
-Full documentation: [rylanmalarchick.github.io/research-code-principles](https://rylanmalarchick.github.io/research-code-principles/)
-
-- [Getting Started](https://rylanmalarchick.github.io/research-code-principles/getting-started/installation/)
-- [Validators Guide](https://rylanmalarchick.github.io/research-code-principles/guide/validators/)
-- [Provenance Guide](https://rylanmalarchick.github.io/research-code-principles/guide/provenance/)
-- [API Reference](https://rylanmalarchick.github.io/research-code-principles/api/validators/)
-- [Philosophy](docs/philosophy.md) — Why good code matters
-- [Style Guide](docs/style-guide-reference.md) — Coding conventions
-- [Agent Prompts](agent_prompts/) — Modular AI context snippets
-- [CHANGELOG](CHANGELOG.md) — Release history
-- [SECURITY](SECURITY.md) — Security policy
-
 ## License
 
-MIT — Use and adapt freely.
+MIT - Use and adapt freely.
 
 ## Author
 
-Rylan Malarchick — [rylan1012@gmail.com](mailto:rylan1012@gmail.com)
+Rylan Malarchick - [rylan1012@gmail.com](mailto:rylan1012@gmail.com)
 
 ---
 
-**v0.1.1** — Documentation site, Dependabot, C++ template (January 2026)
+**v0.1.1** - Documentation site, Dependabot, C++ template (January 2026)

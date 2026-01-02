@@ -54,7 +54,7 @@ class TestValidateProbability:
             get_prob()
 
         assert "not a valid probability" in str(exc_info.value).lower()
-        assert "0 ≤ p ≤ 1" in str(exc_info.value)
+        assert "0 <= p <= 1" in str(exc_info.value)
 
     def test_invalid_greater_than_one(self) -> None:
         """Value > 1 raises ValidationError."""

@@ -3,6 +3,15 @@
 This module provides decorators that validate function outputs against
 physical constraints like unitarity, hermiticity, and probability bounds.
 
+Validation levels:
+    - "debug" (default): Full validation with all physics checks
+    - "lite": Only NaN/Inf sanity checks (fast)
+    - "off": Skip validation entirely (DANGEROUS - for benchmarking only)
+
+Control validation level via:
+    - Decorator parameter: @validate_unitary(level="lite")
+    - Environment variable: AGENTBIBLE_VALIDATION_LEVEL=off
+
 Example:
     >>> from agentbible.validators import validate_unitary
     >>> import numpy as np
@@ -12,6 +21,10 @@ Example:
     ...     return np.eye(2)
     >>>
     >>> gate = create_gate()  # Validates automatically
+
+    >>> @validate_unitary(level="lite")  # Only NaN/Inf check (faster)
+    ... def create_gate_fast():
+    ...     return np.eye(2)
 """
 
 from agentbible.errors import (
@@ -27,6 +40,11 @@ from agentbible.errors import (
     TraceError,
     UnitarityError,
     ValidationError,
+)
+from agentbible.validators.base import (
+    ENV_VALIDATION_LEVEL,
+    ValidationLevel,
+    get_validation_level,
 )
 from agentbible.validators.bounds import (
     validate_finite,
@@ -46,6 +64,10 @@ from agentbible.validators.quantum import (
 )
 
 __all__ = [
+    # Validation level control
+    "ValidationLevel",
+    "get_validation_level",
+    "ENV_VALIDATION_LEVEL",
     # Base errors
     "ValidationError",
     "PhysicsConstraintError",

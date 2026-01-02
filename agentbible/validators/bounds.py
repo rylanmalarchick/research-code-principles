@@ -10,6 +10,12 @@ All validators include:
 - Numerical sanity checks (NaN/Inf detection before bounds checks)
 - Support for rtol and atol tolerances where applicable
 - Educational error messages with guidance
+- Conditional validation levels (debug/lite/off)
+
+Validation levels:
+- "debug" (default): Full validation with all bounds checks
+- "lite": Only NaN/Inf sanity checks (fast)
+- "off": Skip validation entirely (DANGEROUS - for benchmarking only)
 """
 
 from __future__ import annotations
@@ -18,7 +24,12 @@ import functools
 from typing import Any, Callable, TypeVar, overload
 
 from agentbible.errors import BoundsError, NonFiniteError
-from agentbible.validators.base import get_numpy
+from agentbible.validators.base import (
+    ValidationLevel,
+    get_numpy,
+    get_validation_level,
+    maybe_warn_validation_off,
+)
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -56,6 +67,7 @@ def validate_positive(func: F) -> F: ...
 def validate_positive(
     *,
     atol: float = 0.0,
+    level: str | ValidationLevel | None = None,
 ) -> Callable[[F], F]: ...
 
 
@@ -63,6 +75,7 @@ def validate_positive(
     func: F | None = None,
     *,
     atol: float = 0.0,
+    level: str | ValidationLevel | None = None,
 ) -> F | Callable[[F], F]:
     """Validate that a function returns positive value(s).
 
@@ -75,15 +88,22 @@ def validate_positive(
         @validate_positive(atol=1e-10)
         def compute_near_positive(): ...
 
+        @validate_positive(level="lite")  # Only NaN/Inf check
+        def compute_energy_fast(): ...
+
     Args:
         func: The function to decorate (when used without parentheses).
         atol: Absolute tolerance. Values > -atol are considered valid.
+        level: Validation level - "debug" (full), "lite" (NaN/Inf only), or "off".
+            Can also be set globally via AGENTBIBLE_VALIDATION_LEVEL env var.
+            WARNING: "off" disables ALL validation - use only for benchmarking.
 
     Returns:
         Decorated function that validates its return value.
 
     Raises:
-        ValidationError: If any value is not positive.
+        BoundsError: If any value is not positive (level="debug").
+        NonFiniteError: If any value is NaN/Inf (level="debug" or "lite").
 
     Example:
         >>> @validate_positive
@@ -96,13 +116,26 @@ def validate_positive(
         @functools.wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             result = fn(*args, **kwargs)
-            np = get_numpy()
 
+            # Determine effective validation level
+            effective_level = get_validation_level(level)
+
+            # If validation is off, skip everything (with warning)
+            if effective_level == ValidationLevel.OFF:
+                maybe_warn_validation_off(fn.__name__)
+                return result
+
+            np = get_numpy()
             arr = np.asarray(result)
 
-            # Check for NaN/Inf FIRST (before bounds checks)
+            # Check for NaN/Inf FIRST (both debug and lite modes)
             _check_finite_first(arr, fn.__name__)
 
+            # If lite mode, stop here (no bounds checks)
+            if effective_level == ValidationLevel.LITE:
+                return result
+
+            # Full validation (debug mode)
             min_val = float(np.min(arr))
 
             if min_val <= -atol:
@@ -133,6 +166,7 @@ def validate_non_negative(func: F) -> F: ...
 def validate_non_negative(
     *,
     atol: float = 0.0,
+    level: str | ValidationLevel | None = None,
 ) -> Callable[[F], F]: ...
 
 
@@ -140,6 +174,7 @@ def validate_non_negative(
     func: F | None = None,
     *,
     atol: float = 0.0,
+    level: str | ValidationLevel | None = None,
 ) -> F | Callable[[F], F]:
     """Validate that a function returns non-negative value(s).
 
@@ -152,15 +187,22 @@ def validate_non_negative(
         @validate_non_negative(atol=1e-10)
         def get_near_zero(): ...
 
+        @validate_non_negative(level="off")  # DANGEROUS - for benchmarking only
+        def get_count_fast(): ...
+
     Args:
         func: The function to decorate (when used without parentheses).
         atol: Absolute tolerance. Values >= -atol are considered valid.
+        level: Validation level - "debug" (full), "lite" (NaN/Inf only), or "off".
+            Can also be set globally via AGENTBIBLE_VALIDATION_LEVEL env var.
+            WARNING: "off" disables ALL validation - use only for benchmarking.
 
     Returns:
         Decorated function that validates its return value.
 
     Raises:
-        ValidationError: If any value is negative.
+        BoundsError: If any value is negative (level="debug").
+        NonFiniteError: If any value is NaN/Inf (level="debug" or "lite").
 
     Example:
         >>> @validate_non_negative
@@ -173,13 +215,26 @@ def validate_non_negative(
         @functools.wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             result = fn(*args, **kwargs)
-            np = get_numpy()
 
+            # Determine effective validation level
+            effective_level = get_validation_level(level)
+
+            # If validation is off, skip everything (with warning)
+            if effective_level == ValidationLevel.OFF:
+                maybe_warn_validation_off(fn.__name__)
+                return result
+
+            np = get_numpy()
             arr = np.asarray(result)
 
-            # Check for NaN/Inf FIRST (before bounds checks)
+            # Check for NaN/Inf FIRST (both debug and lite modes)
             _check_finite_first(arr, fn.__name__)
 
+            # If lite mode, stop here (no bounds checks)
+            if effective_level == ValidationLevel.LITE:
+                return result
+
+            # Full validation (debug mode)
             min_val = float(np.min(arr))
 
             if min_val < -atol:
@@ -208,6 +263,7 @@ def validate_range(
     *,
     inclusive: bool = True,
     atol: float = 0.0,
+    level: str | ValidationLevel | None = None,
 ) -> Callable[[F], F]:
     """Validate that a function returns value(s) within a specified range.
 
@@ -218,12 +274,16 @@ def validate_range(
         max_val: Maximum allowed value. None means no upper bound.
         inclusive: Whether bounds are inclusive. Default True.
         atol: Absolute tolerance for boundary checks.
+        level: Validation level - "debug" (full), "lite" (NaN/Inf only), or "off".
+            Can also be set globally via AGENTBIBLE_VALIDATION_LEVEL env var.
+            WARNING: "off" disables ALL validation - use only for benchmarking.
 
     Returns:
         Decorator that validates function return values.
 
     Raises:
-        ValidationError: If any value is outside the range.
+        BoundsError: If any value is outside the range (level="debug").
+        NonFiniteError: If any value is NaN/Inf (level="debug" or "lite").
 
     Example:
         >>> @validate_range(0.0, 1.0)
@@ -239,26 +299,39 @@ def validate_range(
         @functools.wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             result = fn(*args, **kwargs)
-            np = get_numpy()
 
+            # Determine effective validation level
+            effective_level = get_validation_level(level)
+
+            # If validation is off, skip everything (with warning)
+            if effective_level == ValidationLevel.OFF:
+                maybe_warn_validation_off(fn.__name__)
+                return result
+
+            np = get_numpy()
             arr = np.asarray(result)
 
-            # Check for NaN/Inf FIRST (before bounds checks)
+            # Check for NaN/Inf FIRST (both debug and lite modes)
             _check_finite_first(arr, fn.__name__)
 
+            # If lite mode, stop here (no bounds checks)
+            if effective_level == ValidationLevel.LITE:
+                return result
+
+            # Full validation (debug mode)
             actual_min = float(np.min(arr))
             actual_max = float(np.max(arr))
 
             # Build expected string
             if min_val is not None and max_val is not None:
                 if inclusive:
-                    expected = f"{min_val} ≤ x ≤ {max_val}"
+                    expected = f"{min_val} <= x <= {max_val}"
                 else:
                     expected = f"{min_val} < x < {max_val}"
             elif min_val is not None:
-                expected = f"x {'≥' if inclusive else '>'} {min_val}"
+                expected = f"x {'>=' if inclusive else '>'} {min_val}"
             else:
-                expected = f"x {'≤' if inclusive else '<'} {max_val}"
+                expected = f"x {'<=' if inclusive else '<'} {max_val}"
 
             # Check minimum
             if min_val is not None:
@@ -318,11 +391,16 @@ def validate_finite(func: F) -> F: ...
 
 
 @overload
-def validate_finite() -> Callable[[F], F]: ...
+def validate_finite(
+    *,
+    level: str | ValidationLevel | None = None,
+) -> Callable[[F], F]: ...
 
 
 def validate_finite(
     func: F | None = None,
+    *,
+    level: str | ValidationLevel | None = None,
 ) -> F | Callable[[F], F]:
     """Validate that a function returns finite values (no NaN or Inf).
 
@@ -335,14 +413,20 @@ def validate_finite(
         @validate_finite()
         def compute(): ...
 
+        @validate_finite(level="off")  # DANGEROUS - for benchmarking only
+        def compute_fast(): ...
+
     Args:
         func: The function to decorate (when used without parentheses).
+        level: Validation level - "debug" or "lite" (both check NaN/Inf), or "off".
+            Can also be set globally via AGENTBIBLE_VALIDATION_LEVEL env var.
+            WARNING: "off" disables ALL validation - use only for benchmarking.
 
     Returns:
         Decorated function that validates its return value.
 
     Raises:
-        ValidationError: If any value is NaN or Inf.
+        NonFiniteError: If any value is NaN or Inf (level="debug" or "lite").
 
     Example:
         >>> import numpy as np
@@ -356,8 +440,17 @@ def validate_finite(
         @functools.wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             result = fn(*args, **kwargs)
-            np = get_numpy()
 
+            # Determine effective validation level
+            effective_level = get_validation_level(level)
+
+            # If validation is off, skip everything (with warning)
+            if effective_level == ValidationLevel.OFF:
+                maybe_warn_validation_off(fn.__name__)
+                return result
+
+            # Both debug and lite modes check for NaN/Inf
+            np = get_numpy()
             arr = np.asarray(result)
 
             if not np.all(np.isfinite(arr)):

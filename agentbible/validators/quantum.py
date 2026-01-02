@@ -9,6 +9,12 @@ All validators include:
 - Numerical sanity checks (NaN/Inf detection before physics checks)
 - Support for both rtol and atol tolerances
 - Educational error messages with academic references
+- Conditional validation levels (debug/lite/off)
+
+Validation levels:
+- "debug" (default): Full validation with all physics checks
+- "lite": Only NaN/Inf sanity checks (fast)
+- "off": Skip validation entirely (DANGEROUS - for benchmarking only)
 """
 
 from __future__ import annotations
@@ -25,8 +31,11 @@ from agentbible.errors import (
     UnitarityError,
 )
 from agentbible.validators.base import (
+    ValidationLevel,
     get_numpy,
+    get_validation_level,
     is_square_matrix,
+    maybe_warn_validation_off,
 )
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -66,6 +75,7 @@ def validate_unitary(
     *,
     rtol: float = 1e-5,
     atol: float = 1e-8,
+    level: str | ValidationLevel | None = None,
 ) -> Callable[[F], F]: ...
 
 
@@ -74,6 +84,7 @@ def validate_unitary(
     *,
     rtol: float = 1e-5,
     atol: float = 1e-8,
+    level: str | ValidationLevel | None = None,
 ) -> F | Callable[[F], F]:
     """Validate that a function returns a unitary matrix.
 
@@ -86,16 +97,23 @@ def validate_unitary(
         @validate_unitary(rtol=1e-6)
         def make_precise_gate(): ...
 
+        @validate_unitary(level="lite")  # Only check for NaN/Inf
+        def make_gate_fast(): ...
+
     Args:
         func: The function to decorate (when used without parentheses).
         rtol: Relative tolerance for comparison. Default 1e-5.
         atol: Absolute tolerance for comparison. Default 1e-8.
+        level: Validation level - "debug" (full), "lite" (NaN/Inf only), or "off".
+            Can also be set globally via AGENTBIBLE_VALIDATION_LEVEL env var.
+            WARNING: "off" disables ALL validation - use only for benchmarking.
 
     Returns:
         Decorated function that validates its return value.
 
     Raises:
-        ValidationError: If the returned matrix is not unitary.
+        UnitarityError: If the returned matrix is not unitary (level="debug").
+        NonFiniteError: If the matrix contains NaN/Inf (level="debug" or "lite").
 
     Example:
         >>> import numpy as np
@@ -109,14 +127,28 @@ def validate_unitary(
         @functools.wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             result = fn(*args, **kwargs)
+
+            # Determine effective validation level
+            effective_level = get_validation_level(level)
+
+            # If validation is off, skip everything (with warning)
+            if effective_level == ValidationLevel.OFF:
+                maybe_warn_validation_off(fn.__name__)
+                return result
+
             np = get_numpy()
 
             # Convert to numpy array if needed
             arr = np.asarray(result)
 
-            # Check for NaN/Inf FIRST (before physics checks)
+            # Check for NaN/Inf FIRST (both debug and lite modes)
             _check_finite(arr, fn.__name__)
 
+            # If lite mode, stop here (no physics checks)
+            if effective_level == ValidationLevel.LITE:
+                return result
+
+            # Full validation (debug mode)
             # Check shape
             if not is_square_matrix(arr):
                 raise UnitarityError(
@@ -162,6 +194,7 @@ def validate_hermitian(
     *,
     rtol: float = 1e-5,
     atol: float = 1e-8,
+    level: str | ValidationLevel | None = None,
 ) -> Callable[[F], F]: ...
 
 
@@ -170,6 +203,7 @@ def validate_hermitian(
     *,
     rtol: float = 1e-5,
     atol: float = 1e-8,
+    level: str | ValidationLevel | None = None,
 ) -> F | Callable[[F], F]:
     """Validate that a function returns a Hermitian matrix.
 
@@ -182,16 +216,23 @@ def validate_hermitian(
         @validate_hermitian(rtol=1e-6)
         def make_precise_hamiltonian(): ...
 
+        @validate_hermitian(level="off")  # DANGEROUS - for benchmarking only
+        def make_hamiltonian_fast(): ...
+
     Args:
         func: The function to decorate (when used without parentheses).
         rtol: Relative tolerance for comparison. Default 1e-5.
         atol: Absolute tolerance for comparison. Default 1e-8.
+        level: Validation level - "debug" (full), "lite" (NaN/Inf only), or "off".
+            Can also be set globally via AGENTBIBLE_VALIDATION_LEVEL env var.
+            WARNING: "off" disables ALL validation - use only for benchmarking.
 
     Returns:
         Decorated function that validates its return value.
 
     Raises:
-        ValidationError: If the returned matrix is not Hermitian.
+        HermiticityError: If the returned matrix is not Hermitian (level="debug").
+        NonFiniteError: If the matrix contains NaN/Inf (level="debug" or "lite").
 
     Example:
         >>> import numpy as np
@@ -205,14 +246,28 @@ def validate_hermitian(
         @functools.wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             result = fn(*args, **kwargs)
+
+            # Determine effective validation level
+            effective_level = get_validation_level(level)
+
+            # If validation is off, skip everything (with warning)
+            if effective_level == ValidationLevel.OFF:
+                maybe_warn_validation_off(fn.__name__)
+                return result
+
             np = get_numpy()
 
             # Convert to numpy array if needed
             arr = np.asarray(result)
 
-            # Check for NaN/Inf FIRST (before physics checks)
+            # Check for NaN/Inf FIRST (both debug and lite modes)
             _check_finite(arr, fn.__name__)
 
+            # If lite mode, stop here (no physics checks)
+            if effective_level == ValidationLevel.LITE:
+                return result
+
+            # Full validation (debug mode)
             # Check shape
             if not is_square_matrix(arr):
                 raise HermiticityError(
@@ -257,6 +312,7 @@ def validate_density_matrix(
     *,
     rtol: float = 1e-5,
     atol: float = 1e-8,
+    level: str | ValidationLevel | None = None,
 ) -> Callable[[F], F]: ...
 
 
@@ -265,6 +321,7 @@ def validate_density_matrix(
     *,
     rtol: float = 1e-5,
     atol: float = 1e-8,
+    level: str | ValidationLevel | None = None,
 ) -> F | Callable[[F], F]:
     """Validate that a function returns a valid density matrix.
 
@@ -280,16 +337,25 @@ def validate_density_matrix(
         @validate_density_matrix(rtol=1e-6)
         def make_precise_state(): ...
 
+        @validate_density_matrix(level="lite")  # Only NaN/Inf check
+        def make_state_fast(): ...
+
     Args:
         func: The function to decorate (when used without parentheses).
         rtol: Relative tolerance for comparison. Default 1e-5.
         atol: Absolute tolerance for comparison. Default 1e-8.
+        level: Validation level - "debug" (full), "lite" (NaN/Inf only), or "off".
+            Can also be set globally via AGENTBIBLE_VALIDATION_LEVEL env var.
+            WARNING: "off" disables ALL validation - use only for benchmarking.
 
     Returns:
         Decorated function that validates its return value.
 
     Raises:
-        ValidationError: If the returned matrix is not a valid density matrix.
+        DensityMatrixError: If the returned matrix is not a valid density matrix.
+        TraceError: If the trace is not 1.
+        PositivityError: If any eigenvalue is negative.
+        NonFiniteError: If the matrix contains NaN/Inf.
 
     Example:
         >>> import numpy as np
@@ -303,14 +369,28 @@ def validate_density_matrix(
         @functools.wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             result = fn(*args, **kwargs)
+
+            # Determine effective validation level
+            effective_level = get_validation_level(level)
+
+            # If validation is off, skip everything (with warning)
+            if effective_level == ValidationLevel.OFF:
+                maybe_warn_validation_off(fn.__name__)
+                return result
+
             np = get_numpy()
 
             # Convert to numpy array if needed
             arr = np.asarray(result)
 
-            # Check for NaN/Inf FIRST (before physics checks)
+            # Check for NaN/Inf FIRST (both debug and lite modes)
             _check_finite(arr, fn.__name__)
 
+            # If lite mode, stop here (no physics checks)
+            if effective_level == ValidationLevel.LITE:
+                return result
+
+            # Full validation (debug mode)
             # Check shape
             if not is_square_matrix(arr):
                 raise DensityMatrixError(

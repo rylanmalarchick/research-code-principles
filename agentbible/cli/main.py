@@ -5,6 +5,7 @@ Usage:
     bible init my-project --template python-scientific
     bible context --all ./agent_docs
     bible validate state.npy --check unitarity
+    bible audit ./src --json
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ import click
 from rich.console import Console
 
 from agentbible import __version__
+from agentbible.cli.audit import run_audit
 from agentbible.cli.init import run_init
 from agentbible.cli.validate import run_validate
 
@@ -215,7 +217,90 @@ def info() -> None:
     console.print("  bible init      - Create new project from template")
     console.print("  bible context   - Generate AI context from docs")
     console.print("  bible validate  - Validate physics constraints")
+    console.print("  bible audit     - Check code against AgentBible principles")
     console.print("  bible info      - Show this information")
+
+
+@cli.command()
+@click.argument("path", type=click.Path(exists=True))
+@click.option(
+    "--json",
+    "output_json",
+    is_flag=True,
+    help="Output results as JSON for CI integration.",
+)
+@click.option(
+    "--no-line-length",
+    is_flag=True,
+    help="Skip Rule of 50 (function line length) check.",
+)
+@click.option(
+    "--no-docstrings",
+    is_flag=True,
+    help="Skip docstring presence check.",
+)
+@click.option(
+    "--no-type-hints",
+    is_flag=True,
+    help="Skip type hints check.",
+)
+@click.option(
+    "--max-lines",
+    type=int,
+    default=50,
+    help="Maximum allowed function lines (default: 50).",
+)
+@click.option(
+    "--strict",
+    is_flag=True,
+    help="Treat all violations as errors (fail on warnings).",
+)
+@click.option(
+    "--exclude",
+    "-e",
+    multiple=True,
+    help="Glob patterns to exclude (can be used multiple times).",
+)
+def audit(
+    path: str,
+    output_json: bool,
+    no_line_length: bool,
+    no_docstrings: bool,
+    no_type_hints: bool,
+    max_lines: int,
+    strict: bool,
+    exclude: tuple[str, ...],
+) -> None:
+    """Audit code against AgentBible principles.
+
+    Checks Python code for compliance with:
+    - Rule of 50: Functions should be <= 50 lines
+    - Docstrings: Public functions/classes need documentation
+    - Type hints: Function signatures should have annotations
+
+    Use --json for CI integration (machine-readable output).
+
+    Examples:
+        bible audit ./src
+        bible audit ./src --json
+        bible audit ./src --strict --max-lines 30
+        bible audit ./src --exclude "**/test_*.py"
+    """
+    output_format = "json" if output_json else "text"
+    exclude_list = list(exclude) if exclude else None
+
+    sys.exit(
+        run_audit(
+            path=path,
+            output_format=output_format,
+            check_line_length=not no_line_length,
+            check_docstrings=not no_docstrings,
+            check_type_hints=not no_type_hints,
+            max_lines=max_lines,
+            strict=strict,
+            exclude=exclude_list,
+        )
+    )
 
 
 if __name__ == "__main__":
