@@ -168,7 +168,8 @@ def get_repo_info() -> dict[str, Any]:
             "name,url,defaultBranchRef,owner",
         ]
     )
-    return json.loads(result.stdout)
+    data: dict[str, Any] = json.loads(result.stdout)
+    return data
 
 
 def create_release(
