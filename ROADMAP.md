@@ -2,10 +2,11 @@
 
 This document outlines the development roadmap for AgentBible.
 
-## v0.1.1 (January 2026) - Current Release
+## v0.2.1 (January 2026) - Current Release
 
 **Status:** Released
 
+### v0.2.0 Features
 - Physics validators (`@validate_unitary`, `@validate_density_matrix`, etc.)
 - Provenance metadata capture (git, seeds, packages, hardware)
 - Project templates (Python Scientific, C++ HPC/CUDA)
@@ -14,21 +15,28 @@ This document outlines the development roadmap for AgentBible.
 - GitHub Actions CI/CD with trusted PyPI publishing
 - Dependabot for automated dependency updates
 
-## v0.2.0 (Q1 2026) - Hardening & Tooling
-
-**Status:** In Development
-
-### Validator Hardening
-- [ ] Conditional validation levels (`debug`, `lite`, `off`) for performance tuning
-- [ ] Environment variable `AGENTBIBLE_VALIDATION_LEVEL` for global control
-- [ ] CUDA driver version capture in hardware metadata
-
-### CLI Enhancements
-- [ ] `bible audit` command - Self-verify code against AgentBible principles
+### v0.2.0 Features (NEW)
+- [x] Conditional validation levels (`debug`, `lite`, `off`) for performance tuning
+- [x] Environment variable `AGENTBIBLE_VALIDATION_LEVEL` for global control
+- [x] CUDA driver version capture in hardware metadata
+- [x] `bible audit` command - Self-verify code against AgentBible principles
   - Rule of 50 (function line length)
   - Docstring presence check
   - Type hints verification
   - JSON output for CI integration
+
+### v0.2.1 Features (NEW)
+- [x] `bible ci status` - Show GitHub Actions workflow status
+- [x] `bible ci verify` - Verify CI is passing (with --wait option)
+- [x] `bible ci release` - Full automated release flow
+- [x] Enhanced `.cursorrules` with CI/CD guidance for AI agents
+- [x] `gh` CLI integration patterns and best practices
+
+## v0.3.0 (Q2 2026) - Ecosystem Integration
+
+**Status:** Planned
+
+### CLI Enhancements
 - [ ] `bible report` command - Generate scientific health reports from HDF5 provenance
 
 ### AI Agent Integration
@@ -45,10 +53,6 @@ This document outlines the development roadmap for AgentBible.
 - [ ] Baseline benchmarks for all validators
 - [ ] Performance regression tracking in CI
 
-## v0.3.0 (Q2 2026) - Ecosystem Integration
-
-**Status:** Planned
-
 ### Jupyter Integration
 - [ ] `%agentbible` magic for notebook validation
 - [ ] Automatic provenance capture for notebook outputs
@@ -57,17 +61,16 @@ This document outlines the development roadmap for AgentBible.
 ### Enhanced Error Messages
 - [ ] Physics references with links to relevant papers/textbooks
 - [ ] Suggested fixes based on common error patterns
-- [ ] Integration with Wolfram Alpha for physics explanations
+
+## v0.4.0 (Q3 2026) - Enterprise & Scale
+
+**Status:** Planned
 
 ### Example Gallery
 - [ ] 5+ real-world project examples
 - [ ] Quantum optimization tutorial
 - [ ] ML training reproducibility example
 - [ ] HPC simulation workflow
-
-## v0.4.0 (Q3 2026) - Enterprise & Scale
-
-**Status:** Planned
 
 ### Cloud Provenance Backend (Optional)
 - [ ] Hosted service for provenance storage

@@ -6,6 +6,9 @@ Usage:
     bible context --all ./agent_docs
     bible validate state.npy --check unitarity
     bible audit ./src --json
+    bible ci status
+    bible ci verify --wait
+    bible ci release 0.3.0
 """
 
 from __future__ import annotations
@@ -17,6 +20,7 @@ from rich.console import Console
 
 from agentbible import __version__
 from agentbible.cli.audit import run_audit
+from agentbible.cli.ci import run_ci_release, run_ci_status, run_ci_verify
 from agentbible.cli.init import run_init
 from agentbible.cli.validate import run_validate
 
@@ -218,6 +222,7 @@ def info() -> None:
     console.print("  bible context   - Generate AI context from docs")
     console.print("  bible validate  - Validate physics constraints")
     console.print("  bible audit     - Check code against AgentBible principles")
+    console.print("  bible ci        - CI/CD status and release automation")
     console.print("  bible info      - Show this information")
 
 
@@ -299,6 +304,145 @@ def audit(
             max_lines=max_lines,
             strict=strict,
             exclude=exclude_list,
+        )
+    )
+
+
+@cli.group()
+def ci() -> None:
+    """CI/CD status and release automation.
+
+    Commands for checking GitHub Actions status, verifying CI passes,
+    and automating the release process.
+
+    IMPORTANT: AI agents should ALWAYS run 'bible ci status' after
+    pushing code to verify CI is passing.
+
+    Examples:
+        bible ci status              # Show recent workflow runs
+        bible ci verify --wait       # Wait for CI and verify it passes
+        bible ci release 0.3.0       # Full release flow
+    """
+    pass
+
+
+@ci.command("status")
+@click.option(
+    "--limit",
+    "-l",
+    type=int,
+    default=10,
+    help="Number of runs to show.",
+)
+@click.option(
+    "--branch",
+    "-b",
+    type=str,
+    help="Filter by branch name.",
+)
+@click.option(
+    "--json",
+    "output_json",
+    is_flag=True,
+    help="Output as JSON.",
+)
+def ci_status(limit: int, branch: str | None, output_json: bool) -> None:
+    """Show CI/CD workflow status.
+
+    Displays recent GitHub Actions workflow runs with their status.
+    Use this to verify that CI is passing after pushing code.
+
+    Examples:
+        bible ci status
+        bible ci status --branch main
+        bible ci status --json
+    """
+    sys.exit(run_ci_status(limit=limit, branch=branch, output_json=output_json))
+
+
+@ci.command("verify")
+@click.option(
+    "--branch",
+    "-b",
+    type=str,
+    help="Branch to verify.",
+)
+@click.option(
+    "--wait",
+    "-w",
+    is_flag=True,
+    help="Wait for in-progress runs to complete.",
+)
+def ci_verify(branch: str | None, wait: bool) -> None:
+    """Verify CI is passing.
+
+    Checks that all recent workflow runs have passed.
+    Use --wait to wait for in-progress runs to complete.
+
+    Exit codes:
+        0 = All checks passing
+        1 = One or more checks failed
+
+    Examples:
+        bible ci verify
+        bible ci verify --wait
+        bible ci verify --branch feature-x --wait
+    """
+    sys.exit(run_ci_verify(branch=branch, wait=wait))
+
+
+@ci.command("release")
+@click.argument("version")
+@click.option(
+    "--no-bump",
+    is_flag=True,
+    help="Skip version bump in files.",
+)
+@click.option(
+    "--no-push",
+    is_flag=True,
+    help="Skip pushing to remote.",
+)
+@click.option(
+    "--no-verify",
+    is_flag=True,
+    help="Skip waiting for CI verification.",
+)
+@click.option(
+    "--draft",
+    is_flag=True,
+    help="Create release as draft.",
+)
+def ci_release(
+    version: str,
+    no_bump: bool,
+    no_push: bool,
+    no_verify: bool,
+    draft: bool,
+) -> None:
+    """Run full release flow.
+
+    Automates the complete release process:
+    1. Bump version in pyproject.toml and __init__.py
+    2. Commit version changes
+    3. Create and push git tag
+    4. Wait for CI to pass
+    5. Create GitHub release
+
+    VERSION should be like "0.3.0" or "v0.3.0".
+
+    Examples:
+        bible ci release 0.3.0
+        bible ci release v0.3.0 --draft
+        bible ci release 0.3.0 --no-verify
+    """
+    sys.exit(
+        run_ci_release(
+            version=version,
+            bump_files=not no_bump,
+            push=not no_push,
+            verify=not no_verify,
+            draft=draft,
         )
     )
 

@@ -51,3 +51,82 @@ pytest                  # Tests pass
 ruff check .            # No lint errors
 mypy src/               # No type errors
 ```
+
+## CI/CD Rules (CRITICAL)
+
+### Always Verify CI After Push
+After EVERY push to remote, you MUST verify CI status:
+```bash
+bible ci status         # Check workflow runs
+# OR
+gh run list --limit 5   # Alternative if bible not available
+```
+
+### If CI Fails
+1. Check what failed: `gh run view <run-id> --log-failed`
+2. Fix the issue locally
+3. Push fix and verify again
+4. NEVER tell the user "CI should pass" without checking
+
+### GitHub CLI Commands (gh)
+The `gh` CLI is your friend. Use it for:
+
+```bash
+# Check CI status
+gh run list --limit 5                    # Recent workflow runs
+gh run view <run-id>                     # Details of a run
+gh run view <run-id> --log-failed        # See failure logs
+gh run watch                             # Watch runs in real-time
+
+# Releases
+gh release create v1.0.0 --generate-notes
+gh release view v1.0.0
+gh release list
+
+# Repository info
+gh repo view --json name,url
+gh api repos/{owner}/{repo}/actions/runs
+
+# Authentication (if needed)
+gh auth status                           # Check auth
+gh auth login                            # Login
+```
+
+### What CAN Be Automated via gh CLI
+- Creating releases and tags
+- Viewing/triggering workflow runs
+- Managing secrets (create/delete, not view values)
+- Creating issues and PRs
+- Repository settings (some)
+
+### What CANNOT Be Automated via gh CLI
+- Enabling GitHub Pages (requires web UI)
+- OAuth app creation
+- Some organization-level settings
+- Viewing secret values (by design)
+- Initial repository creation on new accounts
+
+### Release Flow
+For releases, use the automated flow:
+```bash
+bible ci release 0.3.0   # Handles everything
+```
+
+Or manually:
+```bash
+# 1. Bump version in pyproject.toml and __init__.py
+# 2. Commit: git commit -m "chore: bump version to 0.3.0"
+# 3. Tag: git tag -a v0.3.0 -m "Release v0.3.0"
+# 4. Push: git push origin main && git push origin v0.3.0
+# 5. WAIT for CI: gh run list --limit 3
+# 6. Verify CI passed: bible ci verify --wait
+# 7. Create release: gh release create v0.3.0 --generate-notes
+```
+
+### Common CI Failures
+- **Tests failing**: Run `pytest -v` locally first
+- **Lint errors**: Run `ruff check .` locally first
+- **Type errors**: Run `mypy src/` locally first
+- **Missing dependencies**: Check `pyproject.toml`
+- **Python version issues**: Test on multiple versions locally
+
