@@ -1,6 +1,6 @@
 """Physics constraint violation errors with academic references.
 
-This module provides specialized error classes for physics validation failures.
+This module provides the core error classes for physics validation failures.
 Each error includes:
 - A clear description of what went wrong
 - The expected physical constraint
@@ -8,8 +8,8 @@ Each error includes:
 - Academic references for understanding the constraint
 - Guidance on how to fix the issue
 
-References are provided to help researchers understand the underlying physics
-and to make errors educational rather than just informational.
+Domain-specific errors (e.g., quantum) are located in their respective domains:
+    from agentbible.domains.quantum import UnitarityError, HermiticityError
 """
 
 from __future__ import annotations
@@ -153,114 +153,7 @@ class PhysicsConstraintError(ValidationError):
 
 
 # =============================================================================
-# Quantum Physics Errors
-# =============================================================================
-
-
-class UnitarityError(PhysicsConstraintError):
-    """Raised when a matrix fails the unitarity constraint U†U = I.
-
-    A unitary matrix preserves inner products and is essential for
-    reversible quantum operations. All quantum gates must be unitary.
-    """
-
-    REFERENCE = (
-        "Nielsen & Chuang, 'Quantum Computation and Quantum Information', "
-        "Theorem 2.2 (Box 2.2). https://doi.org/10.1017/CBO9780511976667"
-    )
-    GUIDANCE = (
-        "Your quantum gate is not reversible. Common causes:\n"
-        "    - Missing normalization factor (e.g., 1/√2 for Hadamard)\n"
-        "    - Incorrect matrix elements or signs\n"
-        "    - Numerical precision issues (try increasing tolerance)"
-    )
-
-
-class HermiticityError(PhysicsConstraintError):
-    """Raised when a matrix fails the Hermitian constraint H = H†.
-
-    Hermitian (self-adjoint) matrices have real eigenvalues and are
-    required for physical observables in quantum mechanics.
-    """
-
-    REFERENCE = (
-        "Nielsen & Chuang, 'Quantum Computation and Quantum Information', "
-        "Definition 2.5. Sakurai & Napolitano, 'Modern Quantum Mechanics', "
-        "Section 1.3."
-    )
-    GUIDANCE = (
-        "Observables must be self-adjoint (H = H†). Common causes:\n"
-        "    - Off-diagonal elements not complex conjugates\n"
-        "    - Diagonal elements not purely real\n"
-        "    - Transposed matrix instead of conjugate transpose"
-    )
-
-
-class DensityMatrixError(PhysicsConstraintError):
-    """Raised when a matrix fails density matrix constraints.
-
-    A valid density matrix ρ must satisfy:
-    1. Hermitian: ρ = ρ†
-    2. Unit trace: tr(ρ) = 1 (normalization)
-    3. Positive semi-definite: all eigenvalues ≥ 0
-
-    This ensures the matrix represents a valid quantum state.
-    """
-
-    REFERENCE = (
-        "Nielsen & Chuang, 'Quantum Computation and Quantum Information', "
-        "Section 2.4. Preskill, 'Lecture Notes for Physics 229: Quantum "
-        "Information and Computation', Chapter 3."
-    )
-    GUIDANCE = (
-        "Density matrix represents a quantum state. Common causes of failure:\n"
-        "    - Trace ≠ 1: Matrix not properly normalized\n"
-        "    - Negative eigenvalue: State is unphysical (check your operations)\n"
-        "    - Not Hermitian: Check complex conjugation of off-diagonal elements"
-    )
-
-
-class TraceError(PhysicsConstraintError):
-    """Raised when a matrix has incorrect trace.
-
-    The trace of a density matrix must be 1 (normalization).
-    Trace preservation is also required for quantum channels.
-    """
-
-    REFERENCE = (
-        "Nielsen & Chuang, 'Quantum Computation and Quantum Information', "
-        "Section 8.2.4 on trace-preserving operations."
-    )
-    GUIDANCE = (
-        "Trace must equal expected value. Common causes:\n"
-        "    - Missing normalization (divide by trace)\n"
-        "    - Trace-decreasing operation not accounted for\n"
-        "    - Numerical accumulation of errors"
-    )
-
-
-class PositivityError(PhysicsConstraintError):
-    """Raised when a matrix fails positive semi-definiteness.
-
-    Positive semi-definite matrices have all eigenvalues ≥ 0.
-    This is required for density matrices, covariance matrices,
-    and Gram matrices.
-    """
-
-    REFERENCE = (
-        "Horn & Johnson, 'Matrix Analysis', Chapter 7 on positive definite "
-        "matrices. Higham, 'Functions of Matrices: Theory and Computation'."
-    )
-    GUIDANCE = (
-        "All eigenvalues must be ≥ 0. Common causes:\n"
-        "    - Numerical instability in matrix construction\n"
-        "    - Unphysical operation (e.g., measurement back-action)\n"
-        "    - Try eigenvalue regularization: max(λ, 0)"
-    )
-
-
-# =============================================================================
-# Probability Errors
+# Probability Errors (Core)
 # =============================================================================
 
 
@@ -292,7 +185,7 @@ class NormalizationError(PhysicsConstraintError):
 
     REFERENCE = (
         "Kolmogorov, 'Foundations of the Theory of Probability'. "
-        "For quantum states: Born rule requires |ψ|² probabilities sum to 1."
+        "For quantum states: Born rule requires |psi|^2 probabilities sum to 1."
     )
     GUIDANCE = (
         "Distribution must sum to 1. Common causes:\n"
@@ -303,9 +196,9 @@ class NormalizationError(PhysicsConstraintError):
 
 
 class StateVectorNormError(PhysicsConstraintError):
-    """Raised when a quantum state vector is not normalized.
+    """Raised when a state vector is not normalized.
 
-    A quantum state vector |ψ⟩ must satisfy ⟨ψ|ψ⟩ = 1.
+    A state vector |psi> must satisfy <psi|psi> = 1.
     This ensures the total probability of all measurement outcomes is 1.
     """
 
@@ -314,7 +207,7 @@ class StateVectorNormError(PhysicsConstraintError):
         "Postulate 1 (Section 2.2.1). Born rule interpretation."
     )
     GUIDANCE = (
-        "State vector must have unit norm (||ψ|| = 1). Common causes:\n"
+        "State vector must have unit norm (||psi|| = 1). Common causes:\n"
         "    - Forgot to normalize after state preparation\n"
         "    - Non-unitary evolution (decoherence without renormalization)\n"
         "    - Numerical precision loss in long computations"
@@ -322,7 +215,7 @@ class StateVectorNormError(PhysicsConstraintError):
 
 
 # =============================================================================
-# Numerical Errors
+# Numerical Errors (Core)
 # =============================================================================
 
 
@@ -349,7 +242,7 @@ class NonFiniteError(PhysicsConstraintError):
 class BoundsError(PhysicsConstraintError):
     """Raised when a value is outside expected bounds.
 
-    Many physical quantities have natural bounds (e.g., energy ≥ 0,
+    Many physical quantities have natural bounds (e.g., energy >= 0,
     fidelity in [0, 1], correlation in [-1, 1]).
     """
 
@@ -366,16 +259,11 @@ class BoundsError(PhysicsConstraintError):
 
 
 # =============================================================================
-# Convenience mapping for backward compatibility
+# Convenience mapping for core errors
 # =============================================================================
 
-# Map from constraint type to error class
+# Map from constraint type to error class (core only)
 ERROR_CLASSES = {
-    "unitarity": UnitarityError,
-    "hermiticity": HermiticityError,
-    "density_matrix": DensityMatrixError,
-    "trace": TraceError,
-    "positivity": PositivityError,
     "probability": ProbabilityBoundsError,
     "normalization": NormalizationError,
     "state_vector": StateVectorNormError,
@@ -385,17 +273,16 @@ ERROR_CLASSES = {
 
 
 __all__ = [
+    # Base classes
     "ValidationError",
     "PhysicsConstraintError",
-    "UnitarityError",
-    "HermiticityError",
-    "DensityMatrixError",
-    "TraceError",
-    "PositivityError",
+    # Probability errors
     "ProbabilityBoundsError",
     "NormalizationError",
     "StateVectorNormError",
+    # Numerical errors
     "NonFiniteError",
     "BoundsError",
+    # Mapping
     "ERROR_CLASSES",
 ]

@@ -124,36 +124,111 @@ def init(
     is_flag=True,
     help="Output to stdout instead of clipboard.",
 )
+@click.option(
+    "--embed",
+    is_flag=True,
+    help="Embed documents into vector database for semantic search.",
+)
 def context(
     path: str | None,
     load_all: bool,
     query: str | None,
     stdout: bool,
+    embed: bool,
 ) -> None:
     """Generate AI context from documentation.
 
     Retrieves relevant documentation for AI coding sessions.
-    Wraps the opencode-context functionality.
+    Supports both simple directory loading and semantic search.
 
     Examples:
         bible context --all ./agent_docs
         bible context --query "error handling"
-        bible context ./docs/philosophy.md
+        bible context ./agent_docs --embed
     """
-    console.print("[bold blue]Loading context...[/]")
+    from agentbible.context import ContextManager
 
-    if path:
-        console.print(f"  Path: {path}")
-    if load_all:
-        console.print("  Mode: Load all documents")
+    try:
+        ctx = ContextManager()
+    except Exception as e:
+        console.print(f"[red]Error initializing context manager:[/] {e}")
+        return
+
+    # Embed mode: create vector embeddings
+    if embed and path:
+        console.print(f"[bold blue]Embedding documents from {path}...[/]")
+        try:
+            num_chunks = ctx.embed_directory(path)
+            console.print(f"[green]Created {num_chunks} chunks in vector database[/]")
+        except ImportError as e:
+            console.print(f"[red]Missing dependencies:[/] {e}")
+            console.print("Install with: pip install agentbible[context]")
+        except Exception as e:
+            console.print(f"[red]Error embedding documents:[/] {e}")
+        return
+
+    # Load all mode: simple directory loading
+    if load_all and path:
+        console.print(f"[bold blue]Loading all documents from {path}...[/]")
+        try:
+            result = ctx.load_directory(path)
+            if stdout:
+                console.print(result)
+            else:
+                # Try to copy to clipboard
+                try:
+                    import subprocess
+                    subprocess.run(
+                        ["xclip", "-selection", "clipboard"],
+                        input=result.encode(),
+                        check=True,
+                    )
+                    console.print("[green]Context copied to clipboard![/]")
+                except Exception:
+                    # Fallback to stdout
+                    console.print(result)
+        except FileNotFoundError as e:
+            console.print(f"[red]Error:[/] {e}")
+        return
+
+    # Query mode: semantic search
     if query:
-        console.print(f"  Query: {query}")
+        console.print(f"[bold blue]Searching for:[/] {query}")
+        try:
+            result = ctx.build_context(query=query)
+            if stdout:
+                console.print(result)
+            else:
+                console.print(result)
+        except ImportError as e:
+            console.print(f"[red]Missing dependencies for semantic search:[/] {e}")
+            console.print("Install with: pip install agentbible[context]")
+        except FileNotFoundError as e:
+            console.print(f"[yellow]No embeddings found.[/] Run 'bible context --embed <path>' first.")
+        except Exception as e:
+            console.print(f"[red]Error:[/] {e}")
+        return
 
-    console.print("[yellow]Note: Full implementation wraps opencode-context[/]")
-    # TODO: Implementation wraps opencode-context
-    # - Call oc-context with appropriate flags
-    # - Format output for AI consumption
-    # - Copy to clipboard or stdout
+    # Single file mode
+    if path:
+        from pathlib import Path as P
+        p = P(path)
+        if p.is_file():
+            content = p.read_text()
+            console.print(f"[bold blue]Loaded {p.name}[/]")
+            if stdout:
+                console.print(content)
+            else:
+                console.print(content)
+        else:
+            console.print(f"[yellow]Hint: Use --all to load all docs from a directory[/]")
+        return
+
+    # No arguments: show help
+    console.print("[yellow]Usage examples:[/]")
+    console.print("  bible context --all ./agent_docs    # Load all docs from directory")
+    console.print("  bible context --query 'error'       # Semantic search (requires --embed first)")
+    console.print("  bible context ./docs/README.md      # Load single file")
 
 
 @cli.command()

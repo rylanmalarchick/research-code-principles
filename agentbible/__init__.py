@@ -1,52 +1,53 @@
 """AgentBible: Production-grade infrastructure for AI-assisted research software.
 
 This package provides:
-- Validators: Physics validation decorators (@validate_unitary, @validate_hermitian, etc.)
-- CLI: Project scaffolding and context management (bible init, bible context)
+- Validators: Physics validation decorators (bounds, probability, normalization)
+- Provenance: HDF5-based reproducibility tracking
 - Testing: Physics-aware pytest fixtures and decorators
+- CLI: Project scaffolding and context management (bible init, bible context)
+
+For domain-specific validators (e.g., quantum), import from the domain:
+    from agentbible.domains.quantum import validate_unitary, validate_hermitian
 
 Example:
-    >>> from agentbible.validators import validate_unitary
+    >>> from agentbible import validate_finite, validate_normalized
     >>> import numpy as np
     >>>
-    >>> @validate_unitary
-    ... def create_hadamard():
-    ...     return np.array([[1, 1], [1, -1]]) / np.sqrt(2)
+    >>> @validate_finite
+    ... def compute_result():
+    ...     return np.array([1.0, 2.0, 3.0])
     >>>
-    >>> H = create_hadamard()  # Validates automatically
+    >>> @validate_normalized
+    ... def get_distribution():
+    ...     return np.array([0.25, 0.25, 0.25, 0.25])
 """
 
 from __future__ import annotations
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 __author__ = "Rylan Malarchick"
 __email__ = "rylan1012@gmail.com"
 
-# Public API - errors
+# Public API - core errors
 from agentbible.errors import (
-    DensityMatrixError,
-    HermiticityError,
+    BoundsError,
     NonFiniteError,
+    NormalizationError,
     PhysicsConstraintError,
-    PositivityError,
     ProbabilityBoundsError,
-    TraceError,
-    UnitarityError,
+    StateVectorNormError,
     ValidationError,
 )
 
-# Public API - validators
+# Public API - core validators
 from agentbible.validators import (
-    validate_density_matrix,
     validate_finite,
-    validate_hermitian,
     validate_non_negative,
     validate_normalized,
     validate_positive,
     validate_probabilities,
     validate_probability,
     validate_range,
-    validate_unitary,
 )
 
 __all__ = [
@@ -57,18 +58,12 @@ __all__ = [
     # Base exceptions
     "ValidationError",
     "PhysicsConstraintError",
-    # Physics-specific exceptions (with references)
-    "UnitarityError",
-    "HermiticityError",
-    "DensityMatrixError",
-    "TraceError",
-    "PositivityError",
+    # Core exceptions
     "ProbabilityBoundsError",
+    "NormalizationError",
+    "StateVectorNormError",
     "NonFiniteError",
-    # Quantum validators
-    "validate_unitary",
-    "validate_hermitian",
-    "validate_density_matrix",
+    "BoundsError",
     # Probability validators
     "validate_probability",
     "validate_probabilities",

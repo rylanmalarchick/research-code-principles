@@ -22,14 +22,14 @@ from __future__ import annotations
 import functools
 from typing import Any, Callable, TypeVar, overload
 
-from agentbible.errors import (
+from agentbible.domains.quantum.errors import (
     DensityMatrixError,
     HermiticityError,
-    NonFiniteError,
     PositivityError,
     TraceError,
     UnitarityError,
 )
+from agentbible.errors import NonFiniteError
 from agentbible.validators.base import (
     ValidationLevel,
     get_numpy,
@@ -325,10 +325,10 @@ def validate_density_matrix(
 ) -> F | Callable[[F], F]:
     """Validate that a function returns a valid density matrix.
 
-    A density matrix ρ must satisfy:
-    1. Hermitian: ρ = ρ†
-    2. Unit trace: tr(ρ) = 1
-    3. Positive semi-definite: all eigenvalues ≥ 0
+    A density matrix rho must satisfy:
+    1. Hermitian: rho = rho†
+    2. Unit trace: tr(rho) = 1
+    3. Positive semi-definite: all eigenvalues >= 0
 
     Can be used with or without arguments:
         @validate_density_matrix
@@ -402,14 +402,14 @@ def validate_density_matrix(
                     shape=arr.shape,
                 )
 
-            # Check Hermiticity: ρ = ρ†
+            # Check Hermiticity: rho = rho†
             conjugate_transpose = arr.conj().T
             if not np.allclose(arr, conjugate_transpose, rtol=rtol, atol=atol):
                 max_deviation = float(np.max(np.abs(arr - conjugate_transpose)))
                 raise DensityMatrixError(
                     "Density matrix is not Hermitian",
-                    expected="ρ = ρ† (matrix equals its conjugate transpose)",
-                    got=f"max|ρ - ρ†| = {max_deviation:.2e}",
+                    expected="rho = rho† (matrix equals its conjugate transpose)",
+                    got=f"max|rho - rho†| = {max_deviation:.2e}",
                     function_name=fn.__name__,
                     tolerance={"rtol": rtol, "atol": atol},
                     shape=arr.shape,
@@ -420,26 +420,26 @@ def validate_density_matrix(
                     ),
                 )
 
-            # Check trace: tr(ρ) = 1
+            # Check trace: tr(rho) = 1
             trace = complex(np.trace(arr))
             if not np.isclose(trace, 1.0, rtol=rtol, atol=atol):
                 raise TraceError(
                     "Density matrix does not have unit trace",
-                    expected="tr(ρ) = 1 (probabilities must sum to 1)",
-                    got=f"tr(ρ) = {trace.real:.6f}",
+                    expected="tr(rho) = 1 (probabilities must sum to 1)",
+                    got=f"tr(rho) = {trace.real:.6f}",
                     function_name=fn.__name__,
                     tolerance={"rtol": rtol, "atol": atol},
                     shape=arr.shape,
                 )
 
-            # Check positive semi-definite: all eigenvalues ≥ 0
+            # Check positive semi-definite: all eigenvalues >= 0
             eigenvalues = np.linalg.eigvalsh(arr)
             min_eigenvalue = float(np.min(eigenvalues))
             # Allow small negative eigenvalues within tolerance
             if min_eigenvalue < -atol:
                 raise PositivityError(
                     "Density matrix is not positive semi-definite",
-                    expected="All eigenvalues ≥ 0 (physical states have non-negative probabilities)",
+                    expected="All eigenvalues >= 0 (physical states have non-negative probabilities)",
                     got=f"min(eigenvalue) = {min_eigenvalue:.2e}",
                     function_name=fn.__name__,
                     tolerance={"rtol": rtol, "atol": atol},
@@ -454,3 +454,10 @@ def validate_density_matrix(
     if func is not None:
         return decorator(func)
     return decorator
+
+
+__all__ = [
+    "validate_unitary",
+    "validate_hermitian",
+    "validate_density_matrix",
+]

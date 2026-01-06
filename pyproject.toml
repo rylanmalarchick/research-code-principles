@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentbible"
-version = "0.2.1"
-description = "Production-grade infrastructure for AI-assisted research software"
+version = "0.3.0"
+description = "One-shot correct infrastructure for AI agents working on scientific code"
 readme = "README.md"
 license = "MIT"
 authors = [
@@ -50,6 +50,29 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Domain plugins (no extra deps required, establishes the pattern)
+quantum = []  # Quantum computing validators (unitarity, hermiticity, density matrices)
+# Future domains:
+# chemistry = ["ase", "rdkit"]
+# fluids = ["scipy"]
+
+# Feature extras
+hdf5 = [
+    "h5py>=3.0",
+]
+context = [
+    "chromadb>=0.4",
+    "openai>=1.0",
+    "tiktoken>=0.5",
+]
+# Legacy alias for context
+vector = [
+    "chromadb>=0.4",
+    "openai>=1.0",
+    "tiktoken>=0.5",
+]
+
+# Development
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
@@ -59,16 +82,10 @@ dev = [
     "mypy>=1.0",
     "pre-commit>=3.0",
 ]
-hdf5 = [
-    "h5py>=3.0",
-]
-vector = [
-    "chromadb>=0.4",
-    "openai>=1.0",
-    "tiktoken>=0.5",
-]
+
+# All extras
 all = [
-    "agentbible[dev,hdf5,vector]",
+    "agentbible[quantum,hdf5,vector,dev]",
 ]
 
 [project.scripts]

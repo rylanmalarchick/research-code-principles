@@ -9,21 +9,24 @@ from typing import Any
 import numpy as np
 import pytest
 
-from agentbible.errors import NonFiniteError, UnitarityError
+from agentbible.domains.quantum import (
+    UnitarityError,
+    validate_density_matrix,
+    validate_hermitian,
+    validate_unitary,
+)
+from agentbible.errors import NonFiniteError
 from agentbible.validators import (
     ENV_VALIDATION_LEVEL,
     ValidationLevel,
     get_validation_level,
-    validate_density_matrix,
     validate_finite,
-    validate_hermitian,
     validate_non_negative,
     validate_normalized,
     validate_positive,
     validate_probabilities,
     validate_probability,
     validate_range,
-    validate_unitary,
 )
 
 

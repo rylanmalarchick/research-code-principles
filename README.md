@@ -7,14 +7,17 @@
 [![codecov](https://codecov.io/gh/rylanmalarchick/research-code-principles/branch/main/graph/badge.svg)](https://codecov.io/gh/rylanmalarchick/research-code-principles)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+> **One-shot correct infrastructure for AI agents working on scientific code.**
+
 ## Why AgentBible Exists
 
-When Copilot or Claude generates quantum computing code, how do you know it's physically correct?
+When AI generates scientific code, how do you know it's numerically correct?
 When you run an experiment, how do you reproduce it 6 months later?
 
 **AgentBible solves both problems:**
 
-- **Physics validators** catch invalid code at runtime (`@validate_unitary`, `@validate_density_matrix`, etc.)
+- **Core validators** catch numerical bugs at runtime (`@validate_finite`, `@validate_probability`, etc.)
+- **Domain plugins** add field-specific validation (quantum: `@validate_unitary`, `@validate_density_matrix`)
 - **Automatic provenance** captures everything needed for reproducibility (git SHA, random seeds, package versions, hardware info)
 
 **Result:** Research code you can trust and reproduce.
@@ -29,6 +32,9 @@ pip install agentbible
 # With HDF5 provenance support
 pip install agentbible[hdf5]
 
+# With semantic context retrieval
+pip install agentbible[context]
+
 # Full development install
 pip install agentbible[all]
 ```
@@ -37,32 +43,33 @@ pip install agentbible[all]
 
 ```python
 # WITHOUT AgentBible - silent bug, hours of debugging
-def create_hadamard():
-    return np.array([[1, 1], [1, 0]]) / np.sqrt(2)  # Bug: should be [1, -1]
-    # This is NOT unitary. You won't catch it until your quantum simulation
-    # produces nonsense results and you spend hours debugging.
+def calculate_probability(logits):
+    return np.exp(logits)  # Bug: forgot normalization
+    # This returns values > 1. You won't catch it until your
+    # model produces nonsense results and you spend hours debugging.
 
-H = create_hadamard()  # No error - bug silently propagates
+probs = calculate_probability(np.array([2.0, 1.0]))  # No error - bug silently propagates
 ```
 
 ```python
 # WITH AgentBible - catches it immediately
-from agentbible import validate_unitary
+from agentbible import validate_finite, validate_probabilities
 
-@validate_unitary
-def create_hadamard():
-    return np.array([[1, 1], [1, 0]]) / np.sqrt(2)  # Same bug
+@validate_finite
+@validate_probabilities
+def calculate_probability(logits):
+    return np.exp(logits)  # Same bug
 
-H = create_hadamard()
-# UnitarityError: Matrix is not unitary
-#   Expected: U@U.H = I (conjugate transpose times matrix equals identity)
-#   Got: max|U@U - I| = 5.00e-01
-#   Function: create_hadamard
+probs = calculate_probability(np.array([2.0, 1.0]))
+# ProbabilityBoundsError: Value not in [0, 1]
+#   Expected: 0 <= p <= 1 (probability must be in unit interval)
+#   Got: max = 7.389...
+#   Function: calculate_probability
 #
-#   Reference: Nielsen & Chuang, 'Quantum Computation and Quantum Information'
-#   Guidance: Your quantum gate is not reversible. Common causes:
-#       - Missing normalization factor (e.g., 1/sqrt(2) for Hadamard)
-#       - Incorrect matrix elements or signs
+#   Reference: Kolmogorov, 'Foundations of Probability Theory'
+#   Guidance: Probability must be in [0, 1]. Common causes:
+#       - Forgot normalization (softmax)
+#       - Numerical overflow
 ```
 
 **The bug is caught immediately, with an educational error message.**
@@ -72,17 +79,51 @@ H = create_hadamard()
 ### Create a New Project
 
 ```bash
-bible init my-quantum-sim --template python-scientific
-cd my-quantum-sim
+bible init my-simulation --template python-scientific
+cd my-simulation
 source .venv/bin/activate
 pip install -e ".[dev]"
-pytest  # 28 tests pass immediately
+pytest  # Tests pass immediately
 ```
 
-### Use Physics Validators
+### Use Core Validators (Any Scientific Code)
 
 ```python
-from agentbible import validate_unitary, validate_density_matrix
+from agentbible import (
+    validate_finite,
+    validate_positive,
+    validate_probability,
+    validate_normalized,
+)
+import numpy as np
+
+@validate_finite
+@validate_positive
+def calculate_energy(mass: float, velocity: np.ndarray) -> float:
+    """Kinetic energy must be finite and positive."""
+    return 0.5 * mass * np.dot(velocity, velocity)
+
+@validate_finite
+@validate_normalized()
+def softmax(logits: np.ndarray) -> np.ndarray:
+    """Softmax must be finite and sum to 1."""
+    exp_logits = np.exp(logits - np.max(logits))
+    return exp_logits / exp_logits.sum()
+
+# Validation happens automatically on return
+energy = calculate_energy(2.0, np.array([1, 2, 3]))  # OK
+probs = softmax(np.array([2.0, 1.0, 0.1]))           # OK - sums to 1
+```
+
+### Use Domain Validators (Quantum Computing)
+
+```python
+# Quantum validators are in the domains subpackage
+from agentbible.domains.quantum import (
+    validate_unitary,
+    validate_hermitian,
+    validate_density_matrix,
+)
 import numpy as np
 
 @validate_unitary
@@ -157,8 +198,8 @@ def test_reproducible(deterministic_seed):
 **AgentBible is for:**
 
 - Researchers using AI agents (Claude, Copilot, Cursor) to write scientific code
-- Quantum computing developers who need correctness guarantees
-- ML/Physics/HPC developers who care about reproducibility
+- ML/Physics/HPC developers who care about correctness and reproducibility
+- Quantum computing developers who need physics validation
 - PhD students who want rigorous software from day one
 - Anyone who has lost hours debugging a subtle numerical bug
 
@@ -170,23 +211,28 @@ def test_reproducible(deterministic_seed):
 
 ## Features
 
-### Validators
+### Core Validators (Always Available)
+
+| Decorator | Validates |
+|-----------|-----------|
+| `@validate_finite` | No NaN or Inf |
+| `@validate_positive` | Value > 0 |
+| `@validate_non_negative` | Value >= 0 |
+| `@validate_range(min, max)` | Value in [min, max] |
+| `@validate_probability` | Value in [0, 1] |
+| `@validate_probabilities` | Array of probabilities |
+| `@validate_normalized` | Sum or norm = 1 |
+
+### Quantum Domain (`agentbible.domains.quantum`)
 
 | Decorator | Validates |
 |-----------|-----------|
 | `@validate_unitary` | U @ U.H = I |
 | `@validate_hermitian` | A = A.H |
 | `@validate_density_matrix` | Hermitian, trace=1, positive semi-definite |
-| `@validate_probability` | Value in [0, 1] |
-| `@validate_probabilities` | Array of probabilities |
-| `@validate_normalized` | Sum or norm = 1 |
-| `@validate_positive` | Value > 0 |
-| `@validate_non_negative` | Value >= 0 |
-| `@validate_range(min, max)` | Value in [min, max] |
-| `@validate_finite` | No NaN or Inf |
 
 All validators:
-- Check for NaN/Inf **before** physics checks (catches numerical instability first)
+- Check for NaN/Inf **before** domain-specific checks
 - Support both `rtol` and `atol` tolerances
 - Provide educational error messages with academic references
 
@@ -256,7 +302,12 @@ bible init my-project --template cpp-hpc-cuda
 
 ## Status
 
-**v0.1.1** (Alpha) - Core validators working, API stable, ready for real use.
+**v0.3.0** (Alpha) - Modular architecture with core/domain separation. API stable, ready for real use.
+
+- Core validators work for any scientific code
+- Quantum domain validators available via `agentbible.domains.quantum`
+- Context module for AI-assisted development
+- Philosophy module with importable principles
 
 See the full [ROADMAP.md](ROADMAP.md) for what's coming next.
 
@@ -311,4 +362,4 @@ Rylan Malarchick - [rylan1012@gmail.com](mailto:rylan1012@gmail.com)
 
 ---
 
-**v0.1.1** - Documentation site, Dependabot, C++ template (January 2026)
+**v0.3.0** - Modular architecture, context module, philosophy module (January 2026)
