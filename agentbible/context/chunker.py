@@ -69,7 +69,7 @@ class DocumentChunker:
         """Lazy-load tiktoken encoder."""
         if self._encoder is None:
             try:
-                import tiktoken
+                import tiktoken  # type: ignore[import-not-found]
 
                 self._encoder = tiktoken.get_encoding("cl100k_base")
             except ImportError:
@@ -94,7 +94,7 @@ class DocumentChunker:
     ) -> list[Chunk]:
         """Split document into chunks, preserving markdown structure."""
         lines = content.split("\n")
-        chunks = []
+        chunks: list[Chunk] = []
 
         current_section = "Introduction"
         current_chunk_lines: list[tuple[int, str]] = []

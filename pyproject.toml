@@ -80,6 +80,7 @@ dev = [
     "hypothesis>=6.0",
     "ruff>=0.1",
     "mypy>=1.0",
+    "types-PyYAML>=6.0",
     "pre-commit>=3.0",
 ]
 
