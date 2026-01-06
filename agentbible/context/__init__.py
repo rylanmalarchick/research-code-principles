@@ -24,9 +24,9 @@ Install with: pip install agentbible[context]
 
 from __future__ import annotations
 
+from .chunker import Chunk, DocumentChunker
+from .config import ContextConfig, DocConfig, ProjectConfig
 from .manager import ContextManager
-from .config import ContextConfig, ProjectConfig, DocConfig
-from .chunker import DocumentChunker, Chunk
 
 __all__ = [
     "ContextManager",

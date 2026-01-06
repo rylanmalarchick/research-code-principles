@@ -203,16 +203,16 @@ def context(
         except ImportError as e:
             console.print(f"[red]Missing dependencies for semantic search:[/] {e}")
             console.print("Install with: pip install agentbible[context]")
-        except FileNotFoundError as e:
-            console.print(f"[yellow]No embeddings found.[/] Run 'bible context --embed <path>' first.")
+        except FileNotFoundError:
+            console.print("[yellow]No embeddings found.[/] Run 'bible context --embed <path>' first.")
         except Exception as e:
             console.print(f"[red]Error:[/] {e}")
         return
 
     # Single file mode
     if path:
-        from pathlib import Path as P
-        p = P(path)
+        from pathlib import Path
+        p = Path(path)
         if p.is_file():
             content = p.read_text()
             console.print(f"[bold blue]Loaded {p.name}[/]")
@@ -221,7 +221,7 @@ def context(
             else:
                 console.print(content)
         else:
-            console.print(f"[yellow]Hint: Use --all to load all docs from a directory[/]")
+            console.print("[yellow]Hint: Use --all to load all docs from a directory[/]")
         return
 
     # No arguments: show help
