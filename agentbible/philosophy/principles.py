@@ -11,13 +11,12 @@ These principles guide how AI agents should write scientific code:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional
 
 
 @dataclass(frozen=True)
 class Principle:
     """A core principle for research software development.
-    
+
     Attributes:
         name: Short name for the principle
         summary: One-line summary
@@ -25,6 +24,7 @@ class Principle:
         why_agents_fail: Common ways AI agents violate this principle
         how_to_recognize: Signs you're following this principle
     """
+
     name: str
     summary: str
     description: str
@@ -141,6 +141,7 @@ INFRASTRUCTURE_ENABLES_SPEED = Principle(
 @dataclass(frozen=True)
 class PrinciplesNamespace:
     """Namespace containing all 5 core principles."""
+
     CORRECTNESS_FIRST: Principle = CORRECTNESS_FIRST
     SPECIFICATION_BEFORE_CODE: Principle = SPECIFICATION_BEFORE_CODE
     FAIL_FAST_WITH_CLARITY: Principle = FAIL_FAST_WITH_CLARITY
@@ -152,7 +153,7 @@ class PrinciplesNamespace:
 PRINCIPLES = PrinciplesNamespace()
 
 
-def get_all_principles() -> List[Principle]:
+def get_all_principles() -> list[Principle]:
     """Return all 5 principles as a list."""
     return [
         CORRECTNESS_FIRST,
@@ -164,26 +165,26 @@ def get_all_principles() -> List[Principle]:
 
 
 def get_agent_context(
-    topics: Optional[List[str]] = None,
+    topics: list[str] | None = None,
     include_all: bool = False,
 ) -> str:
     """Generate context text for AI agent sessions.
-    
+
     Args:
         topics: List of topics to include. Options:
             - "correctness", "test-first", "validation", "simplicity", "infrastructure"
             - If None and include_all is False, returns core summary
         include_all: If True, include all principles in full detail
-    
+
     Returns:
         Formatted markdown text suitable for AI agent context window.
-    
+
     Example:
         >>> context = get_agent_context(topics=["test-first", "validation"])
         >>> # Use this in your AI session context
     """
     lines = ["# AgentBible Core Principles\n"]
-    
+
     if include_all:
         principles = get_all_principles()
     elif topics:
@@ -211,7 +212,7 @@ def get_agent_context(
         for i, p in enumerate(get_all_principles(), 1):
             lines.append(f"{i}. **{p.name}**: {p.summary}")
         return "\n".join(lines)
-    
+
     # Full format for selected principles
     for p in principles:
         lines.append(f"## {p.name}\n")
@@ -220,7 +221,7 @@ def get_agent_context(
         lines.append(f"**Why agents fail:** {p.why_agents_fail}\n")
         lines.append(f"**How to recognize success:** {p.how_to_recognize}\n")
         lines.append("")
-    
+
     return "\n".join(lines)
 
 

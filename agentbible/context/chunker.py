@@ -181,9 +181,7 @@ class DocumentChunker:
             total_chunks=0,  # Will be updated later
         )
 
-    def _get_overlap_lines(
-        self, lines: list[tuple[int, str]]
-    ) -> list[tuple[int, str]]:
+    def _get_overlap_lines(self, lines: list[tuple[int, str]]) -> list[tuple[int, str]]:
         """Get lines for overlap from the end of current chunk."""
         overlap_tokens = 0
         overlap_lines: list[tuple[int, str]] = []

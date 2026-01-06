@@ -178,6 +178,7 @@ def context(
                 # Try to copy to clipboard
                 try:
                     import subprocess
+
                     subprocess.run(
                         ["xclip", "-selection", "clipboard"],
                         input=result.encode(),
@@ -204,7 +205,9 @@ def context(
             console.print(f"[red]Missing dependencies for semantic search:[/] {e}")
             console.print("Install with: pip install agentbible[context]")
         except FileNotFoundError:
-            console.print("[yellow]No embeddings found.[/] Run 'bible context --embed <path>' first.")
+            console.print(
+                "[yellow]No embeddings found.[/] Run 'bible context --embed <path>' first."
+            )
         except Exception as e:
             console.print(f"[red]Error:[/] {e}")
         return
@@ -212,6 +215,7 @@ def context(
     # Single file mode
     if path:
         from pathlib import Path
+
         p = Path(path)
         if p.is_file():
             content = p.read_text()
@@ -221,13 +225,19 @@ def context(
             else:
                 console.print(content)
         else:
-            console.print("[yellow]Hint: Use --all to load all docs from a directory[/]")
+            console.print(
+                "[yellow]Hint: Use --all to load all docs from a directory[/]"
+            )
         return
 
     # No arguments: show help
     console.print("[yellow]Usage examples:[/]")
-    console.print("  bible context --all ./agent_docs    # Load all docs from directory")
-    console.print("  bible context --query 'error'       # Semantic search (requires --embed first)")
+    console.print(
+        "  bible context --all ./agent_docs    # Load all docs from directory"
+    )
+    console.print(
+        "  bible context --query 'error'       # Semantic search (requires --embed first)"
+    )
     console.print("  bible context ./docs/README.md      # Load single file")
 
 

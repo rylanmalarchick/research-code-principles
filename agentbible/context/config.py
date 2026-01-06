@@ -11,7 +11,6 @@ from typing import Any
 
 import yaml
 
-
 # Default paths
 AGENTBIBLE_DIR = Path.home() / ".local" / "share" / "agentbible"
 CONFIG_PATH = AGENTBIBLE_DIR / "config.yaml"

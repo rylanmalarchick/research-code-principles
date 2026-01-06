@@ -359,9 +359,7 @@ class ContextManager:
             settings=Settings(anonymized_telemetry=False),
         )
 
-        collection_name = (
-            f"project_{project_name}" if project_name else "global_docs"
-        )
+        collection_name = f"project_{project_name}" if project_name else "global_docs"
 
         return client.get_collection(
             name=collection_name,
