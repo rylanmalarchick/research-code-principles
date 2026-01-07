@@ -71,11 +71,6 @@ from agentbible.validators.bounds import (
     validate_positive,
     validate_range,
 )
-from agentbible.validators.probability import (
-    validate_normalized,
-    validate_probabilities,
-    validate_probability,
-)
 from agentbible.validators.pipeline import (
     ValidationPipeline,
     ValidationResult,
@@ -83,6 +78,11 @@ from agentbible.validators.pipeline import (
     create_numeric_pipeline,
     create_positive_pipeline,
     create_probability_pipeline,
+)
+from agentbible.validators.probability import (
+    validate_normalized,
+    validate_probabilities,
+    validate_probability,
 )
 
 __all__ = [

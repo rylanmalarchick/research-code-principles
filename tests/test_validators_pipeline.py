@@ -11,10 +11,7 @@ from agentbible.errors import BoundsError, NonFiniteError, ProbabilityBoundsErro
 from agentbible.validators.arrays import (
     check_finite,
     check_non_negative,
-    check_normalized,
     check_positive,
-    check_probabilities,
-    check_range,
 )
 from agentbible.validators.pipeline import (
     ValidationPipeline,
@@ -203,7 +200,7 @@ class TestValidateAll:
         # The validate_all runs with strict=False, so errors are warnings
         # Let's test with a pipeline that will collect errors differently
         if result.errors:
-            with pytest.raises(Exception):
+            with pytest.raises(NonFiniteError):
                 result.raise_if_failed()
 
 
@@ -215,20 +212,18 @@ class TestStrictModeContext:
         pipeline = ValidationPipeline([check_finite], strict=True)
         arr = np.array([np.nan])
 
-        with ValidationPipeline.strict_mode(False):
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always")
-                pipeline(arr)  # Should warn, not raise
-                assert len(w) >= 1
+        with ValidationPipeline.strict_mode(False), warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            pipeline(arr)  # Should warn, not raise
+            assert len(w) >= 1
 
     def test_context_manager_strict(self) -> None:
         """Context manager can set strict mode."""
         pipeline = ValidationPipeline([check_finite], strict=False)
         arr = np.array([np.nan])
 
-        with ValidationPipeline.strict_mode(True):
-            with pytest.raises(NonFiniteError):
-                pipeline(arr)
+        with ValidationPipeline.strict_mode(True), pytest.raises(NonFiniteError):
+            pipeline(arr)
 
     def test_context_manager_restores(self) -> None:
         """Context manager restores previous state."""

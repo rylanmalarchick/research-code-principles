@@ -62,7 +62,6 @@ def _compute_lag1_autocorrelation(arr: NDArray[np.floating]) -> float:
 
     arr = arr.astype(np.float64)
     mean = np.mean(arr)
-    n = len(arr)
 
     # Deviations from mean
     deviations = arr - mean
@@ -111,7 +110,9 @@ def check_no_leakage(
         >>> check_no_leakage(["blh", "t2m", "rh"], forbidden=FORBIDDEN)  # Passes
         >>> check_no_leakage(["blh", "inversion_height"], forbidden=FORBIDDEN)  # Raises
     """
-    features_set = set(feature_names) if not isinstance(feature_names, set) else feature_names
+    features_set = (
+        set(feature_names) if not isinstance(feature_names, set) else feature_names
+    )
     found = features_set & forbidden
 
     if found:

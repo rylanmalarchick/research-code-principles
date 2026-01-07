@@ -97,7 +97,9 @@ class TestCheckTemporalAutocorrelation:
             warnings.simplefilter("always")
             result = check_temporal_autocorrelation(arr, name="residuals")
             # Filter for our specific warning
-            autocorr_warnings = [x for x in w if issubclass(x.category, AutocorrelationWarning)]
+            autocorr_warnings = [
+                x for x in w if issubclass(x.category, AutocorrelationWarning)
+            ]
             assert len(autocorr_warnings) == 0
         assert np.array_equal(result, arr)
 
@@ -114,7 +116,9 @@ class TestCheckTemporalAutocorrelation:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             check_temporal_autocorrelation(arr, name="correlated", max_autocorr=0.5)
-            autocorr_warnings = [x for x in w if issubclass(x.category, AutocorrelationWarning)]
+            autocorr_warnings = [
+                x for x in w if issubclass(x.category, AutocorrelationWarning)
+            ]
             assert len(autocorr_warnings) == 1
             assert "autocorrelation" in str(autocorr_warnings[0].message).lower()
 
@@ -144,14 +148,18 @@ class TestCheckTemporalAutocorrelation:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             check_temporal_autocorrelation(arr, max_autocorr=0.5)
-            autocorr_warnings = [x for x in w if issubclass(x.category, AutocorrelationWarning)]
+            autocorr_warnings = [
+                x for x in w if issubclass(x.category, AutocorrelationWarning)
+            ]
             assert len(autocorr_warnings) == 0
 
         # With threshold 0.2, should warn
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             check_temporal_autocorrelation(arr, max_autocorr=0.2)
-            autocorr_warnings = [x for x in w if issubclass(x.category, AutocorrelationWarning)]
+            autocorr_warnings = [
+                x for x in w if issubclass(x.category, AutocorrelationWarning)
+            ]
             assert len(autocorr_warnings) == 1
 
 
@@ -240,8 +248,12 @@ class TestCheckExchangeability:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             # Use relaxed thresholds that IID data should easily pass
-            result = check_exchangeability(residuals, name="conformal", max_autocorr=0.3, max_drift=0.3)
-            exch_warnings = [x for x in w if issubclass(x.category, ExchangeabilityWarning)]
+            result = check_exchangeability(
+                residuals, name="conformal", max_autocorr=0.3, max_drift=0.3
+            )
+            exch_warnings = [
+                x for x in w if issubclass(x.category, ExchangeabilityWarning)
+            ]
             assert len(exch_warnings) == 0
         assert np.array_equal(result, residuals)
 
@@ -257,22 +269,23 @@ class TestCheckExchangeability:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             check_exchangeability(residuals, name="correlated", max_autocorr=0.3)
-            exch_warnings = [x for x in w if issubclass(x.category, ExchangeabilityWarning)]
+            exch_warnings = [
+                x for x in w if issubclass(x.category, ExchangeabilityWarning)
+            ]
             assert len(exch_warnings) == 1
             assert "exchangeability" in str(exch_warnings[0].message).lower()
 
     def test_mean_drift_warns(self) -> None:
         """Mean drift triggers exchangeability warning."""
         # First half centered at 0, second half centered at 2
-        residuals = np.concatenate([
-            np.random.randn(50),
-            np.random.randn(50) + 2.0
-        ])
+        residuals = np.concatenate([np.random.randn(50), np.random.randn(50) + 2.0])
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             check_exchangeability(residuals, name="drifted", max_drift=0.1)
-            exch_warnings = [x for x in w if issubclass(x.category, ExchangeabilityWarning)]
+            exch_warnings = [
+                x for x in w if issubclass(x.category, ExchangeabilityWarning)
+            ]
             assert len(exch_warnings) == 1
             assert "drift" in str(exch_warnings[0].message).lower()
 
@@ -295,9 +308,9 @@ class TestValidateNoLeakageDecorator:
 
     def test_valid_features_pass(self) -> None:
         """Decorated function runs with valid features."""
-        FORBIDDEN = {"target_lagged", "inversion_height"}
+        forbidden = {"target_lagged", "inversion_height"}
 
-        @validate_no_leakage(forbidden=FORBIDDEN)
+        @validate_no_leakage(forbidden=forbidden)
         def load_data(feature_names: list[str]) -> dict:
             return {"features": feature_names}
 
@@ -306,9 +319,9 @@ class TestValidateNoLeakageDecorator:
 
     def test_forbidden_features_raise(self) -> None:
         """Decorated function raises on forbidden features."""
-        FORBIDDEN = {"target_lagged", "inversion_height"}
+        forbidden = {"target_lagged", "inversion_height"}
 
-        @validate_no_leakage(forbidden=FORBIDDEN)
+        @validate_no_leakage(forbidden=forbidden)
         def load_data(feature_names: list[str]) -> dict:
             return {"features": feature_names}
 
@@ -317,9 +330,9 @@ class TestValidateNoLeakageDecorator:
 
     def test_positional_arg(self) -> None:
         """Can specify positional argument index."""
-        FORBIDDEN = {"bad_feature"}
+        forbidden = {"bad_feature"}
 
-        @validate_no_leakage(forbidden=FORBIDDEN, feature_names_arg=0)
+        @validate_no_leakage(forbidden=forbidden, feature_names_arg=0)
         def process(features: list[str], other: int) -> str:
             return f"processed {len(features)} features"
 
@@ -331,9 +344,9 @@ class TestValidateNoLeakageDecorator:
 
     def test_preserves_function_metadata(self) -> None:
         """Decorator preserves function name and docstring."""
-        FORBIDDEN = {"bad"}
+        forbidden = {"bad"}
 
-        @validate_no_leakage(forbidden=FORBIDDEN)
+        @validate_no_leakage(forbidden=forbidden)
         def my_function(feature_names: list[str]) -> None:
             """My docstring."""
             pass
@@ -347,29 +360,31 @@ class TestValidateCvStrategyDecorator:
 
     def test_iid_target_no_warning(self) -> None:
         """IID target doesn't trigger warning."""
+
         @validate_cv_strategy
-        def train_model(X, y):
+        def train_model(x_data, y):
             return "model"
 
         np.random.seed(42)
-        X = np.random.randn(100, 5)
+        x_data = np.random.randn(100, 5)
         y = np.random.randn(100)
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            result = train_model(X, y)
+            result = train_model(x_data, y)
             cv_warnings = [x for x in w if issubclass(x.category, CVStrategyWarning)]
             assert len(cv_warnings) == 0
         assert result == "model"
 
     def test_autocorrelated_target_warns(self) -> None:
         """Highly autocorrelated target triggers warning."""
+
         @validate_cv_strategy(max_autocorr=0.3)
-        def train_model(X, y):
+        def train_model(x_data, y):
             return "model"
 
         np.random.seed(42)
-        X = np.random.randn(100, 5)
+        x_data = np.random.randn(100, 5)
         # Create autocorrelated target
         y = np.zeros(100)
         y[0] = np.random.randn()
@@ -378,43 +393,46 @@ class TestValidateCvStrategyDecorator:
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            train_model(X, y)
+            train_model(x_data, y)
             cv_warnings = [x for x in w if issubclass(x.category, CVStrategyWarning)]
             assert len(cv_warnings) == 1
 
     def test_warn_only_false_raises(self) -> None:
         """With warn_only=False, raises ValueError."""
+
         @validate_cv_strategy(max_autocorr=0.1, warn_only=False)
-        def train_model(X, y):
+        def train_model(x_data, y):
             return "model"
 
         np.random.seed(42)
-        X = np.random.randn(100, 5)
+        x_data = np.random.randn(100, 5)
         y = np.zeros(100)
         y[0] = np.random.randn()
         for i in range(1, 100):
             y[i] = 0.9 * y[i - 1] + 0.1 * np.random.randn()
 
         with pytest.raises(ValueError):
-            train_model(X, y)
+            train_model(x_data, y)
 
     def test_custom_target_arg(self) -> None:
         """Can specify custom target argument name."""
+
         @validate_cv_strategy(target_arg="target")
-        def train_model(X, target):
+        def train_model(x_data, target):
             return "model"
 
         np.random.seed(42)
-        X = np.random.randn(100, 5)
+        x_data = np.random.randn(100, 5)
         target = np.random.randn(100)
 
-        result = train_model(X, target)
+        result = train_model(x_data, target)
         assert result == "model"
 
     def test_preserves_function_metadata(self) -> None:
         """Decorator preserves function name and docstring."""
+
         @validate_cv_strategy
-        def my_training_function(X, y):
+        def my_training_function(x_data, y):
             """Train a model."""
             pass
 

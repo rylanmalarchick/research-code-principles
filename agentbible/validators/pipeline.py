@@ -233,7 +233,7 @@ class ValidationPipeline:
             warnings=warning_messages,
         )
 
-    def extend(self, *checks: CheckFunction) -> "ValidationPipeline":
+    def extend(self, *checks: CheckFunction) -> ValidationPipeline:
         """Create a new pipeline with additional checks.
 
         Args:
@@ -249,7 +249,7 @@ class ValidationPipeline:
             stop_on_first_error=self._stop_on_first_error,
         )
 
-    def with_name(self, name: str) -> "ValidationPipeline":
+    def with_name(self, name: str) -> ValidationPipeline:
         """Create a new pipeline with a different default name.
 
         Args:
@@ -266,7 +266,7 @@ class ValidationPipeline:
         )
 
     @staticmethod
-    def strict_mode(strict: bool) -> "StrictModeContext":
+    def strict_mode(strict: bool) -> StrictModeContext:
         """Context manager to temporarily override strict mode.
 
         Args:
@@ -298,7 +298,7 @@ class StrictModeContext:
         self._strict = strict
         self._token: contextvars.Token[bool | None] | None = None
 
-    def __enter__(self) -> "StrictModeContext":
+    def __enter__(self) -> StrictModeContext:
         self._token = _strict_mode_override.set(self._strict)
         return self
 

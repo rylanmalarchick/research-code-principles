@@ -56,16 +56,6 @@ from agentbible.errors import (
 )
 
 # Public API - core validators (decorators)
-from agentbible.validators import (
-    validate_finite,
-    validate_non_negative,
-    validate_normalized,
-    validate_positive,
-    validate_probabilities,
-    validate_probability,
-    validate_range,
-)
-
 # Public API - array checks (direct validation functions)
 from agentbible.validators import (
     check_finite,
@@ -75,6 +65,13 @@ from agentbible.validators import (
     check_probabilities,
     check_probability,
     check_range,
+    validate_finite,
+    validate_non_negative,
+    validate_normalized,
+    validate_positive,
+    validate_probabilities,
+    validate_probability,
+    validate_range,
 )
 
 __all__ = [

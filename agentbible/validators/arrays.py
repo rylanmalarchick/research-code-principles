@@ -33,10 +33,10 @@ Example:
 from __future__ import annotations
 
 import warnings
-from typing import Any, TypeVar
+from typing import TypeVar
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import ArrayLike
 
 from agentbible.errors import (
     BoundsError,

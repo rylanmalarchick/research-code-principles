@@ -247,7 +247,9 @@ class TestCheckRelativeHumidity:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             check_relative_humidity(rh, strict=False)
-            rh_warnings = [x for x in w if issubclass(x.category, RelativeHumidityWarning)]
+            rh_warnings = [
+                x for x in w if issubclass(x.category, RelativeHumidityWarning)
+            ]
             assert len(rh_warnings) == 1
 
 
@@ -334,7 +336,10 @@ class TestAtmosphericErrorAttributes:
         """CloudBaseHeightError has REFERENCE and GUIDANCE."""
         assert hasattr(CloudBaseHeightError, "REFERENCE")
         assert hasattr(CloudBaseHeightError, "GUIDANCE")
-        assert "WMO" in CloudBaseHeightError.REFERENCE or "Stull" in CloudBaseHeightError.REFERENCE
+        assert (
+            "WMO" in CloudBaseHeightError.REFERENCE
+            or "Stull" in CloudBaseHeightError.REFERENCE
+        )
 
     def test_boundary_layer_height_error_has_reference(self) -> None:
         """BoundaryLayerHeightError has REFERENCE and GUIDANCE."""
@@ -344,4 +349,7 @@ class TestAtmosphericErrorAttributes:
     def test_lifting_condensation_level_error_has_reference(self) -> None:
         """LiftingCondensationLevelError has REFERENCE and GUIDANCE."""
         assert hasattr(LiftingCondensationLevelError, "REFERENCE")
-        assert "Bolton" in LiftingCondensationLevelError.REFERENCE or "Romps" in LiftingCondensationLevelError.REFERENCE
+        assert (
+            "Bolton" in LiftingCondensationLevelError.REFERENCE
+            or "Romps" in LiftingCondensationLevelError.REFERENCE
+        )

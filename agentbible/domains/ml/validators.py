@@ -31,7 +31,6 @@ from agentbible.domains.ml.checks import (
 )
 from agentbible.domains.ml.errors import (
     CVStrategyWarning,
-    DataLeakageError,
 )
 from agentbible.validators.base import (
     ValidationLevel,
@@ -117,9 +116,8 @@ def validate_no_leakage(
             if isinstance(feature_names_arg, str):
                 if feature_names_arg in kwargs:
                     feature_names = kwargs[feature_names_arg]
-            elif isinstance(feature_names_arg, int):
-                if len(args) > feature_names_arg:
-                    feature_names = args[feature_names_arg]
+            elif isinstance(feature_names_arg, int) and len(args) > feature_names_arg:
+                feature_names = args[feature_names_arg]
 
             # If we found feature names, check them
             if feature_names is not None:
@@ -223,9 +221,8 @@ def validate_cv_strategy(
                 # where y is the second positional argument
                 elif target_arg == "y" and len(args) > 1:
                     target = args[1]
-            elif isinstance(target_arg, int):
-                if len(args) > target_arg:
-                    target = args[target_arg]
+            elif isinstance(target_arg, int) and len(args) > target_arg:
+                target = args[target_arg]
 
             # If we found target, check autocorrelation
             if target is not None:
