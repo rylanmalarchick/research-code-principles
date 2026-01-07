@@ -159,7 +159,7 @@ class ValidationPipeline:
             The input array unchanged (for chaining).
 
         Raises:
-            Various validation errors if strict=True and validation fails.
+            ValidationError: If strict=True and any validation check fails.
         """
         effective_name = name if name is not None else self._name
 
