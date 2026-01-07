@@ -67,12 +67,12 @@ def _compute_lag1_autocorrelation(arr: NDArray[np.floating]) -> float:
     deviations = arr - mean
 
     # Variance (denominator)
-    variance = np.sum(deviations**2)
+    variance: np.floating = np.sum(deviations**2)
     if variance == 0:
         return 0.0
 
     # Autocovariance at lag 1 (numerator)
-    autocovariance = np.sum(deviations[:-1] * deviations[1:])
+    autocovariance: np.floating = np.sum(deviations[:-1] * deviations[1:])
 
     # Normalize by variance
     return float(autocovariance / variance)
