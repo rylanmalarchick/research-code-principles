@@ -5,6 +5,8 @@ Domains are optional and can be imported explicitly when needed.
 
 Available domains:
     - quantum: Quantum computing validators (unitarity, hermiticity, density matrices)
+    - ml: Machine learning validators (data leakage, coverage, exchangeability)
+    - atmospheric: Atmospheric science validators (CBH, BLH, cloud layers)
 
 Example:
     >>> from agentbible.domains.quantum import validate_unitary
@@ -13,6 +15,13 @@ Example:
     >>> @validate_unitary
     ... def create_hadamard():
     ...     return np.array([[1, 1], [1, -1]]) / np.sqrt(2)
+
+    >>> from agentbible.domains.ml import check_no_leakage, check_coverage
+    >>> FORBIDDEN = {"target_lagged", "inversion_height"}
+    >>> check_no_leakage(["blh", "t2m"], forbidden=FORBIDDEN)
+
+    >>> from agentbible.domains.atmospheric import check_cloud_base_height
+    >>> check_cloud_base_height(np.array([500, 1000, 1500]), name="cbh")
 
 Future domains (contributions welcome):
     - chemistry: Molecular structure and thermodynamics validators

@@ -231,6 +231,34 @@ def test_reproducible(deterministic_seed):
 | `@validate_hermitian` | A = A.H |
 | `@validate_density_matrix` | Hermitian, trace=1, positive semi-definite |
 
+### ML Domain (`agentbible.domains.ml`)
+
+| Function/Decorator | Validates |
+|-------------------|-----------|
+| `check_no_leakage(features, forbidden)` | No forbidden features (data leakage) |
+| `check_coverage(y_true, y_lower, y_upper)` | Prediction interval coverage |
+| `check_exchangeability(residuals)` | Conformal prediction assumptions |
+| `@validate_cv_strategy` | Warn if random CV inappropriate |
+
+### Atmospheric Domain (`agentbible.domains.atmospheric`)
+
+| Function | Validates |
+|----------|-----------|
+| `check_cloud_base_height(arr)` | CBH in valid range (0-12000m) |
+| `check_boundary_layer_height(arr)` | BLH in valid range (10-5000m) |
+| `check_cloud_layer_consistency(base, top)` | Cloud base < cloud top |
+| `check_relative_humidity(arr)` | RH in [0, 100]% |
+
+### Validation Pipeline
+
+```python
+from agentbible.validators import ValidationPipeline, check_finite, check_positive
+
+# Compose validators
+pipeline = ValidationPipeline([check_finite, check_positive], name="energy")
+pipeline(energy_array)  # Runs all checks
+```
+
 All validators:
 - Check for NaN/Inf **before** domain-specific checks
 - Support both `rtol` and `atol` tolerances
@@ -302,12 +330,14 @@ bible init my-project --template cpp-hpc-cuda
 
 ## Status
 
-**v0.3.0** (Alpha) - Modular architecture with core/domain separation. API stable, ready for real use.
+**v0.4.0** (Alpha) - New ML and atmospheric domains, validation pipelines. API stable, ready for real use.
 
 - Core validators work for any scientific code
-- Quantum domain validators available via `agentbible.domains.quantum`
+- Quantum domain validators via `agentbible.domains.quantum`
+- ML domain validators via `agentbible.domains.ml`
+- Atmospheric domain validators via `agentbible.domains.atmospheric`
+- ValidationPipeline for composing multiple checks
 - Context module for AI-assisted development
-- Philosophy module with importable principles
 
 See the full [ROADMAP.md](ROADMAP.md) for what's coming next.
 
@@ -362,4 +392,4 @@ Rylan Malarchick - [rylan1012@gmail.com](mailto:rylan1012@gmail.com)
 
 ---
 
-**v0.3.0** - Modular architecture, context module, philosophy module (January 2026)
+**v0.4.0** - ML domain, atmospheric domain, validation pipelines (January 2026)

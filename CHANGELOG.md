@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-01-06
+
+### Added
+
+#### Array Validators (Direct Check Functions)
+- New `check_*` functions for direct array validation in pipelines:
+  - `check_finite(arr, name, strict)` - Validate no NaN/Inf
+  - `check_positive(arr, name, atol, strict)` - Validate all values > 0
+  - `check_non_negative(arr, name, atol, strict)` - Validate all values >= 0
+  - `check_range(arr, min_val, max_val, name, inclusive, atol, strict)` - Validate range
+  - `check_probability(value, name, atol, strict)` - Validate scalar in [0, 1]
+  - `check_probabilities(arr, name, atol, strict)` - Validate array in [0, 1]
+  - `check_normalized(arr, name, axis, rtol, atol, strict)` - Validate sums to 1
+- All check functions support `strict=False` to warn instead of raise
+
+#### Validation Pipeline
+- New `ValidationPipeline` class for composing multiple validators
+- Pre-built pipelines: `create_numeric_pipeline`, `create_positive_pipeline`,
+  `create_probability_pipeline`, `create_distribution_pipeline`
+- `ValidationResult` dataclass for collecting all validation outcomes
+- Context manager `ValidationPipeline.strict_mode()` for temporary override
+
+#### ML Domain (`agentbible.domains.ml`)
+- New domain for machine learning validation:
+  - `check_no_leakage(feature_names, forbidden, strict)` - Detect data leakage
+  - `check_temporal_autocorrelation(arr, max_autocorr, strict)` - Detect high autocorrelation
+  - `check_coverage(y_true, y_lower, y_upper, target, tolerance, strict)` - Validate prediction intervals
+  - `check_exchangeability(residuals, max_autocorr, max_drift, strict)` - Check conformal assumptions
+- Decorators:
+  - `@validate_no_leakage(forbidden, feature_names_arg)` - Prevent forbidden features
+  - `@validate_cv_strategy(max_autocorr, target_arg, warn_only)` - Warn on random CV issues
+- Errors: `DataLeakageError`, `CoverageError`
+- Warnings: `ExchangeabilityWarning`, `AutocorrelationWarning`, `CVStrategyWarning`
+
+#### Atmospheric Domain (`agentbible.domains.atmospheric`)
+- New domain for atmospheric science validation:
+  - `check_cloud_base_height(arr, min_height, max_height, strict)` - Validate CBH
+  - `check_boundary_layer_height(arr, min_height, max_height, strict)` - Validate BLH
+  - `check_lifting_condensation_level(arr, min_height, max_height, strict)` - Validate LCL
+  - `check_cloud_layer_consistency(cloud_base, cloud_top, strict)` - Validate base < top
+  - `check_relative_humidity(arr, allow_supersaturation, strict)` - Validate RH in [0, 100]
+  - `check_temperature_inversion(base_height, top_height, base_temp, top_temp, strict)` - Validate inversions
+- Errors: `CloudBaseHeightError`, `BoundaryLayerHeightError`, `LiftingCondensationLevelError`,
+  `CloudLayerConsistencyError`, `TemperatureInversionError`
+- Warnings: `RelativeHumidityWarning`, `AtmosphericStabilityWarning`
+
+### Changed
+
+- Version bumped to 0.4.0
+- Updated domains `__init__.py` to document ML and atmospheric domains
+
 ## [0.2.1] - 2026-01-02
 
 ### Added
@@ -183,7 +234,8 @@ This is the initial release combining 6 development sprints:
 5. CI/CD & Security (GitHub Actions, pip-audit, trusted publishing)
 6. Documentation & Polish (README, CHANGELOG, badges)
 
-[Unreleased]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.2.1...v0.4.0
 [0.2.1]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.1.0...v0.1.1

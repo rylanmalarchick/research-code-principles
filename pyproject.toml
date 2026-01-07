@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentbible"
-version = "0.3.0"
+version = "0.4.0"
 description = "One-shot correct infrastructure for AI agents working on scientific code"
 readme = "README.md"
 license = "MIT"
@@ -52,6 +52,8 @@ dependencies = [
 [project.optional-dependencies]
 # Domain plugins (no extra deps required, establishes the pattern)
 quantum = []  # Quantum computing validators (unitarity, hermiticity, density matrices)
+ml = []  # Machine learning validators (data leakage, coverage, exchangeability)
+atmospheric = []  # Atmospheric science validators (CBH, BLH, cloud layers)
 # Future domains:
 # chemistry = ["ase", "rdkit"]
 # fluids = ["scipy"]
@@ -86,7 +88,7 @@ dev = [
 
 # All extras
 all = [
-    "agentbible[quantum,hdf5,vector,dev]",
+    "agentbible[quantum,ml,atmospheric,hdf5,vector,dev]",
 ]
 
 [project.scripts]
