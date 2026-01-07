@@ -212,7 +212,10 @@ class TestStrictModeContext:
         pipeline = ValidationPipeline([check_finite], strict=True)
         arr = np.array([np.nan])
 
-        with ValidationPipeline.strict_mode(False), warnings.catch_warnings(record=True) as w:
+        with (
+            ValidationPipeline.strict_mode(False),
+            warnings.catch_warnings(record=True) as w,
+        ):
             warnings.simplefilter("always")
             pipeline(arr)  # Should warn, not raise
             assert len(w) >= 1
