@@ -7,6 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-01-19
+
+### Added
+
+#### New CLI Commands
+- `bible scaffold` command for generating module stubs with docstrings and type hints
+  - `--class` option to generate a class with given name
+  - `--dataclass` option to generate a dataclass
+  - `--methods` and `--fields` options for customization
+  - `--functions` option to generate standalone functions
+  - Automatic test file generation (skip with `--no-test`)
+- `bible retrofit` command to add AgentBible structure to existing projects
+  - Detects project type (Python, C++) automatically
+  - `--cursorrules`, `--precommit`, `--validators`, `--conftest`, `--agent-docs` options
+  - Interactive mode for guided setup
+  - `--all` flag to add all components at once
+- `bible check-coverage` command for quick pytest-cov coverage checks
+  - `--threshold` and `--fail-under` options
+  - `--html` flag for HTML report generation
+- `bible report` command for HDF5 provenance report generation
+  - `--format text|markdown|json` output formats
+  - `--output` option to write to file
+  - Extracts and formats provenance metadata from HDF5 files
+- `bible registry` command group for AI agent integration
+  - `bible registry show` - Display current registry configuration
+  - `bible registry init` - Create default `agent_registry.yaml`
+  - `bible registry check <path>` - Check files use required validators
+
+#### New Research Templates
+- `python-quantum` template for quantum computing projects
+  - Pre-configured unitarity, hermiticity validators
+  - Example gates.py and circuits.py modules
+  - Quantum-specific test fixtures
+- `python-ml` template for machine learning projects
+  - Data leakage detection helpers
+  - Reproducibility utilities (seed management, model checkpointing)
+  - ML-specific validation patterns
+- `python-simulation` template for numerical simulation projects
+  - HDF5 I/O helpers with provenance tracking
+  - Conservation law validators
+  - Simulation-specific test fixtures
+
+#### Jupyter Integration
+- `agentbible.jupyter` module for notebook support
+  - `%load_ext agentbible.jupyter` to load the extension
+  - `%agentbible` line magic for quick validation
+  - `%%validate` cell magic for validating cell outputs
+  - Graceful fallback when IPython not available
+
+#### Pre-commit Integration
+- `.pre-commit-hooks.yaml` in repo root
+- AgentBible can now be used as a pre-commit hook
+
+#### Enhanced Error Messages
+- `PhysicsConstraintError` now includes `reference` and `guidance` fields
+- All physics errors include academic references and fix suggestions
+- `to_dict()` method for serializing errors to JSON
+
+### Changed
+
+- Version bumped to 0.5.0
+- Updated `bible info` to display `bible registry` command
+- Updated `bible info` to display `bible report` command
+- Updated templates `__init__.py` with all new template registrations
+
 ## [0.4.0] - 2026-01-06
 
 ### Added
@@ -234,7 +299,8 @@ This is the initial release combining 6 development sprints:
 5. CI/CD & Security (GitHub Actions, pip-audit, trusted publishing)
 6. Documentation & Polish (README, CHANGELOG, badges)
 
-[Unreleased]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.2.1...v0.4.0
 [0.2.1]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.1.1...v0.2.0

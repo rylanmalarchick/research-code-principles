@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentbible"
-version = "0.4.0"
+version = "0.5.0"
 description = "One-shot correct infrastructure for AI agents working on scientific code"
 readme = "README.md"
 license = "MIT"

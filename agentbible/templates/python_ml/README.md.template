@@ -1,0 +1,112 @@
+# {{PROJECT_NAME}}
+
+{{PROJECT_DESCRIPTION}}
+
+Generated with [AgentBible](https://github.com/rylanmalarchick/research-code-principles) using the `python-ml` template.
+
+## Quick Start
+
+```bash
+# Activate virtual environment (created by bible init)
+source .venv/bin/activate
+
+# Install with dev dependencies
+pip install -e ".[dev]"
+
+# Optional: Install PyTorch support
+pip install -e ".[torch]"
+
+# Optional: Install experiment tracking
+pip install -e ".[experiment]"
+
+# Run tests
+pytest
+
+# Run linting
+ruff check .
+
+# Run type checking
+mypy src/
+```
+
+## Project Structure
+
+```
+{{PROJECT_NAME}}/
+|-- src/                       # Source code
+|   |-- __init__.py
+|   |-- validation.py          # ML validation utilities
+|   |-- data.py                # Data loading utilities
+|   +-- models.py              # Model definitions
+|-- tests/                     # Test suite
+|   |-- conftest.py            # ML fixtures
+|   +-- test_validation.py     # Validation tests
+|-- .cursorrules               # AI agent instructions
+|-- pyproject.toml             # Project configuration
++-- README.md                  # This file
+```
+
+## ML Validation
+
+The `validation.py` module provides ML-specific constraint checking:
+
+```python
+from src.validation import (
+    check_no_data_leakage,
+    check_class_balance,
+    check_feature_scaling,
+    check_no_nan_inf,
+    check_array_shape,
+    check_prediction_range,
+)
+
+# Validate ML operations
+check_no_data_leakage(train_idx, test_idx)   # No overlap
+check_class_balance(labels, max_ratio=10)     # Not too imbalanced
+check_feature_scaling(X, expected="standard") # Proper scaling
+check_no_nan_inf(data, name="features")       # Clean data
+```
+
+## Reproducibility
+
+The `reproducibility.py` module provides seed management:
+
+```python
+from src.reproducibility import set_all_seeds, get_seed_state
+
+# Set all random seeds
+set_all_seeds(42)
+
+# Save/restore random state for exact reproduction
+state = get_seed_state()
+```
+
+## Development
+
+### Running Tests
+
+```bash
+pytest                      # Run all tests
+pytest -v                   # Verbose output
+pytest -m "not slow"        # Skip slow tests
+pytest -m "not requires_torch"  # Skip PyTorch tests
+pytest --cov=src            # With coverage
+```
+
+### Code Quality
+
+```bash
+ruff check .                # Lint
+ruff format .               # Format
+mypy src/                   # Type check
+```
+
+## ML Research Resources
+
+- [sklearn Documentation](https://scikit-learn.org/stable/)
+- [PyTorch Tutorials](https://pytorch.org/tutorials/)
+- [Weights & Biases Guides](https://docs.wandb.ai/)
+
+## License
+
+MIT - Created {{YEAR}}

@@ -1,0 +1,99 @@
+# {{PROJECT_NAME}} - Scientific Simulation AI Agent Rules
+
+This project follows AgentBible research code principles for simulations.
+
+## Mandatory Rules
+
+### 1. Test Before Code
+- REFUSE to write implementation without test specification
+- Write test file FIRST, then implementation
+- Ask "What are the test cases?" before writing simulation code
+
+### 2. Rule of 50
+- Functions must be <= 50 lines
+- If longer, STOP and refactor into smaller functions
+- Each function does ONE thing
+
+### 3. Type Everything
+- Type hints on ALL function signatures
+- Docstrings on ALL public functions (Google style)
+- Run `mypy src/` before committing
+
+### 4. Simulation Validation (CRITICAL)
+Always validate simulation constraints explicitly:
+
+```python
+from src.validation import (
+    check_conservation,          # Energy/mass/momentum conserved
+    check_stability,             # Numerical stability (no blowup)
+    check_convergence,           # Solution converged
+    check_physical_bounds,       # Values in physical range
+    check_cfl_condition,         # Time step stability
+)
+```
+
+### 5. Simulation-Specific Requirements
+- ALWAYS check conservation laws (energy, mass, momentum)
+- ALWAYS verify numerical stability (no NaN, no exponential growth)
+- ALWAYS document physical units and dimensions
+- ALWAYS use HDF5 for large data output with provenance metadata
+- Track simulation parameters and version in output files
+
+### 6. No Silent Failures
+- NEVER use bare `except:`
+- ALWAYS log or re-raise with context
+- Include what failed, expected value, actual value
+
+### 7. Reproducibility
+- Set random seeds explicitly
+- Document simulation parameters
+- Use `tests/conftest.py` fixtures
+- Save ALL parameters to output files
+
+## Project Structure
+
+- Source code: `src/`
+- Tests: `tests/`
+- Run `pytest` before committing
+- Minimum 70% test coverage
+
+## Parallelization
+
+This template supports:
+- **MPI**: `pip install -e ".[parallel]"` for distributed computing
+- **Dask**: For out-of-core and parallel computing
+- **Joblib**: For simple parallelization
+
+## Before Committing
+
+```bash
+pytest                  # Tests pass
+ruff check .            # No lint errors
+mypy src/               # No type errors
+```
+
+## CI/CD Rules (CRITICAL)
+
+### Always Verify CI After Push
+After EVERY push to remote, you MUST verify CI status:
+```bash
+bible ci status         # Check workflow runs
+# OR
+gh run list --limit 5   # Alternative if bible not available
+```
+
+### If CI Fails
+1. Check what failed: `gh run view <run-id> --log-failed`
+2. Fix the issue locally
+3. Push fix and verify again
+4. NEVER tell the user "CI should pass" without checking
+
+## Common Simulation Pitfalls
+
+1. **CFL condition**: Time step must satisfy stability constraints
+2. **Conservation violations**: Track conserved quantities every step
+3. **Numerical precision**: Use float64 for accumulating quantities
+4. **Initial conditions**: Validate IC satisfies constraints
+5. **Boundary conditions**: Handle edges correctly
+6. **Output frequency**: Don't output every step for long simulations
+7. **Memory leaks**: Clear intermediate arrays in long runs

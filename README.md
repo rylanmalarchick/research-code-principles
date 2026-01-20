@@ -28,6 +28,8 @@ When you run an experiment, how do you reproduce it 6 months later?
 pip install agentbible
 ```
 
+> **Note:** The package name is `agentbible` (no hyphen). If `pip install agent-bible`, you'll get an error.
+
 ```bash
 # With HDF5 provenance support
 pip install agentbible[hdf5]
@@ -37,6 +39,18 @@ pip install agentbible[context]
 
 # Full development install
 pip install agentbible[all]
+```
+
+**Troubleshooting:** If `bible` command is not found after install:
+```bash
+# Check if it's in your PATH
+python -m agentbible.cli.main --version
+
+# On Linux/macOS, ensure ~/.local/bin is in PATH
+export PATH="$HOME/.local/bin:$PATH"
+
+# Or use pipx for isolated CLI tools
+pipx install agentbible
 ```
 
 ## The Problem AgentBible Solves
@@ -268,10 +282,38 @@ All validators:
 
 ```bash
 bible init <name>           # Create project from template
+bible scaffold <file>       # Generate module stubs with tests
+bible retrofit              # Add AgentBible to existing project
 bible validate <file>       # Validate physics constraints
+bible audit <path>          # Check code against AgentBible principles
 bible context               # Generate AI context
+bible ci status             # Show CI/CD workflow status
 bible info                  # Show installation info
 ```
+
+### Configuration
+
+Control validation behavior via environment variable:
+
+```bash
+# Full validation (default) - catches all physics errors
+export AGENTBIBLE_VALIDATION_LEVEL=debug
+
+# Lite mode - only NaN/Inf checks (faster)
+export AGENTBIBLE_VALIDATION_LEVEL=lite
+
+# Off - skip all validation (for benchmarking only!)
+export AGENTBIBLE_VALIDATION_LEVEL=off
+```
+
+Or per-decorator:
+```python
+@validate_unitary(level="lite")  # Override for this function
+def my_gate():
+    ...
+```
+
+Check current level with `bible info`.
 
 ### Provenance Metadata
 

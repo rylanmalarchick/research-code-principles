@@ -1,0 +1,19 @@
+# AgentBible Pre-commit Hooks
+# Use this repo directly as a pre-commit hook source
+#
+# Usage in your project's .pre-commit-config.yaml:
+#   repos:
+#     - repo: https://github.com/rylanmalarchick/research-code-principles
+#       rev: v0.5.0
+#       hooks:
+#         - id: agentbible-audit
+
+- id: agentbible-audit
+  name: AgentBible Audit
+  description: Audit code against AgentBible principles (Rule of 50, docstrings, type hints)
+  entry: bible audit
+  language: python
+  types: [python]
+  pass_filenames: true
+  require_serial: true
+  additional_dependencies: ['agentbible>=0.5.0']

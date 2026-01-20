@@ -1,0 +1,110 @@
+# {{PROJECT_NAME}}
+
+{{PROJECT_DESCRIPTION}}
+
+Generated with [AgentBible](https://github.com/rylanmalarchick/research-code-principles) using the `python-simulation` template.
+
+## Quick Start
+
+```bash
+# Activate virtual environment (created by bible init)
+source .venv/bin/activate
+
+# Install with dev dependencies
+pip install -e ".[dev]"
+
+# Optional: Install parallel computing support
+pip install -e ".[parallel]"
+
+# Optional: Install visualization
+pip install -e ".[viz]"
+
+# Run tests
+pytest
+
+# Run linting
+ruff check .
+
+# Run type checking
+mypy src/
+```
+
+## Project Structure
+
+```
+{{PROJECT_NAME}}/
+|-- src/                       # Source code
+|   |-- __init__.py
+|   |-- validation.py          # Simulation validation utilities
+|   |-- io.py                  # HDF5 I/O with provenance
+|   +-- integrators.py         # Time integration schemes
+|-- tests/                     # Test suite
+|   |-- conftest.py            # Simulation fixtures
+|   +-- test_validation.py     # Validation tests
+|-- .cursorrules               # AI agent instructions
+|-- pyproject.toml             # Project configuration
++-- README.md                  # This file
+```
+
+## Simulation Validation
+
+The `validation.py` module provides simulation constraint checking:
+
+```python
+from src.validation import (
+    check_conservation,
+    check_stability,
+    check_convergence,
+    check_physical_bounds,
+    check_cfl_condition,
+)
+
+# Validate simulation state
+check_conservation(energy_history, rtol=1e-6)   # Energy conserved
+check_stability(solution)                        # No NaN/Inf
+check_convergence(residuals, tol=1e-10)         # Converged
+check_physical_bounds(density, min_val=0)       # Positive density
+check_cfl_condition(dt, dx, velocity)           # CFL < 1
+```
+
+## Data I/O
+
+The `io.py` module provides HDF5 I/O with automatic provenance:
+
+```python
+from src.io import SimulationOutput
+
+with SimulationOutput("output.h5") as out:
+    out.save_parameters(dt=0.001, dx=0.1, n_steps=1000)
+    out.save_snapshot(t=1.0, density=rho, velocity=v)
+```
+
+## Development
+
+### Running Tests
+
+```bash
+pytest                      # Run all tests
+pytest -v                   # Verbose output
+pytest -m "not slow"        # Skip slow tests
+pytest -m "not long_running"  # Skip very long tests
+pytest --cov=src            # With coverage
+```
+
+### Code Quality
+
+```bash
+ruff check .                # Lint
+ruff format .               # Format
+mypy src/                   # Type check
+```
+
+## Simulation Resources
+
+- [SciPy ODE Solvers](https://docs.scipy.org/doc/scipy/reference/integrate.html)
+- [HDF5 Python Guide](https://docs.h5py.org/)
+- [Numerical Recipes](http://numerical.recipes/)
+
+## License
+
+MIT - Created {{YEAR}}

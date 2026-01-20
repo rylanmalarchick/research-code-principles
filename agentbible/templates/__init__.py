@@ -11,6 +11,9 @@ TEMPLATES_DIR = Path(__file__).parent
 # Available templates
 AVAILABLE_TEMPLATES = {
     "python-scientific": TEMPLATES_DIR / "python_research",
+    "python-quantum": TEMPLATES_DIR / "python_quantum",
+    "python-ml": TEMPLATES_DIR / "python_ml",
+    "python-simulation": TEMPLATES_DIR / "python_simulation",
     "cpp-hpc-cuda": TEMPLATES_DIR / "cpp_hpc",
 }
 

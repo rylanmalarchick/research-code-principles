@@ -40,7 +40,7 @@ Example (array checks):
 
 from __future__ import annotations
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 __author__ = "Rylan Malarchick"
 __email__ = "rylan1012@gmail.com"
 

@@ -1,0 +1,106 @@
+# {{PROJECT_NAME}} - Machine Learning AI Agent Rules
+
+This project follows AgentBible research code principles for ML research.
+
+## Mandatory Rules
+
+### 1. Test Before Code
+- REFUSE to write implementation without test specification
+- Write test file FIRST, then implementation
+- Ask "What are the test cases?" before writing models
+
+### 2. Rule of 50
+- Functions must be <= 50 lines
+- If longer, STOP and refactor into smaller functions
+- Each function does ONE thing
+
+### 3. Type Everything
+- Type hints on ALL function signatures
+- Docstrings on ALL public functions (Google style)
+- Run `mypy src/` before committing
+
+### 4. ML Validation (CRITICAL)
+Always validate ML constraints explicitly:
+
+```python
+from src.validation import (
+    check_no_data_leakage,      # Train/test separation
+    check_class_balance,         # Label distribution
+    check_feature_scaling,       # Normalized features
+    check_no_nan_inf,           # Clean data
+    check_reproducibility,       # Seed setting
+    check_gradient_flow,         # Backprop works
+)
+```
+
+### 5. ML-Specific Requirements
+- ALWAYS set random seeds for reproducibility
+- ALWAYS check for data leakage between train/test
+- ALWAYS log hyperparameters and metrics
+- ALWAYS version your data and models
+- Track experiment configs in code, not notebooks
+
+### 6. No Silent Failures
+- NEVER use bare `except:`
+- ALWAYS log or re-raise with context
+- Include what failed, expected value, actual value
+
+### 7. Reproducibility
+- Set random seeds for: numpy, torch, tensorflow, python random
+- Document seed values in experiment configs
+- Use `tests/conftest.py` fixtures
+- Pin package versions
+
+## Project Structure
+
+- Source code: `src/`
+- Tests: `tests/`
+- Run `pytest` before committing
+- Minimum 70% test coverage
+
+## ML Frameworks
+
+This template supports:
+- **scikit-learn**: Included by default
+- **PyTorch**: `pip install -e ".[torch]"`
+- **TensorFlow**: `pip install -e ".[tensorflow]"`
+- **JAX/Flax**: `pip install -e ".[jax]"`
+
+## Experiment Tracking
+
+- **Weights & Biases**: `pip install -e ".[experiment]"`
+- **MLflow**: `pip install -e ".[experiment]"`
+
+## Before Committing
+
+```bash
+pytest                  # Tests pass
+ruff check .            # No lint errors
+mypy src/               # No type errors
+```
+
+## CI/CD Rules (CRITICAL)
+
+### Always Verify CI After Push
+After EVERY push to remote, you MUST verify CI status:
+```bash
+bible ci status         # Check workflow runs
+# OR
+gh run list --limit 5   # Alternative if bible not available
+```
+
+### If CI Fails
+1. Check what failed: `gh run view <run-id> --log-failed`
+2. Fix the issue locally
+3. Push fix and verify again
+4. NEVER tell the user "CI should pass" without checking
+
+## Common ML Pitfalls
+
+1. **Data leakage**: Never use test data for feature engineering or selection
+2. **Random seeds**: Set ALL random sources (numpy, torch, sklearn, python)
+3. **Class imbalance**: Always check label distributions
+4. **Overfitting**: Always validate on held-out data
+5. **Feature scaling**: Fit scaler on train, transform on test
+6. **Hyperparameter tuning**: Use cross-validation, not test set
+7. **Missing values**: Handle explicitly, don't ignore
