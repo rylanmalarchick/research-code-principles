@@ -63,7 +63,7 @@ def add_cursorrules(path: Path, force: bool = False) -> bool:
     cursorrules_path = path / ".cursorrules"
 
     if cursorrules_path.exists() and not force:
-        console.print(f"[yellow]Skipping:[/] .cursorrules already exists")
+        console.print("[yellow]Skipping:[/] .cursorrules already exists")
         return False
 
     # Get the template from agentbible
@@ -80,7 +80,7 @@ def add_cursorrules(path: Path, force: bool = False) -> bool:
         return False
 
     shutil.copy2(source_cursorrules, cursorrules_path)
-    console.print(f"[green]Added:[/] .cursorrules")
+    console.print("[green]Added:[/] .cursorrules")
     return True
 
 
@@ -112,7 +112,7 @@ def add_precommit_config(path: Path, force: bool = False) -> bool:
             return False
 
         # Append hook to existing file
-        with open(precommit_path, "a") as f:
+        with precommit_path.open("a") as f:
             f.write(agentbible_hook)
         console.print("[green]Updated:[/] .pre-commit-config.yaml (added AgentBible hook)")
         return True
@@ -244,7 +244,7 @@ def add_test_conftest(path: Path) -> bool:
             return False
 
         # Append fixtures
-        with open(conftest_path, "a") as f:
+        with conftest_path.open("a") as f:
             f.write("\n\n# AgentBible fixtures\n")
             f.write("from agentbible.testing import deterministic_seed, tolerance, quantum_tolerance\n")
             f.write("\n# Re-export fixtures for pytest discovery\n")
@@ -405,25 +405,20 @@ def run_retrofit(
 
     added_count = 0
 
-    if "cursorrules" in components_to_add:
-        if add_cursorrules(project_path, force):
-            added_count += 1
+    if "cursorrules" in components_to_add and add_cursorrules(project_path, force):
+        added_count += 1
 
-    if "precommit" in components_to_add:
-        if add_precommit_config(project_path, force):
-            added_count += 1
+    if "precommit" in components_to_add and add_precommit_config(project_path, force):
+        added_count += 1
 
-    if "validators" in components_to_add:
-        if add_validation_helpers(project_path, project_type):
-            added_count += 1
+    if "validators" in components_to_add and add_validation_helpers(project_path, project_type):
+        added_count += 1
 
-    if "conftest" in components_to_add:
-        if add_test_conftest(project_path):
-            added_count += 1
+    if "conftest" in components_to_add and add_test_conftest(project_path):
+        added_count += 1
 
-    if "agent_docs" in components_to_add:
-        if add_agent_docs(project_path):
-            added_count += 1
+    if "agent_docs" in components_to_add and add_agent_docs(project_path):
+        added_count += 1
 
     console.print()
     if added_count > 0:

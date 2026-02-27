@@ -6,8 +6,6 @@ This file is automatically loaded by pytest and provides:
 - Custom markers: @pytest.mark.slow, @pytest.mark.requires_qiskit, etc.
 """
 
-from typing import List
-
 import numpy as np
 import pytest
 from numpy.typing import NDArray
@@ -167,7 +165,7 @@ def pure_zero_density() -> NDArray[np.complexfloating]:
 # Kraus Operators for Common Channels
 # ============================================================================
 @pytest.fixture
-def depolarizing_kraus(request: pytest.FixtureRequest) -> List[NDArray[np.complexfloating]]:
+def depolarizing_kraus(request: pytest.FixtureRequest) -> list[NDArray[np.complexfloating]]:
     """Kraus operators for single-qubit depolarizing channel.
 
     Use with: @pytest.mark.parametrize("p", [0.0, 0.1, 0.5])
@@ -175,10 +173,10 @@ def depolarizing_kraus(request: pytest.FixtureRequest) -> List[NDArray[np.comple
     """
     p = getattr(request, "param", 0.1)
 
-    I = np.eye(2, dtype=complex)
-    X = np.array([[0, 1], [1, 0]], dtype=complex)
-    Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
-    Z = np.array([[1, 0], [0, -1]], dtype=complex)
+    I = np.eye(2, dtype=complex)  # noqa: E741, N806
+    X = np.array([[0, 1], [1, 0]], dtype=complex)  # noqa: N806
+    Y = np.array([[0, -1j], [1j, 0]], dtype=complex)  # noqa: N806
+    Z = np.array([[1, 0], [0, -1]], dtype=complex)  # noqa: N806
 
     return [
         np.sqrt(1 - 3 * p / 4) * I,
@@ -189,11 +187,11 @@ def depolarizing_kraus(request: pytest.FixtureRequest) -> List[NDArray[np.comple
 
 
 @pytest.fixture
-def amplitude_damping_kraus() -> List[NDArray[np.complexfloating]]:
+def amplitude_damping_kraus() -> list[NDArray[np.complexfloating]]:
     """Kraus operators for amplitude damping channel with gamma=0.1."""
     gamma = 0.1
-    K0 = np.array([[1, 0], [0, np.sqrt(1 - gamma)]], dtype=complex)
-    K1 = np.array([[0, np.sqrt(gamma)], [0, 0]], dtype=complex)
+    K0 = np.array([[1, 0], [0, np.sqrt(1 - gamma)]], dtype=complex)  # noqa: N806
+    K1 = np.array([[0, np.sqrt(gamma)], [0, 0]], dtype=complex)  # noqa: N806
     return [K0, K1]
 
 

@@ -183,7 +183,7 @@ class ContextAuditor:
         return issues
 
     def _check_workflow_checklist(
-        self, content: str, lines: list[str]
+        self, _content: str, lines: list[str]
     ) -> list[ContextIssue]:
         """Detect workflow checklists and procedural instructions."""
         issues: list[ContextIssue] = []
@@ -229,7 +229,7 @@ class ContextAuditor:
         return issues
 
     def _check_long_code_blocks(
-        self, content: str, lines: list[str]
+        self, content: str, _lines: list[str]
     ) -> list[ContextIssue]:
         """Detect fenced code blocks exceeding MAX_CODE_BLOCK_LINES lines."""
         issues: list[ContextIssue] = []
@@ -332,8 +332,8 @@ class ContextAuditor:
                 not stripped
                 or stripped.startswith("#")
                 or bool(_TOOL_CMD.search(line))
-                or stripped.startswith("-")
-                and bool(_TOOL_CMD.search(line))
+                or (stripped.startswith("-")
+                and bool(_TOOL_CMD.search(line)))
             )
             if is_safe and bool(_TOOL_CMD.search(line)):
                 if run_start is None:

@@ -394,7 +394,7 @@ def run_report(
         console.print(f"[red]Error:[/] File not found: {filepath}")
         return 1
 
-    if not path.suffix.lower() in (".h5", ".hdf5"):
+    if path.suffix.lower() not in (".h5", ".hdf5"):
         console.print(f"[yellow]Warning:[/] File may not be HDF5: {filepath}")
 
     # Load metadata and dataset info

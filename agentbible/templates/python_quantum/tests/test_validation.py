@@ -4,12 +4,9 @@ These tests demonstrate the specification-before-code principle:
 each test defines expected behavior for the validation functions.
 """
 
-from typing import List
-
 import numpy as np
 import pytest
 from numpy.typing import NDArray
-
 from src.validation import (
     check_cptp,
     check_density_matrix,
@@ -226,13 +223,13 @@ class TestCheckCPTP:
         check_cptp(kraus)
 
     def test_depolarizing_channel(
-        self, depolarizing_kraus: List[NDArray[np.complexfloating]]
+        self, depolarizing_kraus: list[NDArray[np.complexfloating]]
     ) -> None:
         """Depolarizing channel is CPTP."""
         check_cptp(depolarizing_kraus)
 
     def test_amplitude_damping_channel(
-        self, amplitude_damping_kraus: List[NDArray[np.complexfloating]]
+        self, amplitude_damping_kraus: list[NDArray[np.complexfloating]]
     ) -> None:
         """Amplitude damping channel is CPTP."""
         check_cptp(amplitude_damping_kraus)

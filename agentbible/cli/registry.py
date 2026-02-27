@@ -6,7 +6,7 @@ Manages agent_registry.yaml for AI agent integration.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 from rich.console import Console
@@ -58,9 +58,9 @@ DEFAULT_REGISTRY = {
 REGISTRY_FILENAME = "agent_registry.yaml"
 
 
-def find_registry(start_path: Path = Path.cwd()) -> Optional[Path]:
+def find_registry(start_path: Path | None = None) -> Path | None:
     """Find agent_registry.yaml in current or parent directories."""
-    current = start_path.resolve()
+    current = (start_path or Path.cwd()).resolve()
     while current != current.parent:
         registry = current / REGISTRY_FILENAME
         if registry.exists():
@@ -69,15 +69,15 @@ def find_registry(start_path: Path = Path.cwd()) -> Optional[Path]:
     return None
 
 
-def load_registry(path: Path) -> Dict[str, Any]:
+def load_registry(path: Path) -> dict[str, Any]:
     """Load registry from YAML file."""
-    with open(path) as f:
+    with path.open() as f:
         return yaml.safe_load(f) or {}
 
 
-def save_registry(path: Path, registry: Dict[str, Any]) -> None:
+def save_registry(path: Path, registry: dict[str, Any]) -> None:
     """Save registry to YAML file."""
-    with open(path, "w") as f:
+    with path.open("w") as f:
         yaml.dump(registry, f, default_flow_style=False, sort_keys=False)
 
 
@@ -149,7 +149,6 @@ def run_registry_init(force: bool = False) -> int:
 def run_registry_check(path: str) -> int:
     """Check if files in path use required validators."""
     import fnmatch
-    import re
 
     registry_path = find_registry()
     if registry_path is None:
@@ -165,12 +164,9 @@ def run_registry_check(path: str) -> int:
         return 1
 
     # Collect Python files
-    if target_path.is_file():
-        files = [target_path]
-    else:
-        files = list(target_path.rglob("*.py"))
+    files = [target_path] if target_path.is_file() else list(target_path.rglob("*.py"))
 
-    issues: List[Dict[str, Any]] = []
+    issues: list[dict[str, Any]] = []
     checked = 0
 
     for file in files:
@@ -226,7 +222,7 @@ def run_registry_check(path: str) -> int:
 
 def run_registry(
     action: str,
-    path: Optional[str] = None,
+    path: str | None = None,
     force: bool = False,
 ) -> int:
     """Run the registry command.

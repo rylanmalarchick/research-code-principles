@@ -7,7 +7,6 @@ each test defines expected behavior for the validation functions.
 import numpy as np
 import pytest
 from numpy.typing import NDArray
-
 from src.validation import (
     check_array_shape,
     check_class_balance,
@@ -121,23 +120,23 @@ class TestCheckArrayShape:
 
     def test_correct_ndim_passes(self) -> None:
         """Correct ndim passes validation."""
-        X = np.random.randn(10, 5)
+        X = np.random.randn(10, 5)  # noqa: N806
         check_array_shape(X, expected_ndim=2)
 
     def test_wrong_ndim_raises(self) -> None:
         """Wrong ndim raises ValueError."""
-        X = np.random.randn(10, 5)
+        X = np.random.randn(10, 5)  # noqa: N806
         with pytest.raises(ValueError, match="dimensions"):
             check_array_shape(X, expected_ndim=3)
 
     def test_min_samples_passes(self) -> None:
         """Sufficient samples pass validation."""
-        X = np.random.randn(100, 5)
+        X = np.random.randn(100, 5)  # noqa: N806
         check_array_shape(X, min_samples=50)
 
     def test_insufficient_samples_raises(self) -> None:
         """Insufficient samples raise ValueError."""
-        X = np.random.randn(10, 5)
+        X = np.random.randn(10, 5)  # noqa: N806
         with pytest.raises(ValueError, match="minimum"):
             check_array_shape(X, min_samples=50)
 
@@ -182,5 +181,5 @@ class TestCheckProbabilityPredictions:
     def test_out_of_range_raises(self) -> None:
         """Probabilities outside [0, 1] raise ValueError."""
         bad_probs = np.array([[0.5, 0.6], [0.4, 0.6]])  # First row > 1
-        with pytest.raises(ValueError, match="out of range|sum to 1"):
+        with pytest.raises(ValueError, match="out of range|sum to 1"):  # noqa: RUF043
             check_probability_predictions(bad_probs)

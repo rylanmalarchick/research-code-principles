@@ -7,7 +7,6 @@ each test defines expected behavior for the validation functions.
 import numpy as np
 import pytest
 from numpy.typing import NDArray
-
 from src.validation import (
     check_cfl_condition,
     check_conservation,
@@ -32,7 +31,7 @@ class TestCheckConservation:
         self, drifting_energy: NDArray[np.floating]
     ) -> None:
         """Drifting energy fails validation."""
-        with pytest.raises(ValueError, match="Conservation.*violated"):
+        with pytest.raises(ValueError, match="Conservation.*violated"):  # noqa: RUF043
             check_conservation(drifting_energy, rtol=1e-4)
 
     def test_single_value_passes(self) -> None:
@@ -123,7 +122,7 @@ class TestCheckCFLCondition:
 
     def test_unstable_cfl_fails(self, unstable_cfl_params: dict) -> None:
         """Parameters exceeding CFL limit fail."""
-        with pytest.raises(ValueError, match="CFL condition.*violated"):
+        with pytest.raises(ValueError, match="CFL condition.*violated"):  # noqa: RUF043
             check_cfl_condition(**unstable_cfl_params)
 
     def test_returns_cfl_number(self, stable_cfl_params: dict) -> None:

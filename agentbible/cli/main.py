@@ -568,8 +568,9 @@ def report(
 @cli.command()
 def info() -> None:
     """Show information about AgentBible installation."""
-    from agentbible.validators.base import ENV_VALIDATION_LEVEL, get_validation_level
     import os
+
+    from agentbible.validators.base import ENV_VALIDATION_LEVEL, get_validation_level
 
     console.print(f"[bold]AgentBible[/] v{__version__}")
     console.print()

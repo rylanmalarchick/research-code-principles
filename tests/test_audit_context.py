@@ -16,7 +16,6 @@ from agentbible.cli.context_audit import (
 )
 from agentbible.cli.main import cli
 
-
 # --- Sample content fixtures ---
 
 MINIMAL_COMPLIANT = """\
@@ -329,7 +328,7 @@ ruff check .
 class TestRunAuditContext:
     """Tests for run_audit_context function."""
 
-    def test_missing_file_returns_error(self, capsys: pytest.CaptureFixture) -> None:
+    def test_missing_file_returns_error(self, capsys: pytest.CaptureFixture) -> None:  # noqa: ARG002
         """Missing file returns exit code 1."""
         exit_code = run_audit_context(file="/nonexistent/AGENTS.md")
         assert exit_code == 1
@@ -369,7 +368,7 @@ class TestRunAuditContext:
         f = tmp_path / "AGENTS.md"
         f.write_text(MINIMAL_COMPLIANT)
 
-        exit_code = run_audit_context(file=str(f), output_json=True)
+        run_audit_context(file=str(f), output_json=True)
         captured = capsys.readouterr()
         data = json.loads(captured.out)
 

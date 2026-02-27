@@ -7,7 +7,6 @@ Google-style docstrings.
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -185,7 +184,7 @@ def generate_dataclass_stub(
 
     # Generate docstring with attributes
     attr_docs = []
-    for name, type_ in fields:
+    for name, _type in fields:
         attr_docs.append(f"        {name}: TODO: Describe {name}.")
 
     # Generate validation if requested
@@ -282,16 +281,16 @@ def generate_test_stub(
 
     # Add import comment
     if class_name:
-        lines.append(f"# TODO: Uncomment after implementation")
+        lines.append("# TODO: Uncomment after implementation")
         lines.append(f"# from <package>.{module_name} import {class_name}")
         lines.append("")
     elif dataclass_name:
-        lines.append(f"# TODO: Uncomment after implementation")
+        lines.append("# TODO: Uncomment after implementation")
         lines.append(f"# from <package>.{module_name} import {dataclass_name}")
         lines.append("")
     elif functions:
         func_imports = ", ".join(functions)
-        lines.append(f"# TODO: Uncomment after implementation")
+        lines.append("# TODO: Uncomment after implementation")
         lines.append(f"# from <package>.{module_name} import {func_imports}")
         lines.append("")
 
@@ -315,7 +314,7 @@ def generate_test_stub(
                     "",
                     f"    def test_{method}(self) -> None:",
                     f'        """Test {method} method."""',
-                    f'        pytest.skip("TODO: Implement")',
+                    '        pytest.skip("TODO: Implement")',
                 ]
             )
 

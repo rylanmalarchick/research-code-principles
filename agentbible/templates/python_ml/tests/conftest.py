@@ -42,7 +42,7 @@ def binary_classification_data() -> tuple:
         Tuple of (X, y) where X is (100, 5) features and y is (100,) labels.
     """
     np.random.seed(42)
-    X = np.random.randn(100, 5)
+    X = np.random.randn(100, 5)  # noqa: N806
     y = (X[:, 0] + X[:, 1] > 0).astype(int)
     return X, y
 
@@ -55,7 +55,7 @@ def multiclass_data() -> tuple:
         Tuple of (X, y) where X is (150, 4) features and y is (150,) labels.
     """
     np.random.seed(42)
-    X = np.random.randn(150, 4)
+    X = np.random.randn(150, 4)  # noqa: N806
     # Create 3 classes based on feature combinations
     y = np.zeros(150, dtype=int)
     y[X[:, 0] > 0.5] = 1
@@ -71,7 +71,7 @@ def regression_data() -> tuple:
         Tuple of (X, y) where X is (100, 3) features and y is (100,) targets.
     """
     np.random.seed(42)
-    X = np.random.randn(100, 3)
+    X = np.random.randn(100, 3)  # noqa: N806
     y = 2 * X[:, 0] + 0.5 * X[:, 1] - X[:, 2] + np.random.randn(100) * 0.1
     return X, y
 
@@ -84,7 +84,7 @@ def imbalanced_data() -> tuple:
         Tuple of (X, y) with 90/10 class split.
     """
     np.random.seed(42)
-    X = np.random.randn(100, 5)
+    X = np.random.randn(100, 5)  # noqa: N806
     y = np.zeros(100, dtype=int)
     y[:10] = 1  # Only 10% positive class
     return X, y
@@ -127,7 +127,7 @@ def leaky_indices() -> tuple:
 def standardized_features() -> NDArray[np.floating]:
     """Standardized features (mean=0, std=1)."""
     np.random.seed(42)
-    X = np.random.randn(100, 5)
+    X = np.random.randn(100, 5)  # noqa: N806
     return (X - X.mean(axis=0)) / X.std(axis=0)
 
 
@@ -135,9 +135,9 @@ def standardized_features() -> NDArray[np.floating]:
 def minmax_features() -> NDArray[np.floating]:
     """Min-max scaled features (range [0, 1])."""
     np.random.seed(42)
-    X = np.random.randn(100, 5)
-    X_min = X.min(axis=0)
-    X_max = X.max(axis=0)
+    X = np.random.randn(100, 5)  # noqa: N806
+    X_min = X.min(axis=0)  # noqa: N806
+    X_max = X.max(axis=0)  # noqa: N806
     return (X - X_min) / (X_max - X_min)
 
 
@@ -145,7 +145,7 @@ def minmax_features() -> NDArray[np.floating]:
 def unscaled_features() -> NDArray[np.floating]:
     """Unscaled features with varying scales."""
     np.random.seed(42)
-    X = np.random.randn(100, 5)
+    X = np.random.randn(100, 5)  # noqa: N806
     X[:, 0] *= 1000  # Large scale
     X[:, 1] *= 0.001  # Small scale
     return X
@@ -155,7 +155,7 @@ def unscaled_features() -> NDArray[np.floating]:
 def features_with_nan() -> NDArray[np.floating]:
     """Features containing NaN values (for testing detection)."""
     np.random.seed(42)
-    X = np.random.randn(100, 5)
+    X = np.random.randn(100, 5)  # noqa: N806
     X[0, 0] = np.nan
     X[10, 2] = np.nan
     return X
@@ -165,7 +165,7 @@ def features_with_nan() -> NDArray[np.floating]:
 def features_with_inf() -> NDArray[np.floating]:
     """Features containing Inf values (for testing detection)."""
     np.random.seed(42)
-    X = np.random.randn(100, 5)
+    X = np.random.randn(100, 5)  # noqa: N806
     X[0, 0] = np.inf
     X[10, 2] = -np.inf
     return X

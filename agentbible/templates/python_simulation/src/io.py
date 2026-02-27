@@ -10,7 +10,7 @@ import datetime
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import h5py
 import numpy as np
@@ -165,7 +165,7 @@ class SimulationOutput:
         grp.create_dataset("values", data=values)
 
 
-def load_simulation(filepath: Union[str, Path]) -> Dict[str, Any]:
+def load_simulation(filepath: Union[str, Path]) -> dict[str, Any]:
     """Load simulation data from HDF5 file.
 
     Args:
@@ -175,7 +175,7 @@ def load_simulation(filepath: Union[str, Path]) -> Dict[str, Any]:
         Dictionary with keys: 'parameters', 'provenance', 'snapshots', 'timeseries'.
     """
     filepath = Path(filepath)
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "parameters": {},
         "provenance": {},
         "snapshots": [],
@@ -193,7 +193,7 @@ def load_simulation(filepath: Union[str, Path]) -> Dict[str, Any]:
             param_grp = f["parameters"]
             for key, value in param_grp.attrs.items():
                 result["parameters"][key] = value
-            for key in param_grp.keys():
+            for key in param_grp:
                 result["parameters"][key] = param_grp[key][:]
 
         # Load snapshots
@@ -202,14 +202,14 @@ def load_simulation(filepath: Union[str, Path]) -> Dict[str, Any]:
             for snap_name in sorted(snap_grp.keys()):
                 snap = snap_grp[snap_name]
                 snap_data = {"time": snap.attrs["time"]}
-                for field_name in snap.keys():
+                for field_name in snap:
                     snap_data[field_name] = snap[field_name][:]
                 result["snapshots"].append(snap_data)
 
         # Load timeseries
         if "timeseries" in f:
             ts_grp = f["timeseries"]
-            for ts_name in ts_grp.keys():
+            for ts_name in ts_grp:
                 ts = ts_grp[ts_name]
                 result["timeseries"][ts_name] = {
                     "times": ts["times"][:],

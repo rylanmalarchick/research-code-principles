@@ -10,7 +10,7 @@ import os
 import random
 import sys
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -138,8 +138,8 @@ def restore_seed_state(state: SeedState) -> None:
 
 def get_experiment_config(
     seed: int = 42,
-    extra_params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    extra_params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """Generate a reproducibility config for experiment tracking.
 
     Args:
@@ -151,7 +151,7 @@ def get_experiment_config(
     """
     import numpy as np
 
-    config: Dict[str, Any] = {
+    config: dict[str, Any] = {
         "seed": seed,
         "numpy_version": np.__version__,
         "python_version": sys.version,
