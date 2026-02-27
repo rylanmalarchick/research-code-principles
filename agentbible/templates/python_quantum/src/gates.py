@@ -17,6 +17,7 @@ from numpy.typing import NDArray
 # Pauli Matrices
 # =============================================================================
 
+
 def pauli_x() -> NDArray[np.complexfloating]:
     """Pauli X gate (bit flip).
 
@@ -65,6 +66,7 @@ def identity(n: int = 1) -> NDArray[np.complexfloating]:
 # =============================================================================
 # Common Single-Qubit Gates
 # =============================================================================
+
 
 def hadamard() -> NDArray[np.complexfloating]:
     """Hadamard gate.
@@ -119,6 +121,7 @@ def s_gate() -> NDArray[np.complexfloating]:
 # =============================================================================
 # Rotation Gates
 # =============================================================================
+
 
 def rx(theta: float) -> NDArray[np.complexfloating]:
     """Rotation around X-axis.
@@ -177,6 +180,7 @@ def rz(theta: float) -> NDArray[np.complexfloating]:
 # =============================================================================
 # Two-Qubit Gates
 # =============================================================================
+
 
 def cnot() -> NDArray[np.complexfloating]:
     """Controlled-NOT (CNOT) gate.
@@ -247,6 +251,7 @@ def iswap() -> NDArray[np.complexfloating]:
 # =============================================================================
 # Gate Composition Utilities
 # =============================================================================
+
 
 def controlled(
     gate: NDArray[np.complexfloating],

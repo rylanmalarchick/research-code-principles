@@ -47,7 +47,9 @@ class TestCheckConservation:
 class TestCheckStability:
     """Tests for check_stability function."""
 
-    def test_stable_solution_passes(self, positive_density: NDArray[np.floating]) -> None:
+    def test_stable_solution_passes(
+        self, positive_density: NDArray[np.floating]
+    ) -> None:
         """Stable solution passes validation."""
         check_stability(positive_density)  # Should not raise
 

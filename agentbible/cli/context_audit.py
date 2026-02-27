@@ -141,9 +141,7 @@ class ContextAuditor:
         issues: list[ContextIssue] = []
 
         # Find lines with tree characters
-        tree_lines = [
-            i + 1 for i, line in enumerate(lines) if _TREE_CHARS.search(line)
-        ]
+        tree_lines = [i + 1 for i, line in enumerate(lines) if _TREE_CHARS.search(line)]
 
         if tree_lines:
             start = tree_lines[0]
@@ -207,9 +205,7 @@ class ContextAuditor:
 
         # Detect "Before X:" / "After X:" / "Step N:" patterns
         before_after_lines = [
-            i + 1
-            for i, line in enumerate(lines)
-            if _BEFORE_AFTER.match(line.strip())
+            i + 1 for i, line in enumerate(lines) if _BEFORE_AFTER.match(line.strip())
         ]
         if before_after_lines and not numbered_runs:
             for ln in before_after_lines:
@@ -332,8 +328,7 @@ class ContextAuditor:
                 not stripped
                 or stripped.startswith("#")
                 or bool(_TOOL_CMD.search(line))
-                or (stripped.startswith("-")
-                and bool(_TOOL_CMD.search(line)))
+                or (stripped.startswith("-") and bool(_TOOL_CMD.search(line)))
             )
             if is_safe and bool(_TOOL_CMD.search(line)):
                 if run_start is None:
@@ -430,9 +425,7 @@ def _print_context_report(result: ContextAuditResult) -> None:
     )
 
     score_color = "green" if result.passed else "red"
-    console.print(
-        f"Tightness score: [{score_color}]{result.tightness_score}/100[/]"
-    )
+    console.print(f"Tightness score: [{score_color}]{result.tightness_score}/100[/]")
 
     if result.issues:
         console.print()

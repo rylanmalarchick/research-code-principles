@@ -83,9 +83,7 @@ class TestCheckFeatureScaling:
         """Standardized features pass standard scaling check."""
         check_feature_scaling(standardized_features, expected="standard")
 
-    def test_minmax_features_pass(
-        self, minmax_features: NDArray[np.floating]
-    ) -> None:
+    def test_minmax_features_pass(self, minmax_features: NDArray[np.floating]) -> None:
         """Min-max scaled features pass minmax check."""
         check_feature_scaling(minmax_features, expected="minmax")
 
@@ -100,7 +98,9 @@ class TestCheckFeatureScaling:
 class TestCheckNoNanInf:
     """Tests for check_no_nan_inf function."""
 
-    def test_clean_data_passes(self, standardized_features: NDArray[np.floating]) -> None:
+    def test_clean_data_passes(
+        self, standardized_features: NDArray[np.floating]
+    ) -> None:
         """Clean data passes validation."""
         check_no_nan_inf(standardized_features)  # Should not raise
 

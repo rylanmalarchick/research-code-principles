@@ -165,7 +165,9 @@ def pure_zero_density() -> NDArray[np.complexfloating]:
 # Kraus Operators for Common Channels
 # ============================================================================
 @pytest.fixture
-def depolarizing_kraus(request: pytest.FixtureRequest) -> list[NDArray[np.complexfloating]]:
+def depolarizing_kraus(
+    request: pytest.FixtureRequest,
+) -> list[NDArray[np.complexfloating]]:
     """Kraus operators for single-qubit depolarizing channel.
 
     Use with: @pytest.mark.parametrize("p", [0.0, 0.1, 0.5])

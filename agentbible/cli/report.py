@@ -57,7 +57,9 @@ def _format_hardware_text(hardware: dict[str, Any] | None) -> list[str]:
         lines.append(f"  CPU: {hardware['cpu_model']}")
     if hardware.get("cpu_count_logical"):
         physical = hardware.get("cpu_count_physical", "?")
-        lines.append(f"  Cores: {physical} physical, {hardware['cpu_count_logical']} logical")
+        lines.append(
+            f"  Cores: {physical} physical, {hardware['cpu_count_logical']} logical"
+        )
     if hardware.get("memory_total_gb"):
         lines.append(f"  Memory: {hardware['memory_total_gb']} GB")
     if hardware.get("gpu_info"):
@@ -127,17 +129,19 @@ def generate_text_report(
             if metadata.get("git_diff_truncated"):
                 lines.append("    ... (diff truncated)")
 
-    lines.extend([
-        "",
-        "ENVIRONMENT",
-        "-" * 40,
-        f"  Hostname: {metadata.get('hostname', 'Unknown')}",
-        f"  Platform: {metadata.get('platform', 'Unknown')}",
-        f"  Python: {metadata.get('python_version', 'Unknown').split()[0]}",
-        "",
-        "RANDOM SEEDS",
-        "-" * 40,
-    ])
+    lines.extend(
+        [
+            "",
+            "ENVIRONMENT",
+            "-" * 40,
+            f"  Hostname: {metadata.get('hostname', 'Unknown')}",
+            f"  Platform: {metadata.get('platform', 'Unknown')}",
+            f"  Python: {metadata.get('python_version', 'Unknown').split()[0]}",
+            "",
+            "RANDOM SEEDS",
+            "-" * 40,
+        ]
+    )
 
     numpy_seed = metadata.get("numpy_seed")
     python_seed = metadata.get("python_seed")
@@ -153,33 +157,39 @@ def generate_text_report(
     else:
         lines.append("  No seeds captured (set seeds explicitly for reproducibility)")
 
-    lines.extend([
-        "",
-        "HARDWARE",
-        "-" * 40,
-        *_format_hardware_text(metadata.get("hardware")),
-        "",
-        "KEY PACKAGES",
-        "-" * 40,
-        *_format_packages_text(metadata.get("packages")),
-    ])
+    lines.extend(
+        [
+            "",
+            "HARDWARE",
+            "-" * 40,
+            *_format_hardware_text(metadata.get("hardware")),
+            "",
+            "KEY PACKAGES",
+            "-" * 40,
+            *_format_packages_text(metadata.get("packages")),
+        ]
+    )
 
     # Datasets
-    lines.extend([
-        "",
-        "DATASETS",
-        "-" * 40,
-    ])
+    lines.extend(
+        [
+            "",
+            "DATASETS",
+            "-" * 40,
+        ]
+    )
     for name, (shape, dtype) in datasets.items():
         lines.append(f"  {name}: shape={shape}, dtype={dtype}")
 
     # Extra metadata if present
     if metadata.get("extra"):
-        lines.extend([
-            "",
-            "EXTRA METADATA",
-            "-" * 40,
-        ])
+        lines.extend(
+            [
+                "",
+                "EXTRA METADATA",
+                "-" * 40,
+            ]
+        )
         for key, value in metadata["extra"].items():
             lines.append(f"  {key}: {value}")
 
@@ -222,31 +232,37 @@ def generate_markdown_report(
         lines.append(f"- **Branch**: `{metadata['git_branch']}`")
     if metadata.get("git_dirty"):
         lines.append("")
-        lines.append("> **Warning**: Repository had uncommitted changes when this file was created!")
+        lines.append(
+            "> **Warning**: Repository had uncommitted changes when this file was created!"
+        )
         if metadata.get("git_diff"):
-            lines.extend([
-                "",
-                "<details>",
-                "<summary>Diff preview</summary>",
-                "",
-                "```diff",
-                metadata["git_diff"][:2000],  # Limit in markdown
-                "```",
-                "",
-                "</details>",
-            ])
+            lines.extend(
+                [
+                    "",
+                    "<details>",
+                    "<summary>Diff preview</summary>",
+                    "",
+                    "```diff",
+                    metadata["git_diff"][:2000],  # Limit in markdown
+                    "```",
+                    "",
+                    "</details>",
+                ]
+            )
 
-    lines.extend([
-        "",
-        "## Environment",
-        "",
-        f"- **Hostname**: `{metadata.get('hostname', 'Unknown')}`",
-        f"- **Platform**: `{metadata.get('platform', 'Unknown')}`",
-        f"- **Python**: `{metadata.get('python_version', 'Unknown').split()[0]}`",
-        "",
-        "## Random Seeds",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Environment",
+            "",
+            f"- **Hostname**: `{metadata.get('hostname', 'Unknown')}`",
+            f"- **Platform**: `{metadata.get('platform', 'Unknown')}`",
+            f"- **Python**: `{metadata.get('python_version', 'Unknown').split()[0]}`",
+            "",
+            "## Random Seeds",
+            "",
+        ]
+    )
 
     numpy_seed = metadata.get("numpy_seed")
     python_seed = metadata.get("python_seed")
@@ -263,18 +279,22 @@ def generate_markdown_report(
         lines.append("*No seeds captured. Set seeds explicitly for reproducibility.*")
 
     # Hardware
-    lines.extend([
-        "",
-        "## Hardware",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Hardware",
+            "",
+        ]
+    )
     hardware = metadata.get("hardware")
     if hardware:
         if hardware.get("cpu_model"):
             lines.append(f"- **CPU**: {hardware['cpu_model']}")
         if hardware.get("cpu_count_logical"):
             physical = hardware.get("cpu_count_physical", "?")
-            lines.append(f"- **Cores**: {physical} physical, {hardware['cpu_count_logical']} logical")
+            lines.append(
+                f"- **Cores**: {physical} physical, {hardware['cpu_count_logical']} logical"
+            )
         if hardware.get("memory_total_gb"):
             lines.append(f"- **Memory**: {hardware['memory_total_gb']} GB")
         if hardware.get("gpu_info"):
@@ -288,53 +308,61 @@ def generate_markdown_report(
         lines.append("*No hardware info available.*")
 
     # Packages
-    lines.extend([
-        "",
-        "## Key Packages",
-        "",
-        "| Package | Version |",
-        "|---------|---------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Key Packages",
+            "",
+            "| Package | Version |",
+            "|---------|---------|",
+        ]
+    )
     packages = metadata.get("packages", {})
     for name, version in packages.items():
         lines.append(f"| {name} | {version} |")
 
     # Datasets
-    lines.extend([
-        "",
-        "## Datasets",
-        "",
-        "| Name | Shape | Dtype |",
-        "|------|-------|-------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Datasets",
+            "",
+            "| Name | Shape | Dtype |",
+            "|------|-------|-------|",
+        ]
+    )
     for name, (shape, dtype) in datasets.items():
         lines.append(f"| {name} | {shape} | {dtype} |")
 
     # Extra metadata
     if metadata.get("extra"):
-        lines.extend([
-            "",
-            "## Extra Metadata",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                "## Extra Metadata",
+                "",
+            ]
+        )
         for key, value in metadata["extra"].items():
             lines.append(f"- **{key}**: {value}")
 
     # pip freeze in collapsible section
     if metadata.get("pip_freeze"):
-        lines.extend([
-            "",
-            "## Full Package List",
-            "",
-            "<details>",
-            "<summary>pip freeze output</summary>",
-            "",
-            "```",
-            "\n".join(metadata["pip_freeze"]),
-            "```",
-            "",
-            "</details>",
-        ])
+        lines.extend(
+            [
+                "",
+                "## Full Package List",
+                "",
+                "<details>",
+                "<summary>pip freeze output</summary>",
+                "",
+                "```",
+                "\n".join(metadata["pip_freeze"]),
+                "```",
+                "",
+                "</details>",
+            ]
+        )
 
     return "\n".join(lines)
 

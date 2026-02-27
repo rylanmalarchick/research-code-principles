@@ -135,7 +135,10 @@ class TestRunGenerateAgentsMd:
         assert (tmp_path / "AGENTS.md").exists()
 
     def test_stdout_mode_prints_not_writes(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture,
     ) -> None:
         """--stdout prints content, does not write file."""
         monkeypatch.chdir(tmp_path)

@@ -38,7 +38,9 @@ class TestCheckUnitarity:
         """Hadamard is unitary."""
         check_unitarity(hadamard)
 
-    def test_identity_is_unitary(self, identity_2x2: NDArray[np.complexfloating]) -> None:
+    def test_identity_is_unitary(
+        self, identity_2x2: NDArray[np.complexfloating]
+    ) -> None:
         """Identity is unitary."""
         check_unitarity(identity_2x2)
 
@@ -131,7 +133,9 @@ class TestCheckNormalized:
         check_normalized(plus_state)
         check_normalized(minus_state)
 
-    def test_bell_state_normalized(self, bell_state: NDArray[np.complexfloating]) -> None:
+    def test_bell_state_normalized(
+        self, bell_state: NDArray[np.complexfloating]
+    ) -> None:
         """Bell state is normalized."""
         check_normalized(bell_state)
 

@@ -190,9 +190,7 @@ def generate_dataclass_stub(
     # Generate validation if requested
     validation_lines = []
     if with_validation:
-        numeric_fields = [
-            name for name, type_ in fields if type_ in ("int", "float")
-        ]
+        numeric_fields = [name for name, type_ in fields if type_ in ("int", "float")]
         if numeric_fields:
             validation_lines.append("    def __post_init__(self) -> None:")
             validation_lines.append('        """Validate field values."""')
@@ -407,7 +405,9 @@ def run_scaffold(
     # Generate content based on options
     if dataclass_name:
         content_parts.append(
-            generate_dataclass_stub(dataclass_name, field_list, with_validation=validate)
+            generate_dataclass_stub(
+                dataclass_name, field_list, with_validation=validate
+            )
         )
     elif class_name:
         content_parts.append(generate_class_stub(class_name, method_list))

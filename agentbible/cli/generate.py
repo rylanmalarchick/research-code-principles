@@ -93,6 +93,8 @@ def run_generate_agents_md(
 
     output_path = Path("AGENTS.md")
     output_path.write_text(content, encoding="utf-8")
-    console.print(f"[green]✓[/] Written {output_path} ({len(content.splitlines())} lines)")
+    console.print(
+        f"[green]✓[/] Written {output_path} ({len(content.splitlines())} lines)"
+    )
     console.print("[dim]Verify with: bible audit context AGENTS.md[/]")
     return 0

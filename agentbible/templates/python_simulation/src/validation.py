@@ -79,11 +79,15 @@ def check_stability(
 
     nan_count = np.sum(np.isnan(data))
     if nan_count > 0:
-        raise ValueError(f"Numerical instability{label}: {nan_count} NaN values detected")
+        raise ValueError(
+            f"Numerical instability{label}: {nan_count} NaN values detected"
+        )
 
     inf_count = np.sum(np.isinf(data))
     if inf_count > 0:
-        raise ValueError(f"Numerical instability{label}: {inf_count} Inf values detected")
+        raise ValueError(
+            f"Numerical instability{label}: {inf_count} Inf values detected"
+        )
 
     max_abs = np.max(np.abs(data))
     if max_abs > max_value:
@@ -226,9 +230,7 @@ def check_time_step(
         )
 
     if dt > t_final:
-        raise ValueError(
-            f"Time step{label} {dt} exceeds final time {t_final}"
-        )
+        raise ValueError(f"Time step{label} {dt} exceeds final time {t_final}")
 
     n_steps = int(np.ceil(t_final / dt))
     if n_steps > 1e9:

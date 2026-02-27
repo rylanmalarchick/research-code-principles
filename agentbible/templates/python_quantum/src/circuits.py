@@ -142,7 +142,9 @@ def apply_gate(
         )
 
     if any(t >= state.n_qubits or t < 0 for t in targets):
-        raise ValueError(f"Target qubits {targets} out of range for {state.n_qubits}-qubit state")
+        raise ValueError(
+            f"Target qubits {targets} out of range for {state.n_qubits}-qubit state"
+        )
 
     # Build full operator using tensor products
     full_gate = _expand_gate(gate, targets, state.n_qubits)

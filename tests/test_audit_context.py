@@ -265,7 +265,8 @@ ruff check .
 
         # No overview, checklist, or code block issues
         bad_issues = [
-            i for i in result.issues
+            i
+            for i in result.issues
             if i.kind in ("codebase-overview", "workflow-checklist", "long-code-block")
         ]
         assert len(bad_issues) == 0

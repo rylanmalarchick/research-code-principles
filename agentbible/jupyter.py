@@ -43,11 +43,13 @@ except ImportError:
     def magic_arguments() -> Any:  # type: ignore[misc]
         def decorator(func: Any) -> Any:
             return func
+
         return decorator
 
     def argument(*args: Any, **kwargs: Any) -> Any:  # type: ignore[misc]
         def decorator(func: Any) -> Any:
             return func
+
         return decorator
 
     def parse_argstring(func: Any, line: str) -> Any:  # type: ignore[misc]
@@ -117,6 +119,7 @@ class AgentBibleMagics(Magics):  # type: ignore[misc]
         """Show AgentBible information."""
         try:
             from agentbible import __version__
+
             version = __version__
         except ImportError:
             version = "unknown"
@@ -149,8 +152,13 @@ class AgentBibleMagics(Magics):  # type: ignore[misc]
 
     @cell_magic
     @magic_arguments()
-    @argument("check", type=str, nargs="?", default="all",
-              help="Validation check: unitarity, hermitian, normalized, density, all")
+    @argument(
+        "check",
+        type=str,
+        nargs="?",
+        default="all",
+        help="Validation check: unitarity, hermitian, normalized, density, all",
+    )
     def validate(self, line: str, cell: str) -> Any:
         """Cell magic to validate the cell output.
 
@@ -199,6 +207,7 @@ class AgentBibleMagics(Magics):  # type: ignore[misc]
 
         try:
             from agentbible.validators import check_no_nan_inf
+
             check_no_nan_inf(data)
             checks_passed.append("no_nan_inf")
         except (ImportError, ValueError) as e:
@@ -208,6 +217,7 @@ class AgentBibleMagics(Magics):  # type: ignore[misc]
         if check_type in ("unitarity", "all") and data.ndim == 2:
             try:
                 from agentbible.validators.quantum import check_unitarity
+
                 check_unitarity(data)
                 checks_passed.append("unitarity")
             except ImportError:
@@ -218,6 +228,7 @@ class AgentBibleMagics(Magics):  # type: ignore[misc]
         if check_type in ("hermitian", "all") and data.ndim == 2:
             try:
                 from agentbible.validators.quantum import check_hermitian
+
                 check_hermitian(data)
                 checks_passed.append("hermitian")
             except ImportError:
@@ -228,6 +239,7 @@ class AgentBibleMagics(Magics):  # type: ignore[misc]
         if check_type in ("normalized", "all") and data.ndim == 1:
             try:
                 from agentbible.validators.quantum import check_normalized
+
                 check_normalized(data)
                 checks_passed.append("normalized")
             except ImportError:
@@ -238,6 +250,7 @@ class AgentBibleMagics(Magics):  # type: ignore[misc]
         if check_type in ("density", "all") and data.ndim == 2:
             try:
                 from agentbible.validators.quantum import check_density_matrix
+
                 check_density_matrix(data)
                 checks_passed.append("density_matrix")
             except ImportError:

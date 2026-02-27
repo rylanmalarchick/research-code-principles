@@ -51,13 +51,15 @@ def cli() -> None:
 @click.option(
     "--template",
     "-t",
-    type=click.Choice([
-        "python-scientific",
-        "python-quantum",
-        "python-ml",
-        "python-simulation",
-        "cpp-hpc-cuda",
-    ]),
+    type=click.Choice(
+        [
+            "python-scientific",
+            "python-quantum",
+            "python-ml",
+            "python-simulation",
+            "cpp-hpc-cuda",
+        ]
+    ),
     default="python-scientific",
     help="Project template to use.",
 )
@@ -347,11 +349,12 @@ def context(
     # Load all mode: simple directory loading (deprecated)
     if load_all:
         import sys as _sys
+
         _sys.stderr.write(
             "DeprecationWarning: `--all` is deprecated and will be removed in v0.7.0.\n"
             "  Broad context loading increases agent inference cost by 20-23% with no\n"
             "  measurable benefit when documentation already exists (arxiv:2602.11988).\n"
-            "  Use `bible context --query \"your topic\"` for task-specific retrieval instead.\n"
+            '  Use `bible context --query "your topic"` for task-specific retrieval instead.\n'
         )
 
     if load_all and path:
@@ -603,9 +606,15 @@ def info() -> None:
     console.print("  bible retrofit            - Add AgentBible to existing project")
     console.print("  bible context             - Generate AI context from docs")
     console.print("  bible validate            - Validate physics constraints")
-    console.print("  bible audit code          - Check code against AgentBible principles")
-    console.print("  bible audit context       - Score AGENTS.md / .cursorrules for minimal context")
-    console.print("  bible generate-agents-md  - Generate minimal AGENTS.md (arxiv:2602.11988)")
+    console.print(
+        "  bible audit code          - Check code against AgentBible principles"
+    )
+    console.print(
+        "  bible audit context       - Score AGENTS.md / .cursorrules for minimal context"
+    )
+    console.print(
+        "  bible generate-agents-md  - Generate minimal AGENTS.md (arxiv:2602.11988)"
+    )
     console.print("  bible report              - Generate provenance report from HDF5")
     console.print("  bible ci                  - CI/CD status and release automation")
     console.print("  bible registry            - Manage agent_registry.yaml")

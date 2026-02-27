@@ -108,13 +108,17 @@ def add_precommit_config(path: Path, force: bool = False) -> bool:
     if precommit_path.exists():
         content = precommit_path.read_text()
         if "agentbible-audit" in content:
-            console.print("[yellow]Skipping:[/] .pre-commit-config.yaml already has AgentBible hook")
+            console.print(
+                "[yellow]Skipping:[/] .pre-commit-config.yaml already has AgentBible hook"
+            )
             return False
 
         # Append hook to existing file
         with precommit_path.open("a") as f:
             f.write(agentbible_hook)
-        console.print("[green]Updated:[/] .pre-commit-config.yaml (added AgentBible hook)")
+        console.print(
+            "[green]Updated:[/] .pre-commit-config.yaml (added AgentBible hook)"
+        )
         return True
     else:
         # Create new file with basic config
@@ -165,7 +169,9 @@ def add_validation_helpers(path: Path, project_type: str) -> bool:
 
     validation_path = src_path / "validation.py"
     if validation_path.exists():
-        console.print(f"[yellow]Skipping:[/] {validation_path.relative_to(path)} already exists")
+        console.print(
+            f"[yellow]Skipping:[/] {validation_path.relative_to(path)} already exists"
+        )
         return False
 
     content = '''"""Validation helpers using AgentBible.
@@ -246,10 +252,16 @@ def add_test_conftest(path: Path) -> bool:
         # Append fixtures
         with conftest_path.open("a") as f:
             f.write("\n\n# AgentBible fixtures\n")
-            f.write("from agentbible.testing import deterministic_seed, tolerance, quantum_tolerance\n")
+            f.write(
+                "from agentbible.testing import deterministic_seed, tolerance, quantum_tolerance\n"
+            )
             f.write("\n# Re-export fixtures for pytest discovery\n")
-            f.write("__all__ = ['deterministic_seed', 'tolerance', 'quantum_tolerance']\n")
-        console.print("[green]Updated:[/] tests/conftest.py (added AgentBible fixtures)")
+            f.write(
+                "__all__ = ['deterministic_seed', 'tolerance', 'quantum_tolerance']\n"
+            )
+        console.print(
+            "[green]Updated:[/] tests/conftest.py (added AgentBible fixtures)"
+        )
         return True
 
     # Create new conftest
@@ -293,7 +305,7 @@ def add_agent_docs(path: Path) -> bool:
 
     # Create PROJECT_CONTEXT.md template
     project_context = agent_docs / "PROJECT_CONTEXT.md"
-    project_context.write_text('''# Project Context
+    project_context.write_text("""# Project Context
 
 ## Overview
 
@@ -312,7 +324,7 @@ TODO: List key dependencies
 ## Development Notes
 
 TODO: Important context for AI agents working on this project
-''')
+""")
 
     console.print("[green]Added:[/] agent_docs/ directory with templates")
     return True
@@ -376,7 +388,9 @@ def run_retrofit(
         console.print("[bold]Select components to add:[/]")
         if Confirm.ask("  Add .cursorrules (AI agent coding rules)?", default=True):
             components_to_add.append("cursorrules")
-        if Confirm.ask("  Add .pre-commit-config.yaml (code quality hooks)?", default=True):
+        if Confirm.ask(
+            "  Add .pre-commit-config.yaml (code quality hooks)?", default=True
+        ):
             components_to_add.append("precommit")
         if Confirm.ask("  Add src/validation.py (validation helpers)?", default=True):
             components_to_add.append("validators")
@@ -411,7 +425,9 @@ def run_retrofit(
     if "precommit" in components_to_add and add_precommit_config(project_path, force):
         added_count += 1
 
-    if "validators" in components_to_add and add_validation_helpers(project_path, project_type):
+    if "validators" in components_to_add and add_validation_helpers(
+        project_path, project_type
+    ):
         added_count += 1
 
     if "conftest" in components_to_add and add_test_conftest(project_path):
