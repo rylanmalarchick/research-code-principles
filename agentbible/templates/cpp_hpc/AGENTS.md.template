@@ -1,0 +1,10 @@
+# AGENTS.md
+
+## Tools
+- Test: `ctest --test-dir build --output-on-failure`
+- Build: `cmake -DCMAKE_BUILD_TYPE=Release ..`
+
+## Rules
+- Max 50 lines per function
+- Zero warnings (-Wall -Wextra -Wpedantic)
+- RAII for all resources (no manual new/delete, cudaFree)

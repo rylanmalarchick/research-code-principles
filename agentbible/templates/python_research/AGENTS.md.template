@@ -1,0 +1,15 @@
+# AGENTS.md
+
+## Tools
+- Test: `pytest -x`
+- Lint: `ruff check .`
+- Type: `mypy src/`
+- Coverage: 80% minimum (`pytest --cov=src --cov-fail-under=80`)
+
+## Physics
+- Validate quantum operators: `from agentbible.validators import validate_unitary`
+- Set seeds: `np.random.seed(seed)`
+
+## Rules
+- Max 50 lines per function
+- No bare `except:`

@@ -13,6 +13,7 @@ from pathlib import Path
 
 from rich.console import Console
 
+from agentbible.cli.generate import build_agents_md
 from agentbible.templates import AVAILABLE_TEMPLATES
 
 console = Console()
@@ -240,6 +241,14 @@ def run_init(
     try:
         dest_dir.mkdir(parents=True)
         created_files = copy_template(template_dir, dest_dir, variables)
+
+        # Generate minimal AGENTS.md alongside .cursorrules
+        domain = "quantum" if "quantum" in template else "none"
+        agents_md_content = build_agents_md(domain=domain)
+        agents_md_path = dest_dir / "AGENTS.md"
+        agents_md_path.write_text(agents_md_content, encoding="utf-8")
+        created_files.append(agents_md_path)
+
         console.print(f"[green]✓[/] Created {len(created_files)} files")
     except Exception as e:
         console.print(f"[red]Error copying template:[/] {e}")

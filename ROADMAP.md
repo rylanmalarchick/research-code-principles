@@ -2,7 +2,35 @@
 
 This document outlines the development roadmap for AgentBible.
 
-## v0.2.1 (January 2026) - Current Release
+## v0.6.0 (February 2026) - Evidence-Based Minimal Context
+
+**Status:** Released (Current)
+
+Motivated by arxiv:2602.11988 ("Evaluating AGENTS.md for Coding Agents"), which found that
+LLM-generated context files reduce task success by 2-3% and increase cost by 20-23%, while
+developer-written minimal files improve success by ~4%.
+
+### Features
+- [x] `bible audit context [file]` — Score AGENTS.md / .cursorrules for minimal context compliance
+  - Detects codebase overviews, workflow checklists, and long code blocks
+  - Tightness score (0-100); exits 0 if score ≥ 70 (CI-friendly gate)
+  - JSON output mode for CI integration
+  - Auto-detects AGENTS.md or .cursorrules in current directory
+- [x] `bible generate-agents-md` — Generate minimal, evidence-based AGENTS.md
+  - Flags: `--domain [quantum|ml|atmospheric|none]`, `--test-cmd`, `--coverage`, `--stdout`
+  - Output ≤ 20 lines; generated file passes its own `bible audit context`
+- [x] `bible audit` converted to group with `code` and `context` subcommands
+- [x] `bible init` now also generates minimal AGENTS.md alongside .cursorrules
+- [x] Slimmed `.cursorrules` templates (~13 lines, down from ~134)
+- [x] `bible context --all` deprecated with migration path to `--query`
+  (removal target: v0.7.0)
+
+### Reference
+arxiv:2602.11988 — "Evaluating AGENTS.md for Coding Agents"
+
+---
+
+## v0.2.1 - v0.5.0 (January 2026)
 
 **Status:** Released
 
@@ -31,6 +59,16 @@ This document outlines the development roadmap for AgentBible.
 - [x] `bible ci release` - Full automated release flow
 - [x] Enhanced `.cursorrules` with CI/CD guidance for AI agents
 - [x] `gh` CLI integration patterns and best practices
+
+## v0.7.0 (Q2 2026) - Context Cleanup
+
+**Status:** Planned
+
+### Breaking Changes
+- [ ] Remove `bible context --all` (deprecated in v0.6.0)
+  - Migration: use `bible context --query "your topic"` for task-specific retrieval
+
+---
 
 ## v0.3.0 (Q2 2026) - Ecosystem Integration
 

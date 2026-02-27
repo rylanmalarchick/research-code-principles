@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-02-27
+
+### Added
+
+#### Evidence-Based Minimal Context (arxiv:2602.11988)
+- `bible audit context [file]` — Score AGENTS.md / .cursorrules for minimal context compliance
+  - Detects anti-patterns: codebase overviews (directory trees), workflow checklists, long code blocks
+  - Tightness score 0-100; exits 0 if score ≥ 70 (CI-friendly gate)
+  - JSON output mode (`--json`) for CI integration
+  - Auto-detects AGENTS.md or .cursorrules in current directory
+- `bible generate-agents-md` — Generate minimal, evidence-based AGENTS.md (≤ 20 lines)
+  - `--domain [quantum|ml|atmospheric|none]` for domain-specific tool specs
+  - `--test-cmd`, `--coverage` for custom commands
+  - `--stdout` to print instead of writing file
+  - Generated files automatically pass `bible audit context`
+- `bible audit` converted to a Click command group
+  - `bible audit code <path>` — Code quality audit (was `bible audit <path>`)
+  - `bible audit context [file]` — Context file tightness audit (new)
+- `bible init` now generates a minimal AGENTS.md alongside `.cursorrules`
+
+### Changed
+
+- `.cursorrules` templates slimmed from ~134 lines to ~13 lines
+- `bible context --all` deprecated with stderr warning; removal target v0.7.0
+- Version bumped to 0.6.0
+
+### Reference
+
+arxiv:2602.11988 — "Evaluating AGENTS.md for Coding Agents": LLM-generated broad context
+files reduce task success by 2-3% and increase inference cost by 20-23%. Developer-written
+minimal files (tool specs only, ≤ 20 lines) improve success by ~4%.
+
+---
+
 ## [0.5.0] - 2026-01-19
 
 ### Added
@@ -299,7 +333,8 @@ This is the initial release combining 6 development sprints:
 5. CI/CD & Security (GitHub Actions, pip-audit, trusted publishing)
 6. Documentation & Polish (README, CHANGELOG, badges)
 
-[Unreleased]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.2.1...v0.4.0
 [0.2.1]: https://github.com/rylanmalarchick/research-code-principles/compare/v0.2.0...v0.2.1

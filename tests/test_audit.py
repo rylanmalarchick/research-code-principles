@@ -281,21 +281,29 @@ def long_function():
 
 
 class TestCLIAudit:
-    """Tests for audit CLI command."""
+    """Tests for audit CLI command group."""
 
-    def test_audit_help(self) -> None:
-        """audit --help shows command help."""
+    def test_audit_group_help(self) -> None:
+        """audit --help shows group help with subcommands."""
         runner = CliRunner()
         result = runner.invoke(cli, ["audit", "--help"])
 
         assert result.exit_code == 0
-        assert "Audit code" in result.output
+        assert "code" in result.output
+        assert "context" in result.output
+
+    def test_audit_code_help(self) -> None:
+        """audit code --help shows subcommand help."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["audit", "code", "--help"])
+
+        assert result.exit_code == 0
         assert "--json" in result.output
         assert "--strict" in result.output
         assert "--max-lines" in result.output
 
-    def test_audit_file_json(self, tmp_path: Path) -> None:
-        """audit command produces valid JSON."""
+    def test_audit_code_file_json(self, tmp_path: Path) -> None:
+        """audit code command produces valid JSON."""
         code = textwrap.dedent('''
             def good_func() -> int:
                 """A good function."""
@@ -305,20 +313,20 @@ class TestCLIAudit:
         test_file.write_text(code)
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["audit", str(test_file), "--json"])
+        result = runner.invoke(cli, ["audit", "code", str(test_file), "--json"])
 
         assert result.exit_code == 0
         data = json.loads(result.output)
         assert data["passed"] is True
 
-    def test_audit_directory(self, tmp_path: Path) -> None:
-        """audit command works on directories."""
+    def test_audit_code_directory(self, tmp_path: Path) -> None:
+        """audit code command works on directories."""
         (tmp_path / "file.py").write_text(
             'def f() -> int:\n    """Doc."""\n    return 1'
         )
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["audit", str(tmp_path), "--json"])
+        result = runner.invoke(cli, ["audit", "code", str(tmp_path), "--json"])
 
         assert result.exit_code == 0
         data = json.loads(result.output)

@@ -281,14 +281,24 @@ All validators:
 ### CLI Commands
 
 ```bash
-bible init <name>           # Create project from template
-bible scaffold <file>       # Generate module stubs with tests
-bible retrofit              # Add AgentBible to existing project
-bible validate <file>       # Validate physics constraints
-bible audit <path>          # Check code against AgentBible principles
-bible context               # Generate AI context
-bible ci status             # Show CI/CD workflow status
-bible info                  # Show installation info
+bible init <name>                     # Create project from template (+ AGENTS.md)
+bible scaffold <file>                 # Generate module stubs with tests
+bible retrofit                        # Add AgentBible to existing project
+bible validate <file>                 # Validate physics constraints
+bible audit code <path>              # Check code against AgentBible principles
+bible audit context [file]           # Score AGENTS.md / .cursorrules tightness
+bible generate-agents-md             # Generate minimal evidence-based AGENTS.md
+bible context --query "topic"        # Retrieve task-specific AI context
+bible ci status                       # Show CI/CD workflow status
+bible info                            # Show installation info
+```
+
+**Context audit** scores your AGENTS.md against arxiv:2602.11988 findings — that broad
+context files hurt agent performance. Score ≥ 70 passes; use `--json` for CI integration.
+
+```bash
+bible audit context AGENTS.md        # Score: 95/100 ✓
+bible generate-agents-md --domain quantum --stdout  # Preview output
 ```
 
 ### Configuration
@@ -372,14 +382,16 @@ bible init my-project --template cpp-hpc-cuda
 
 ## Status
 
-**v0.4.0** (Alpha) - New ML and atmospheric domains, validation pipelines. API stable, ready for real use.
+**v0.6.0** (Alpha) - Evidence-based minimal context tooling. API stable, ready for real use.
 
 - Core validators work for any scientific code
 - Quantum domain validators via `agentbible.domains.quantum`
 - ML domain validators via `agentbible.domains.ml`
 - Atmospheric domain validators via `agentbible.domains.atmospheric`
 - ValidationPipeline for composing multiple checks
-- Context module for AI-assisted development
+- `bible audit context` — scores AGENTS.md tightness (arxiv:2602.11988)
+- `bible generate-agents-md` — generates minimal ≤20-line AGENTS.md
+- `bible init` generates AGENTS.md alongside `.cursorrules`
 
 See the full [ROADMAP.md](ROADMAP.md) for what's coming next.
 
@@ -434,4 +446,4 @@ Rylan Malarchick - [rylan1012@gmail.com](mailto:rylan1012@gmail.com)
 
 ---
 
-**v0.4.0** - ML domain, atmospheric domain, validation pipelines (January 2026)
+**v0.6.0** - Evidence-based minimal context tooling (February 2026)

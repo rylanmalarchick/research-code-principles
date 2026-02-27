@@ -3,9 +3,11 @@
 Usage:
     bible --help
     bible init my-project --template python-scientific
-    bible context --all ./agent_docs
+    bible context --query "unitarity"
     bible validate state.npy --check unitarity
-    bible audit ./src --json
+    bible audit code ./src --json
+    bible audit context AGENTS.md
+    bible generate-agents-md --domain quantum
     bible ci status
     bible ci verify --wait
     bible ci release 0.3.0
@@ -21,6 +23,8 @@ from rich.console import Console
 from agentbible import __version__
 from agentbible.cli.audit import run_audit
 from agentbible.cli.ci import run_ci_release, run_ci_status, run_ci_verify
+from agentbible.cli.context_audit import run_audit_context
+from agentbible.cli.generate import run_generate_agents_md
 from agentbible.cli.init import run_init
 from agentbible.cli.registry import run_registry
 from agentbible.cli.report import run_report
@@ -340,7 +344,16 @@ def context(
             console.print(f"[red]Error embedding documents:[/] {e}")
         return
 
-    # Load all mode: simple directory loading
+    # Load all mode: simple directory loading (deprecated)
+    if load_all:
+        import sys as _sys
+        _sys.stderr.write(
+            "DeprecationWarning: `--all` is deprecated and will be removed in v0.7.0.\n"
+            "  Broad context loading increases agent inference cost by 20-23% with no\n"
+            "  measurable benefit when documentation already exists (arxiv:2602.11988).\n"
+            "  Use `bible context --query \"your topic\"` for task-specific retrieval instead.\n"
+        )
+
     if load_all and path:
         console.print(f"[bold blue]Loading all documents from {path}...[/]")
         try:
@@ -584,19 +597,37 @@ def info() -> None:
     console.print("  - cli: Command-line interface")
     console.print()
     console.print("[bold]Available commands:[/]")
-    console.print("  bible init      - Create new project from template")
-    console.print("  bible scaffold  - Generate module stubs with tests")
-    console.print("  bible retrofit  - Add AgentBible to existing project")
-    console.print("  bible context   - Generate AI context from docs")
-    console.print("  bible validate  - Validate physics constraints")
-    console.print("  bible audit     - Check code against AgentBible principles")
-    console.print("  bible report    - Generate provenance report from HDF5")
-    console.print("  bible ci        - CI/CD status and release automation")
-    console.print("  bible registry  - Manage agent_registry.yaml")
-    console.print("  bible info      - Show this information")
+    console.print("  bible init                - Create new project from template")
+    console.print("  bible scaffold            - Generate module stubs with tests")
+    console.print("  bible retrofit            - Add AgentBible to existing project")
+    console.print("  bible context             - Generate AI context from docs")
+    console.print("  bible validate            - Validate physics constraints")
+    console.print("  bible audit code          - Check code against AgentBible principles")
+    console.print("  bible audit context       - Score AGENTS.md / .cursorrules for minimal context")
+    console.print("  bible generate-agents-md  - Generate minimal AGENTS.md (arxiv:2602.11988)")
+    console.print("  bible report              - Generate provenance report from HDF5")
+    console.print("  bible ci                  - CI/CD status and release automation")
+    console.print("  bible registry            - Manage agent_registry.yaml")
+    console.print("  bible info                - Show this information")
 
 
-@cli.command()
+@cli.group()
+def audit() -> None:
+    """Audit code and context files against AgentBible principles.
+
+    Subcommands:
+        code     Check Python source code (Rule of 50, docstrings, types)
+        context  Check AGENTS.md / .cursorrules for minimal context compliance
+
+    Examples:
+        bible audit code ./src --json
+        bible audit context AGENTS.md
+        bible audit context  (auto-detects AGENTS.md or .cursorrules)
+    """
+    pass
+
+
+@audit.command("code")
 @click.argument("path", type=click.Path(exists=True))
 @click.option(
     "--json",
@@ -636,7 +667,7 @@ def info() -> None:
     multiple=True,
     help="Glob patterns to exclude (can be used multiple times).",
 )
-def audit(
+def audit_code(
     path: str,
     output_json: bool,
     no_line_length: bool,
@@ -646,7 +677,7 @@ def audit(
     strict: bool,
     exclude: tuple[str, ...],
 ) -> None:
-    """Audit code against AgentBible principles.
+    """Audit Python code against AgentBible principles.
 
     Checks Python code for compliance with:
     - Rule of 50: Functions should be <= 50 lines
@@ -656,10 +687,10 @@ def audit(
     Use --json for CI integration (machine-readable output).
 
     Examples:
-        bible audit ./src
-        bible audit ./src --json
-        bible audit ./src --strict --max-lines 30
-        bible audit ./src --exclude "**/test_*.py"
+        bible audit code ./src
+        bible audit code ./src --json
+        bible audit code ./src --strict --max-lines 30
+        bible audit code ./src --exclude "**/test_*.py"
     """
     output_format = "json" if output_json else "text"
     exclude_list = list(exclude) if exclude else None
@@ -674,6 +705,82 @@ def audit(
             max_lines=max_lines,
             strict=strict,
             exclude=exclude_list,
+        )
+    )
+
+
+@audit.command("context")
+@click.argument("file", required=False, type=click.Path())
+@click.option(
+    "--json",
+    "output_json",
+    is_flag=True,
+    help="Output results as JSON for CI integration.",
+)
+def audit_context(file: str | None, output_json: bool) -> None:
+    """Audit AGENTS.md or .cursorrules for minimal context compliance.
+
+    Scores the file against arxiv:2602.11988 recommendations.
+    Reports codebase overviews, workflow checklists, and long code blocks.
+
+    Exit code 0 if tightness score >= 70, 1 otherwise.
+
+    Examples:
+        bible audit context
+        bible audit context AGENTS.md
+        bible audit context .cursorrules --json
+    """
+    sys.exit(run_audit_context(file=file, output_json=output_json))
+
+
+@cli.command("generate-agents-md")
+@click.option(
+    "--domain",
+    type=click.Choice(["quantum", "ml", "atmospheric", "none"]),
+    default="none",
+    help="Physics domain for domain-specific constraints.",
+)
+@click.option(
+    "--test-cmd",
+    "test_cmd",
+    type=str,
+    default="pytest -x",
+    help="Test command (default: pytest -x).",
+)
+@click.option(
+    "--coverage",
+    type=int,
+    default=80,
+    help="Coverage threshold percentage (default: 80).",
+)
+@click.option(
+    "--stdout",
+    is_flag=True,
+    help="Print to stdout instead of writing AGENTS.md.",
+)
+def generate_agents_md(
+    domain: str,
+    test_cmd: str,
+    coverage: int,
+    stdout: bool,
+) -> None:
+    """Generate a minimal, evidence-based AGENTS.md.
+
+    Creates an AGENTS.md following arxiv:2602.11988 recommendations:
+    tool specifications only, no codebase overviews or checklists.
+
+    Examples:
+        bible generate-agents-md
+        bible generate-agents-md --domain quantum
+        bible generate-agents-md --stdout > AGENTS.md
+        bible generate-agents-md --coverage 90
+    """
+    sys.exit(
+        run_generate_agents_md(
+            domain=domain,
+            test_cmd=test_cmd,
+            coverage=coverage,
+            stdout=stdout,
         )
     )
 
