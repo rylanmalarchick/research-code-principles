@@ -352,9 +352,9 @@ Check current level with `bible info`.
 Pre-configured with:
 - **ruff** for linting (strict rules)
 - **mypy** in strict mode
-- **pytest** with 70% coverage minimum
+- **pytest** with 80% coverage minimum
 - Physics validation helpers
-- `.cursorrules` for AI agents
+- `AGENTS.md` + `.cursorrules` for AI agents (minimal context, arxiv:2602.11988)
 
 ```bash
 bible init my-project --template python-scientific
