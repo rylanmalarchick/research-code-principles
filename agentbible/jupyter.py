@@ -206,9 +206,9 @@ class AgentBibleMagics(Magics):  # type: ignore[misc]
         checks_failed = []
 
         try:
-            from agentbible.validators import check_no_nan_inf
+            from agentbible.validators import check_finite
 
-            check_no_nan_inf(data)
+            check_finite(data)
             checks_passed.append("no_nan_inf")
         except (ImportError, ValueError) as e:
             if "NaN" in str(e) or "Inf" in str(e):

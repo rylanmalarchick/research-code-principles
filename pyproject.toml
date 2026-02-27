@@ -164,6 +164,7 @@ warn_unused_configs = true
 disable_error_code = ["type-arg"]  # numpy.ndarray generic params vary by numpy version
 exclude = [
     "^agentbible/templates/",  # Template files are not meant to be type-checked here
+    "^agentbible/jupyter\\.py$",  # IPython is an optional dep with no stubs
 ]
 
 [[tool.mypy.overrides]]

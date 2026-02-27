@@ -395,13 +395,14 @@ def run_audit_context(
             console.print(f"[red]Error:[/] File not found: {file}")
             return 1
     else:
-        target = _find_default_context_file()
-        if target is None:
+        found = _find_default_context_file()
+        if found is None:
             console.print(
                 "[red]Error:[/] No AGENTS.md or .cursorrules found in current directory"
             )
             console.print("Specify a file: bible audit context <file>")
             return 1
+        target = found
 
     auditor = ContextAuditor()
     result = auditor.audit_file(target)
