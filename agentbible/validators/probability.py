@@ -284,8 +284,8 @@ def validate_normalized(func: F) -> F: ...
 def validate_normalized(
     *,
     axis: int | None = None,
-    rtol: float = 1e-5,
-    atol: float = 1e-8,
+    rtol: float = 0.0,
+    atol: float = 1e-10,
     level: str | ValidationLevel | None = None,
 ) -> Callable[[F], F]: ...
 
@@ -294,8 +294,8 @@ def validate_normalized(
     func: F | None = None,
     *,
     axis: int | None = None,
-    rtol: float = 1e-5,
-    atol: float = 1e-8,
+    rtol: float = 0.0,
+    atol: float = 1e-10,
     level: str | ValidationLevel | None = None,
 ) -> F | Callable[[F], F]:
     """Validate that a function returns a normalized array (sums to 1).
@@ -363,7 +363,7 @@ def validate_normalized(
             if axis is None:
                 # Total sum should be 1
                 total_float = float(total)
-                if not np.isclose(total_float, 1.0, rtol=rtol, atol=atol):
+                if abs(total_float - 1.0) > atol + rtol:
                     raise NormalizationError(
                         "Array is not normalized",
                         expected="sum = 1 (probability distribution must sum to 1)",
@@ -375,8 +375,9 @@ def validate_normalized(
             else:
                 # Each slice along axis should sum to 1
                 expected_ones = np.ones_like(total)
-                if not np.allclose(total, expected_ones, rtol=rtol, atol=atol):
-                    max_deviation = float(np.max(np.abs(total - expected_ones)))
+                allowed = atol + rtol
+                max_deviation = float(np.max(np.abs(total - expected_ones)))
+                if max_deviation > allowed:
                     raise NormalizationError(
                         f"Array is not normalized along axis {axis}",
                         expected="sum along axis = 1",

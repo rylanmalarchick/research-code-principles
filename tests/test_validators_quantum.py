@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from agentbible.domains.quantum import (
+from agentbible.validators import (
     validate_density_matrix,
     validate_hermitian,
     validate_unitary,

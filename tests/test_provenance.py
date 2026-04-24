@@ -13,7 +13,13 @@ from agentbible.provenance.hdf5 import get_provenance_metadata
 # Only import HDF5-specific functions if h5py is available
 h5py = pytest.importorskip("h5py")
 
-from agentbible.provenance import load_with_metadata, save_with_metadata  # noqa: E402
+from agentbible.provenance import (  # noqa: E402
+    build_provenance_record,
+    emit_provenance_record,
+    load_with_metadata,
+    save_with_metadata,
+    validate_provenance_record,
+)
 
 
 class TestGetProvenanceMetadata:
@@ -184,3 +190,42 @@ class TestLoadWithMetadata:
         assert "git_sha" in metadata
         assert "git_branch" in metadata
         assert "git_dirty" in metadata
+
+
+class TestJsonProvenance:
+    """Tests for schema-compliant JSON provenance records."""
+
+    def test_build_record_matches_schema_contract(self) -> None:
+        record = build_provenance_record(
+            checks_passed=[
+                {
+                    "check_name": "unitary",
+                    "passed": True,
+                    "rtol": 1e-10,
+                    "atol": 1e-12,
+                    "norm_used": "frobenius",
+                    "error_message": None,
+                }
+            ]
+        )
+        payload = record.to_dict()
+        assert validate_provenance_record(payload) == []
+        assert payload["language"] == "python"
+
+    def test_emit_provenance_record_writes_json(self, tmp_path: Path) -> None:
+        target = emit_provenance_record(
+            tmp_path / "results.h5",
+            checks_passed=[
+                {
+                    "check_name": "finite_array",
+                    "passed": True,
+                    "rtol": 0.0,
+                    "atol": 0.0,
+                    "norm_used": "n/a",
+                    "error_message": None,
+                }
+            ],
+        )
+        assert target.name == "results.provenance.json"
+        payload = json.loads(target.read_text(encoding="utf-8"))
+        assert validate_provenance_record(payload) == []

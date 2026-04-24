@@ -1,84 +1,73 @@
-"""AgentBible: Production-grade infrastructure for AI-assisted research software.
-
-This package provides:
-- Validators: Physics validation decorators (bounds, probability, normalization)
-- Array Checks: Direct validation functions for data pipelines
-- Provenance: HDF5-based reproducibility tracking
-- Testing: Physics-aware pytest fixtures and decorators
-- CLI: Project scaffolding and context management (bible init, bible context)
-
-For domain-specific validators (e.g., quantum), import from the domain:
-    from agentbible.domains.quantum import validate_unitary, validate_hermitian
-
-For ML-specific validators (e.g., data leakage), import from the ML domain:
-    from agentbible.domains.ml import check_no_leakage, check_temporal_autocorrelation
-
-Example (decorators):
-    >>> from agentbible import validate_finite, validate_normalized
-    >>> import numpy as np
-    >>>
-    >>> @validate_finite
-    ... def compute_result():
-    ...     return np.array([1.0, 2.0, 3.0])
-    >>>
-    >>> @validate_normalized
-    ... def get_distribution():
-    ...     return np.array([0.25, 0.25, 0.25, 0.25])
-
-Example (array checks):
-    >>> from agentbible import check_finite, check_positive, check_range
-    >>> import numpy as np
-    >>>
-    >>> arr = np.array([1.0, 2.0, 3.0])
-    >>> check_finite(arr, name="temperature")
-    >>> check_positive(arr, name="temperature")
-    >>> check_range(arr, 0, 100, name="temperature")
-    >>>
-    >>> # Warn instead of raise (strict=False)
-    >>> check_positive(arr, name="x", strict=False)  # Warns if invalid
-"""
+"""AgentBible public package surface."""
 
 from __future__ import annotations
 
-__version__ = "0.6.0"
-__author__ = "Rylan Malarchick"
-__email__ = "rylan1012@gmail.com"
-
-# Public API - core errors
 from agentbible.errors import (
     BoundsError,
+    DensityMatrixError,
+    HermiticityError,
     NonFiniteError,
     NormalizationError,
     PhysicsConstraintError,
+    PositiveDefiniteError,
+    PositiveSemidefiniteError,
     ProbabilityBoundsError,
     StateVectorNormError,
+    SymmetryError,
+    TraceError,
+    UnitarityError,
     ValidationError,
 )
-
-# Public API - core validators (decorators)
-# Public API - array checks (direct validation functions)
 from agentbible.validators import (
+    DEFAULT_ATOL,
+    DEFAULT_RTOL,
+    check_density_matrix,
     check_finite,
+    check_finite_array,
+    check_hermitian,
     check_non_negative,
+    check_non_negative_array,
     check_normalized,
+    check_normalized_l1,
     check_positive,
+    check_positive_array,
+    check_positive_definite,
+    check_positive_semidefinite,
     check_probabilities,
     check_probability,
+    check_probability_array,
     check_range,
+    check_symmetric,
+    check_unitary,
+    validate_density_matrix,
     validate_finite,
+    validate_hermitian,
     validate_non_negative,
     validate_normalized,
+    validate_normalized_l1,
     validate_positive,
+    validate_positive_definite,
+    validate_positive_semidefinite,
     validate_probabilities,
     validate_probability,
     validate_range,
+    validate_symmetric,
+    validate_unitary,
 )
+
+__version__ = "1.0.0"
+__author__ = "Rylan Malarchick"
+__email__ = "rylan1012@gmail.com"
+SPEC_VERSION = "1.0"
 
 __all__ = [
     # Metadata
     "__version__",
     "__author__",
     "__email__",
+    "SPEC_VERSION",
+    "DEFAULT_RTOL",
+    "DEFAULT_ATOL",
     # Base exceptions
     "ValidationError",
     "PhysicsConstraintError",
@@ -88,21 +77,48 @@ __all__ = [
     "StateVectorNormError",
     "NonFiniteError",
     "BoundsError",
+    "SymmetryError",
+    "HermiticityError",
+    "UnitarityError",
+    "PositiveDefiniteError",
+    "PositiveSemidefiniteError",
+    "TraceError",
+    "DensityMatrixError",
     # Probability validators (decorators)
     "validate_probability",
     "validate_probabilities",
     "validate_normalized",
+    "validate_normalized_l1",
     # Bounds validators (decorators)
     "validate_positive",
     "validate_non_negative",
     "validate_range",
     "validate_finite",
+    # Matrix validators (decorators)
+    "validate_symmetric",
+    "validate_hermitian",
+    "validate_unitary",
+    "validate_positive_definite",
+    "validate_positive_semidefinite",
+    "validate_density_matrix",
     # Array checks (direct validation functions)
     "check_finite",
+    "check_finite_array",
     "check_positive",
+    "check_positive_array",
     "check_non_negative",
+    "check_non_negative_array",
     "check_range",
     "check_probability",
     "check_probabilities",
+    "check_probability_array",
     "check_normalized",
+    "check_normalized_l1",
+    # Matrix checks (direct validation functions)
+    "check_symmetric",
+    "check_hermitian",
+    "check_unitary",
+    "check_positive_definite",
+    "check_positive_semidefinite",
+    "check_density_matrix",
 ]

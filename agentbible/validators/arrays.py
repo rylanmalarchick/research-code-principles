@@ -469,8 +469,8 @@ def check_normalized(
     *,
     name: str = "distribution",
     axis: int | None = None,
-    rtol: float = 1e-5,
-    atol: float = 1e-8,
+    rtol: float = 0.0,
+    atol: float = 1e-10,
     strict: bool = True,
 ) -> T:
     """Validate that an array is normalized (sums to 1).
@@ -507,7 +507,7 @@ def check_normalized(
     if axis is None:
         # Total sum should be 1
         total_float = float(total)
-        if not np.isclose(total_float, 1.0, rtol=rtol, atol=atol):
+        if abs(total_float - 1.0) > atol + rtol:
             error = NormalizationError(
                 f"Array '{name}' is not normalized",
                 expected="sum = 1 (probability distribution must sum to 1)",
@@ -524,8 +524,9 @@ def check_normalized(
     else:
         # Each slice along axis should sum to 1
         expected_ones = np.ones_like(total)
-        if not np.allclose(total, expected_ones, rtol=rtol, atol=atol):
-            max_deviation = float(np.max(np.abs(total - expected_ones)))
+        allowed = atol + rtol
+        max_deviation = float(np.max(np.abs(total - expected_ones)))
+        if max_deviation > allowed:
             error = NormalizationError(
                 f"Array '{name}' is not normalized along axis {axis}",
                 expected="sum along axis = 1",

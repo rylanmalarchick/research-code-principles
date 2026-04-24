@@ -1,4 +1,4 @@
-"""Physics constraint violation errors with academic references.
+"""Validation errors for scientific numerical correctness checks.
 
 This module provides the core error classes for physics validation failures.
 Each error includes:
@@ -8,8 +8,6 @@ Each error includes:
 - Academic references for understanding the constraint
 - Guidance on how to fix the issue
 
-Domain-specific errors (e.g., quantum) are located in their respective domains:
-    from agentbible.domains.quantum import UnitarityError, HermiticityError
 """
 
 from __future__ import annotations
@@ -258,6 +256,101 @@ class BoundsError(PhysicsConstraintError):
     )
 
 
+class SymmetryError(PhysicsConstraintError):
+    """Raised when a matrix fails the symmetric constraint A = A^T."""
+
+    REFERENCE = "Horn & Johnson, 'Matrix Analysis', Section 0.4 on symmetric matrices."
+    GUIDANCE = (
+        "Symmetric matrices require A[i,j] == A[j,i]. Common causes:\n"
+        "    - Off-diagonal write order bug\n"
+        "    - Missing mirrored assignment\n"
+        "    - Numerical asymmetry from inconsistent updates"
+    )
+
+
+class HermiticityError(PhysicsConstraintError):
+    """Raised when a matrix fails the Hermitian constraint A = A†."""
+
+    REFERENCE = (
+        "Nielsen & Chuang, 'Quantum Computation and Quantum Information', "
+        "Definition 2.5."
+    )
+    GUIDANCE = (
+        "Hermitian matrices require A[i,j] == conj(A[j,i]). Common causes:\n"
+        "    - Missing complex conjugation\n"
+        "    - Diagonal entries not real-valued\n"
+        "    - Transpose used where conjugate transpose was required"
+    )
+
+
+class UnitarityError(PhysicsConstraintError):
+    """Raised when a matrix fails the unitarity constraint U†U = I."""
+
+    REFERENCE = (
+        "Nielsen & Chuang, 'Quantum Computation and Quantum Information', "
+        "Theorem 2.2."
+    )
+    GUIDANCE = (
+        "Unitary matrices preserve norm. Common causes:\n"
+        "    - Missing normalization factor\n"
+        "    - Sign or phase error in matrix entries\n"
+        "    - Numerical drift from repeated approximate updates"
+    )
+
+
+class PositiveDefiniteError(PhysicsConstraintError):
+    """Raised when Cholesky factorization fails for a matrix."""
+
+    REFERENCE = "Horn & Johnson, 'Matrix Analysis', Chapter 7 on positive definite matrices."
+    GUIDANCE = (
+        "Positive definite matrices require successful Cholesky factorization. "
+        "Common causes:\n"
+        "    - Matrix is singular or indefinite\n"
+        "    - Symmetry/Hermiticity was not preserved\n"
+        "    - Accumulated rounding error drove an eigenvalue negative"
+    )
+
+
+class PositiveSemidefiniteError(PhysicsConstraintError):
+    """Raised when a matrix has an eigenvalue below the allowed floor."""
+
+    REFERENCE = "Horn & Johnson, 'Matrix Analysis', Chapter 7 on semidefinite matrices."
+    GUIDANCE = (
+        "Positive semi-definite matrices require eigenvalues >= -atol. Common causes:\n"
+        "    - Unphysical construction or update rule\n"
+        "    - Hermiticity violation before eigenvalue analysis\n"
+        "    - Roundoff error larger than the configured tolerance"
+    )
+
+
+class TraceError(PhysicsConstraintError):
+    """Raised when a matrix trace does not match the required value."""
+
+    REFERENCE = "Trace identities from standard linear algebra."
+    GUIDANCE = (
+        "Trace constraints are typically normalization constraints. Common causes:\n"
+        "    - Forgot to renormalize after a transformation\n"
+        "    - Summation bug in diagonal construction\n"
+        "    - Mixed conventions for probability mass vs amplitude"
+    )
+
+
+class DensityMatrixError(PhysicsConstraintError):
+    """Raised when a matrix fails density-matrix structural requirements."""
+
+    REFERENCE = (
+        "Nielsen & Chuang, 'Quantum Computation and Quantum Information', "
+        "Section 2.4."
+    )
+    GUIDANCE = (
+        "Density matrices must be Hermitian, trace 1, and positive semidefinite. "
+        "Common causes:\n"
+        "    - Missing normalization\n"
+        "    - Non-conjugate off-diagonal entries\n"
+        "    - Invalid state preparation or update logic"
+    )
+
+
 # =============================================================================
 # Convenience mapping for core errors
 # =============================================================================
@@ -269,6 +362,13 @@ ERROR_CLASSES = {
     "state_vector": StateVectorNormError,
     "finite": NonFiniteError,
     "bounds": BoundsError,
+    "symmetric": SymmetryError,
+    "hermitian": HermiticityError,
+    "unitary": UnitarityError,
+    "positive_definite": PositiveDefiniteError,
+    "positive_semidefinite": PositiveSemidefiniteError,
+    "trace": TraceError,
+    "density_matrix": DensityMatrixError,
 }
 
 
@@ -283,6 +383,14 @@ __all__ = [
     # Numerical errors
     "NonFiniteError",
     "BoundsError",
+    # Matrix errors
+    "SymmetryError",
+    "HermiticityError",
+    "UnitarityError",
+    "PositiveDefiniteError",
+    "PositiveSemidefiniteError",
+    "TraceError",
+    "DensityMatrixError",
     # Mapping
     "ERROR_CLASSES",
 ]

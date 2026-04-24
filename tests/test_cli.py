@@ -48,6 +48,7 @@ class TestCLI:
         assert "Generate AI context" in result.output
         assert "--all" in result.output
         assert "--query" in result.output
+        assert "--lang" in result.output
 
     def test_validate_help(self) -> None:
         """validate --help shows command help."""
@@ -55,8 +56,9 @@ class TestCLI:
         result = runner.invoke(cli, ["validate", "--help"])
 
         assert result.exit_code == 0
-        assert "Validate physics constraints" in result.output
+        assert "Validate Python data or inspect a provenance JSON record" in result.output
         assert "--check" in result.output
+        assert "--lang" in result.output
 
     def test_info(self) -> None:
         """info command shows installation info."""

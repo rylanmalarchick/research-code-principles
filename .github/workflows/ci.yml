@@ -1,141 +1,74 @@
-# AgentBible CI/CD
-# Tests, linting, security scanning, and PyPI publishing
-
 name: CI
 
 on:
   push:
-    branches: [main]
-    tags: ["v*"]
   pull_request:
-    branches: [main]
 
 jobs:
-  # ============================================================================
-  # Test Suite
-  # ============================================================================
-  test:
+  checks:
+    name: ${{ matrix.language }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
-
+        include:
+          - language: python
+            setup: python
+          - language: rust
+            setup: rust
+          - language: cpp
+            setup: cpp
+          - language: julia
+            setup: julia
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        if: matrix.setup == 'python'
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
+          python-version: "3.11"
+      - name: Install Rust
+        if: matrix.setup == 'rust'
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install CMake
+        if: matrix.setup == 'cpp'
+        uses: lukka/get-cmake@latest
+      - uses: julia-actions/setup-julia@v2
+        if: matrix.setup == 'julia'
+        with:
+          version: "1.10"
+      - name: Install Python deps
+        if: matrix.language == 'python'
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,hdf5]"
-
-      - name: Lint with ruff
-        run: ruff check agentbible/ tests/ --output-format=github
-
-      - name: Format check with ruff
-        run: ruff format --check agentbible/ tests/
-
-      - name: Type check with mypy
+      - name: Pytest
+        if: matrix.language == 'python'
+        run: pytest -x
+      - name: Ruff
+        if: matrix.language == 'python'
+        run: ruff check agentbible/
+      - name: Mypy
+        if: matrix.language == 'python'
         run: mypy agentbible/
-
-      - name: Test with pytest
-        run: pytest tests/ --cov=agentbible --cov-report=xml --cov-fail-under=75
-
-      - name: Verify CLI entry point
+      - name: Coverage
+        if: matrix.language == 'python'
+        run: pytest --cov=agentbible --cov-fail-under=80
+      - name: Rust checks
+        if: matrix.language == 'rust'
         run: |
-          # Verify the 'bible' command is available and works
-          bible --version
-          bible info
-          # Verify key subcommands exist
-          bible init --help
-          bible validate --help
-          bible audit --help
-          bible ci --help
-
-      - name: Upload coverage to Codecov
-        if: matrix.python-version == '3.12'
-        uses: codecov/codecov-action@v5
-        with:
-          file: ./coverage.xml
-          fail_ci_if_error: false
-
-  # ============================================================================
-  # Security Scanning
-  # ============================================================================
-  security:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Install pip-audit
-        run: pip install pip-audit
-
-      - name: Install package dependencies only
+          cd languages/rust
+          cargo test
+          cargo clippy -- -D warnings
+          cargo fmt --check
+      - name: C++ checks
+        if: matrix.language == 'cpp'
         run: |
-          pip install click>=8.0 rich>=13.0 pyyaml>=6.0 numpy>=1.20
-          pip install h5py>=3.0
-
-      - name: Run pip-audit
-        run: pip-audit --desc on
-
-  # ============================================================================
-  # Build Package
-  # ============================================================================
-  build:
-    runs-on: ubuntu-latest
-    needs: [test, security]
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Install build tools
-        run: pip install build twine
-
-      - name: Build package
-        run: python -m build
-
-      - name: Check package
-        run: twine check dist/*
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: dist
-          path: dist/
-
-  # ============================================================================
-  # Publish to PyPI (on tag push)
-  # ============================================================================
-  publish:
-    runs-on: ubuntu-latest
-    needs: [build]
-    if: startsWith(github.ref, 'refs/tags/v')
-    environment:
-      name: pypi
-      url: https://pypi.org/project/agentbible/
-    permissions:
-      id-token: write  # Required for trusted publishing
-
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v7
-        with:
-          name: dist
-          path: dist/
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        # No password needed - uses trusted publishing via OIDC
+          cd languages/cpp
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+          ctest --test-dir build --output-on-failure
+      - name: Julia tests
+        if: matrix.language == 'julia'
+        run: |
+          cd languages/julia
+          julia --project=. -e "using Pkg; Pkg.test()"

@@ -1,10 +1,10 @@
-"""AgentBible CLI - Command-line interface for research code infrastructure.
+"""AgentBible CLI - command-line interface for correctness and provenance.
 
 Usage:
     bible --help
     bible init my-project --template python-scientific
-    bible context --query "unitarity"
-    bible validate state.npy --check unitarity
+    bible context --query "unitary validation"
+    bible validate results.npy --check unitary
     bible audit code ./src --json
     bible audit context AGENTS.md
     bible generate-agents-md --domain quantum
@@ -38,10 +38,10 @@ console = Console()
 @click.group()
 @click.version_option(version=__version__, prog_name="agentbible")
 def cli() -> None:
-    """AgentBible: Production-grade research code infrastructure.
+    """AgentBible: language-agnostic correctness tooling.
 
-    Tools for AI-assisted scientific software development with
-    physics validation, project scaffolding, and context management.
+    Tools for numerical validation, provenance reporting,
+    source retrieval, and project scaffolding.
     """
     pass
 
@@ -299,6 +299,13 @@ def retrofit(
     help="Semantic query to filter context.",
 )
 @click.option(
+    "--lang",
+    type=click.Choice(["python", "cpp", "rust", "julia", "all"]),
+    default="all",
+    show_default=True,
+    help="Restrict query results to one language tree.",
+)
+@click.option(
     "--stdout",
     is_flag=True,
     help="Output to stdout instead of clipboard.",
@@ -312,6 +319,7 @@ def context(
     path: str | None,
     load_all: bool,
     query: str | None,
+    lang: str,
     stdout: bool,
     embed: bool,
 ) -> None:
@@ -385,7 +393,7 @@ def context(
     if query:
         console.print(f"[bold blue]Searching for:[/] {query}")
         try:
-            result = ctx.build_context(query=query)
+            result = ctx.build_context(query=query, lang=lang)
             if stdout:
                 console.print(result)
             else:
@@ -438,46 +446,55 @@ def context(
     multiple=True,
     type=click.Choice(
         [
-            "unitarity",
-            "hermiticity",
-            "trace",
-            "positivity",
-            "normalization",
-            "all",
+            "finite_array",
+            "positive_array",
+            "non_negative_array",
+            "probability_array",
+            "normalized_l1",
+            "symmetric",
+            "hermitian",
+            "unitary",
+            "positive_definite",
+            "positive_semidefinite",
+            "density_matrix",
         ]
     ),
     help="Validation check to perform.",
 )
 @click.option(
+    "--lang",
+    type=click.Choice(["python", "cpp", "rust", "julia"]),
+    default="python",
+    show_default=True,
+    help="Language implementation to validate or inspect.",
+)
+@click.option(
     "--rtol",
     type=float,
-    default=1e-5,
+    default=1e-10,
     help="Relative tolerance for comparisons.",
 )
 @click.option(
     "--atol",
     type=float,
-    default=1e-8,
+    default=1e-12,
     help="Absolute tolerance for comparisons.",
 )
 def validate(
     file: str,
     check: tuple[str, ...],
+    lang: str,
     rtol: float,
     atol: float,
 ) -> None:
-    """Validate physics constraints in data files.
-
-    Checks numpy arrays or HDF5 datasets against physics constraints
-    like unitarity, hermiticity, and trace preservation.
+    """Validate Python data or inspect a provenance JSON record.
 
     Examples:
-        bible validate state.npy --check unitarity
-        bible validate results.h5 --check all
-        bible validate matrix.npy -c unitarity -c hermiticity
+        bible validate results.npy --check unitary
+        bible validate --lang rust results.provenance.json
+        bible validate results.h5 --check density_matrix
     """
-    checks = list(check) if check else ["all"]
-    sys.exit(run_validate(file, checks, rtol, atol))
+    sys.exit(run_validate(file, list(check), lang=lang, rtol=rtol, atol=atol))
 
 
 @cli.command("check-coverage")
@@ -555,15 +572,12 @@ def report(
     output_format: str,
     output: str | None,
 ) -> None:
-    """Generate provenance report from HDF5 file.
-
-    Extracts and formats provenance metadata from HDF5 files created
-    with save_with_metadata(). Useful for documentation and auditing.
+    """Generate a report from a schema-compliant provenance JSON record.
 
     Examples:
-        bible report results.h5
-        bible report results.h5 --format markdown --output report.md
-        bible report results.h5 --format json
+        bible report results.provenance.json
+        bible report results.provenance.json --format markdown --output report.md
+        bible report results.provenance.json --format json
     """
     sys.exit(run_report(file, output_format, output))
 
@@ -588,24 +602,24 @@ def info() -> None:
         console.print(f"  {ENV_VALIDATION_LEVEL} = {level.value} [dim](default)[/]")
     console.print()
     console.print("  [dim]Validation levels:[/]")
-    console.print("    debug - Full physics validation (default)")
+    console.print("    debug - Full validation (default)")
     console.print("    lite  - Only NaN/Inf checks (fast)")
     console.print("    off   - Skip validation (benchmarking only)")
     console.print()
 
     console.print("[bold]Installed components:[/]")
-    console.print("  - validators: Physics validation decorators")
-    console.print("  - domains: Quantum, ML, and Atmospheric validators")
-    console.print("  - provenance: HDF5 data tracking with metadata")
-    console.print("  - testing: Physics-aware pytest fixtures")
-    console.print("  - cli: Command-line interface")
+    console.print("  - validators: scalar, array, and matrix checks")
+    console.print("  - provenance: HDF5 helpers and JSON records")
+    console.print("  - context: cross-language source retrieval")
+    console.print("  - testing: reproducibility fixtures and runtime checks")
+    console.print("  - cli: validation, reporting, audit, and scaffolding")
     console.print()
     console.print("[bold]Available commands:[/]")
     console.print("  bible init                - Create new project from template")
     console.print("  bible scaffold            - Generate module stubs with tests")
     console.print("  bible retrofit            - Add AgentBible to existing project")
     console.print("  bible context             - Generate AI context from docs")
-    console.print("  bible validate            - Validate physics constraints")
+    console.print("  bible validate            - Validate Python data or inspect provenance JSON")
     console.print(
         "  bible audit code          - Check code against AgentBible principles"
     )
@@ -615,7 +629,7 @@ def info() -> None:
     console.print(
         "  bible generate-agents-md  - Generate minimal AGENTS.md (arxiv:2602.11988)"
     )
-    console.print("  bible report              - Generate provenance report from HDF5")
+    console.print("  bible report              - Generate a report from provenance JSON")
     console.print("  bible ci                  - CI/CD status and release automation")
     console.print("  bible registry            - Manage agent_registry.yaml")
     console.print("  bible info                - Show this information")

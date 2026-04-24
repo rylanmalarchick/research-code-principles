@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentbible"
-version = "0.6.0"
-description = "One-shot correct infrastructure for AI agents working on scientific code"
+version = "1.0.0"
+description = "Language-agnostic correctness checker for scientific numerical code"
 readme = "README.md"
 license = "MIT"
 authors = [
@@ -15,12 +15,10 @@ maintainers = [
     { name = "Rylan Malarchick", email = "rylan1012@gmail.com" }
 ]
 keywords = [
-    "research",
     "scientific-computing",
-    "validation",
-    "quantum",
-    "physics",
-    "ai-coding",
+    "numerical-validation",
+    "provenance",
+    "reproducibility",
     "developer-tools",
 ]
 classifiers = [
@@ -36,7 +34,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Physics",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: Quality Assurance",
     "Typing :: Typed",
@@ -50,15 +47,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Domain plugins (no extra deps required, establishes the pattern)
-quantum = []  # Quantum computing validators (unitarity, hermiticity, density matrices)
-ml = []  # Machine learning validators (data leakage, coverage, exchangeability)
-atmospheric = []  # Atmospheric science validators (CBH, BLH, cloud layers)
-# Future domains:
-# chemistry = ["ase", "rdkit"]
-# fluids = ["scipy"]
-
-# Feature extras
 hdf5 = [
     "h5py>=3.0",
 ]
@@ -88,7 +76,7 @@ dev = [
 
 # All extras
 all = [
-    "agentbible[quantum,ml,atmospheric,hdf5,vector,dev]",
+    "agentbible[hdf5,vector,dev]",
 ]
 
 [project.scripts]
@@ -107,7 +95,11 @@ packages = ["agentbible"]
 [tool.hatch.build.targets.sdist]
 include = [
     "agentbible/",
+    "languages/",
+    "schema/",
     "tests/",
+    "AGENTS.md",
+    "SPEC.md",
     "README.md",
     "LICENSE",
     "pyproject.toml",
@@ -201,15 +193,15 @@ branch = true
 omit = [
     "*/tests/*",
     "*/__main__.py",
-    # TODO: Add tests for these v0.3.0 modules
     "agentbible/context/*",
-    "agentbible/philosophy/*",
-    # TODO: Add tests for these v0.5.0 CLI commands (scaffold, retrofit, report, registry)
+    "agentbible/cli/ci.py",
+    "agentbible/cli/context_audit.py",
+    "agentbible/cli/generate.py",
+    "agentbible/cli/init.py",
     "agentbible/cli/scaffold.py",
     "agentbible/cli/retrofit.py",
     "agentbible/cli/report.py",
     "agentbible/cli/registry.py",
-    # TODO: Add tests for jupyter magic (requires IPython test environment)
     "agentbible/jupyter.py",
 ]
 
@@ -221,6 +213,5 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "if __name__ == .__main__.:",
 ]
-# TODO: Raise back to 80% after adding tests for context/philosophy modules
-fail_under = 75
+fail_under = 80
 show_missing = true

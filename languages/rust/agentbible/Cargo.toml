@@ -1,0 +1,22 @@
+[package]
+name = "agentbible"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+description = "Language-agnostic correctness checker for scientific numerical code"
+license = "MIT"
+repository = "https://github.com/rylanmalarchick/research-code-principles"
+homepage = "https://github.com/rylanmalarchick/research-code-principles"
+documentation = "https://docs.rs/agentbible"
+readme = "../README.md"
+
+[dependencies]
+ndarray = "0.15"
+num-complex = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+approx = "0.5"

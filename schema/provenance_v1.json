@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgentBible Provenance Record",
+  "description": "Cross-language provenance format. All AgentBible language implementations must emit this schema.",
+  "type": "object",
+  "required": ["spec_version", "language", "timestamp", "git_sha", "checks_passed"],
+  "properties": {
+    "spec_version": { "type": "string", "const": "1.0" },
+    "language": { "type": "string", "enum": ["python", "cpp", "rust", "julia"] },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "git_sha": { "type": "string" },
+    "checks_passed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["check_name", "passed", "rtol", "atol"],
+        "properties": {
+          "check_name": { "type": "string" },
+          "passed": { "type": "boolean" },
+          "rtol": { "type": "number" },
+          "atol": { "type": "number" },
+          "norm_used": {
+            "type": "string",
+            "enum": ["frobenius", "max_elementwise", "spectral", "l1", "l2", "linf", "n/a"]
+          },
+          "error_message": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "git_branch": { "type": "string" },
+        "git_dirty": { "type": "boolean" },
+        "hostname": { "type": "string" },
+        "platform": { "type": "string" },
+        "cpu_model": { "type": "string" },
+        "memory_gb": { "type": "number" },
+        "gpu_info": { "type": ["string", "null"] },
+        "slurm_job_id": { "type": ["string", "null"] },
+        "slurm_nodelist": { "type": ["string", "null"] },
+        "mpi_rank": { "type": ["integer", "null"] },
+        "mpi_size": { "type": ["integer", "null"] },
+        "random_seed_numpy": { "type": ["integer", "null"] },
+        "random_seed_python": { "type": ["integer", "null"] },
+        "packages": { "type": "object", "additionalProperties": { "type": "string" } },
+        "pip_freeze": { "type": "string" },
+        "quantum_backend": { "type": ["string", "null"] },
+        "quantum_shots": { "type": ["integer", "null"] }
+      }
+    }
+  }
+}
