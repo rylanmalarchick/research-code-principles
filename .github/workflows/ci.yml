@@ -21,8 +21,8 @@ jobs:
           - language: julia
             setup: julia
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         if: matrix.setup == 'python'
         with:
           python-version: "3.11"
