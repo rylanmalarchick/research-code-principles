@@ -13,7 +13,7 @@ Example usage:
     print(context)
 
     # Load all docs from a directory
-    context = ctx.build_context(all_from_dir="./agent_docs")
+    context = ctx.build_context(all_from_dir="./docs")
 
 Dependencies:
     Core: pyyaml, tiktoken

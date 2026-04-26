@@ -217,12 +217,6 @@ def scaffold(
     help="Add tests/conftest.py with fixtures.",
 )
 @click.option(
-    "--agent-docs",
-    "agent_docs",
-    is_flag=True,
-    help="Add agent_docs/ directory.",
-)
-@click.option(
     "--all",
     "all_components",
     is_flag=True,
@@ -246,7 +240,6 @@ def retrofit(
     precommit: bool,
     validators: bool,
     conftest: bool,
-    agent_docs: bool,
     all_components: bool,
     no_interactive: bool,
     force: bool,
@@ -258,7 +251,6 @@ def retrofit(
     - .pre-commit-config.yaml (code quality hooks)
     - validation.py (AgentBible validator re-exports)
     - tests/conftest.py (pytest fixtures)
-    - agent_docs/ (AI context documents)
 
     Run without options for interactive mode.
 
@@ -275,7 +267,6 @@ def retrofit(
             precommit=precommit,
             validators=validators,
             conftest=conftest,
-            agent_docs=agent_docs,
             all_components=all_components,
             interactive=not no_interactive,
             force=force,
@@ -329,9 +320,9 @@ def context(
     Supports both simple directory loading and semantic search.
 
     Examples:
-        bible context --all ./agent_docs
+        bible context --all ./docs
         bible context --query "error handling"
-        bible context ./agent_docs --embed
+        bible context ./docs --embed
     """
     from agentbible.context import ContextManager
 
@@ -429,9 +420,7 @@ def context(
 
     # No arguments: show help
     console.print("[yellow]Usage examples:[/]")
-    console.print(
-        "  bible context --all ./agent_docs    # Load all docs from directory"
-    )
+    console.print("  bible context --all ./docs          # Load all docs from directory")
     console.print(
         "  bible context --query 'error'       # Semantic search (requires --embed first)"
     )

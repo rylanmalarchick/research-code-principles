@@ -286,57 +286,12 @@ __all__ = ['deterministic_seed', 'tolerance', 'quantum_tolerance']
     return True
 
 
-def add_agent_docs(path: Path) -> bool:
-    """Create agent_docs directory with templates.
-
-    Args:
-        path: Project root directory.
-
-    Returns:
-        True if directory was created, False otherwise.
-    """
-    agent_docs = path / "agent_docs"
-
-    if agent_docs.exists():
-        console.print("[yellow]Skipping:[/] agent_docs/ already exists")
-        return False
-
-    agent_docs.mkdir()
-
-    # Create PROJECT_CONTEXT.md template
-    project_context = agent_docs / "PROJECT_CONTEXT.md"
-    project_context.write_text("""# Project Context
-
-## Overview
-
-**Name:** TODO
-**Purpose:** TODO
-**Status:** TODO
-
-## Key Components
-
-TODO: Describe main modules and their responsibilities
-
-## Dependencies
-
-TODO: List key dependencies
-
-## Development Notes
-
-TODO: Important context for AI agents working on this project
-""")
-
-    console.print("[green]Added:[/] agent_docs/ directory with templates")
-    return True
-
-
 def run_retrofit(
     path: str | None = None,
     cursorrules: bool = False,
     precommit: bool = False,
     validators: bool = False,
     conftest: bool = False,
-    agent_docs: bool = False,
     all_components: bool = False,
     interactive: bool = True,
     force: bool = False,
@@ -349,7 +304,6 @@ def run_retrofit(
         precommit: Add pre-commit configuration.
         validators: Add validation.py helper.
         conftest: Add tests/conftest.py with fixtures.
-        agent_docs: Add agent_docs/ directory.
         all_components: Add all components.
         interactive: If True, prompt for each component.
         force: If True, overwrite existing files.
@@ -378,7 +332,6 @@ def run_retrofit(
         and not precommit
         and not validators
         and not conftest
-        and not agent_docs
     )
 
     components_to_add = []
@@ -396,8 +349,6 @@ def run_retrofit(
             components_to_add.append("validators")
         if Confirm.ask("  Add tests/conftest.py (pytest fixtures)?", default=True):
             components_to_add.append("conftest")
-        if Confirm.ask("  Add agent_docs/ (AI context documents)?", default=True):
-            components_to_add.append("agent_docs")
     else:
         if add_all or cursorrules:
             components_to_add.append("cursorrules")
@@ -407,8 +358,6 @@ def run_retrofit(
             components_to_add.append("validators")
         if add_all or conftest:
             components_to_add.append("conftest")
-        if add_all or agent_docs:
-            components_to_add.append("agent_docs")
 
     if not components_to_add:
         console.print("[yellow]No components selected. Nothing to do.[/]")
@@ -431,9 +380,6 @@ def run_retrofit(
         added_count += 1
 
     if "conftest" in components_to_add and add_test_conftest(project_path):
-        added_count += 1
-
-    if "agent_docs" in components_to_add and add_agent_docs(project_path):
         added_count += 1
 
     console.print()

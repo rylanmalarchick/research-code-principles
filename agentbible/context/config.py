@@ -174,14 +174,6 @@ class ContextConfig:
             except ValueError:
                 continue
 
-        # Check for agent_docs directory
-        for parent in [cwd, *list(cwd.parents)]:
-            if (parent / "agent_docs").is_dir():
-                # Try to match against registered projects
-                for project in self.projects.values():
-                    if project.root == parent:
-                        return project
-
         return None
 
     def get_global_always_include(self) -> list[DocConfig]:

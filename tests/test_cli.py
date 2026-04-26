@@ -60,6 +60,14 @@ class TestCLI:
         assert "--check" in result.output
         assert "--lang" in result.output
 
+    def test_retrofit_help_omits_agent_docs(self) -> None:
+        """retrofit --help no longer advertises agent_docs scaffolding."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["retrofit", "--help"])
+
+        assert result.exit_code == 0
+        assert "--agent-docs" not in result.output
+
     def test_info(self) -> None:
         """info command shows installation info."""
         runner = CliRunner()

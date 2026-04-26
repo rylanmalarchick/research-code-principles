@@ -5,12 +5,12 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from agentbible.errors import ValidationError
 from agentbible.validators import (
     validate_density_matrix,
     validate_hermitian,
     validate_unitary,
 )
-from agentbible.errors import ValidationError
 
 
 class TestValidateUnitary:

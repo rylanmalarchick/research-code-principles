@@ -140,7 +140,8 @@ bible context [OPTIONS]
 |--------|-------------|
 | `--all` | Load all context files |
 | `--query`, `-q` | Search for specific context |
-| `--dir`, `-d` | Context directory |
+| `PATH` | File or directory to load or embed |
+| `--embed` | Build embeddings for a directory |
 
 **Examples:**
 
@@ -149,7 +150,7 @@ bible context [OPTIONS]
 bible context
 
 # Load all context from directory
-bible context --all ./agent_docs
+bible context --all ./docs
 
 # Search for specific topic
 bible context --query "error handling"
