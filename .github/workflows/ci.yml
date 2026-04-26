@@ -32,7 +32,7 @@ jobs:
       - name: Install CMake
         if: matrix.setup == 'cpp'
         uses: lukka/get-cmake@latest
-      - uses: julia-actions/setup-julia@v2
+      - uses: julia-actions/setup-julia@v3
         if: matrix.setup == 'julia'
         with:
           version: "1.10"
