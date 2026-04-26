@@ -302,8 +302,6 @@ project-name/
 │   └── (test files)
 ├── docs/
 │   └── (documentation)
-└── examples/
-    └── (usage examples)
 ```
 
 ### Bootstrap Checklist

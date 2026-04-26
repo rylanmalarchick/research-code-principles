@@ -24,14 +24,11 @@ Format:
 **Why it works:** [Explanation]
 ```
 
-### 3. New Examples
-Implemented something following these principles? Create `examples/[domain]-[task]/`.
-
-Include:
-- Source code (≤200 lines)
-- Full test suite
-- README explaining design
-- `prompting-log.md` showing how you prompted for it
+### 3. New Validation Cases
+Implemented a new rule, CLI behavior, or language binding? Add coverage in the
+existing test trees (`tests/`, `languages/rust/agentbible/tests/`,
+`languages/cpp/tests/`, `languages/julia/test/`) and keep the change scoped to
+the current repo contract.
 
 ### 4. Improvements to Standards
 - "This C++ standard doesn't work for X, suggest Y"

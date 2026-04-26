@@ -155,9 +155,6 @@ bible context --all ./agent_docs
 bible context --query "error handling"
 ```
 
-!!! note
-    This command wraps the `opencode-context` tool if installed.
-
 ---
 
 ### `bible info`

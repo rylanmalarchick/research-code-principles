@@ -141,11 +141,10 @@ Documentation files are in `docs/site/`.
 Releases are handled by maintainers:
 
 1. Update version in `pyproject.toml`
-2. Update `CHANGELOG.md`
-3. Commit: `git commit -m "chore: release v0.1.2"`
-4. Tag: `git tag v0.1.2`
-5. Push: `git push origin main --tags`
-6. CI automatically publishes to PyPI
+2. Commit release changes
+3. Tag the release
+4. Push `main` and tags
+5. CI publishes the Python package
 
 ## Questions?
 

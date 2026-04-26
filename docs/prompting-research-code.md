@@ -325,6 +325,5 @@ Track your prompting experiments:
 
 ## See Also
 
-- `examples/quantum-gate-example/prompting-log.md` — Real prompting session
 - `agent-coding-context.md` — Paste into AI for coding sessions
 - `research-code-principles.md` — The philosophy behind these patterns
